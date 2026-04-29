@@ -6,7 +6,9 @@ import Register from './pages/Auth/Register'
 import Dashboard from './pages/Dashboard/Dashboard'
 import Students from './pages/Students/Students'
 import Groups from './pages/Groups/Groups'
+import Courses from './pages/Courses/Courses'
 import Lessons from './pages/Lessons/Lessons'
+import Sessions from './pages/Sessions/Sessions'
 import Feedbacks from './pages/Feedbacks/Feedbacks'
 
 function App() {
@@ -33,7 +35,9 @@ function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/students" element={<Students />} />
         <Route path="/groups" element={<Groups />} />
+        <Route path="/courses" element={<Courses />} />
         <Route path="/lessons" element={<Lessons />} />
+        <Route path="/sessions" element={<Sessions />} />
         <Route path="/feedbacks" element={<Feedbacks />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

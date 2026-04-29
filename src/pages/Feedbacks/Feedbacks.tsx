@@ -21,6 +21,8 @@ import {
   CardContent,
   IconButton,
   LinearProgress,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Edit,
@@ -28,13 +30,16 @@ import {
   PictureAsPdf,
   WhatsApp,
   Refresh,
+  Search,
+  Clear,
 } from '@mui/icons-material'
-import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridActionsCellItem, GridSortModel } from '@mui/x-data-grid'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { feedbackApi } from '../../api/services'
 import { Feedback } from '../../types/data'
+import { useDebounce } from '../../hooks/useDebounce'
 
 const feedbackSchema = z.object({
   attendance_score: z.string().min(1, 'Attendance score is required'),
@@ -55,6 +60,8 @@ const generateFeedbackSchema = z.object({
 type GenerateFeedbackFormData = z.infer<typeof generateFeedbackSchema>
 
 const Feedbacks: React.FC = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [feedbackPagination, setFeedbackPagination] = useState({
     page: 1,
@@ -69,6 +76,9 @@ const Feedbacks: React.FC = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' })
   const [pdfGenerating, setPdfGenerating] = useState<number | null>(null)
   const [waScheduling, setWaScheduling] = useState<number | null>(null)
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 500)
+  const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'desc' }])
 
   const {
     register,
@@ -90,11 +100,19 @@ const Feedbacks: React.FC = () => {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [debouncedSearch, sortModel])
 
   const fetchData = async () => {
     try {
-      const feedbacksRes = await feedbackApi.getFeedbacks({ page: feedbackPagination.page, limit: feedbackPagination.limit })
+      const sortBy = sortModel[0]?.field || 'id'
+      const sortDir = sortModel[0]?.sort || 'desc'
+      const feedbacksRes = await feedbackApi.getFeedbacks({ 
+        page: feedbackPagination.page, 
+        limit: feedbackPagination.limit,
+        search: debouncedSearch,
+        sort_by: sortBy,
+        sort_dir: sortDir
+      })
       setFeedbacks(feedbacksRes.data)
       setFeedbackPagination({
         page: feedbacksRes.page,
@@ -199,7 +217,7 @@ const Feedbacks: React.FC = () => {
     return labels[type][parseInt(score)] || score
   }
 
-  const columns: GridColDef[] = [
+  const allColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     {
       field: 'student_name',
@@ -284,6 +302,12 @@ const Feedbacks: React.FC = () => {
     },
   ]
 
+  const columns = isMobile 
+    ? allColumns.filter(col => 
+        ['id', 'student_name', 'course', 'number', 'attendance_score', 'wa_scheduled', 'actions'].includes(col.field)
+      )
+    : allColumns
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -294,15 +318,31 @@ const Feedbacks: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Feedbacks</Typography>
-        <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexDirection={{ xs: 'column', sm: 'row' }} gap={{ xs: 2, sm: 0 }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' }, mb: { xs: 2, sm: 0 } }}>Feedbacks</Typography>
+        <Box display="flex" gap={{ xs: 1, sm: 2 }} flexWrap="wrap" justifyContent={{ xs: 'stretch', sm: 'flex-start' }}>
+          <TextField
+            placeholder="Search feedbacks..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+              endAdornment: search && (
+                <Clear 
+                  sx={{ cursor: 'pointer', color: 'text.secondary' }} 
+                  onClick={() => setSearch('')} 
+                />
+              )
+            }}
+            sx={{ width: { xs: '100%', sm: 300 } }}
+            size="small"
+          />
           <Button
             variant="outlined"
             startIcon={<Refresh />}
             onClick={() => handleSendWhatsApp()}
             disabled={waScheduling === 0}
-            sx={{ mr: 2 }}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Schedule All WhatsApp
           </Button>
@@ -310,7 +350,7 @@ const Feedbacks: React.FC = () => {
             variant="contained"
             startIcon={<Assessment />}
             onClick={() => setGenerateDialogOpen(true)}
-            sx={{ mr: 2 }}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Generate Feedbacks
           </Button>
@@ -379,8 +419,16 @@ const Feedbacks: React.FC = () => {
           onPaginationModelChange={(model) => {
             const newPage = model.page + 1
             const newLimit = model.pageSize
+            const sortBy = sortModel[0]?.field || 'id'
+            const sortDir = sortModel[0]?.sort || 'desc'
             setFeedbackPagination(prev => ({ ...prev, page: newPage, limit: newLimit }))
-            feedbackApi.getFeedbacks({ page: newPage, limit: newLimit }).then(response => {
+            feedbackApi.getFeedbacks({ 
+              page: newPage, 
+              limit: newLimit,
+              search: debouncedSearch,
+              sort_by: sortBy,
+              sort_dir: sortDir
+            }).then(response => {
               setFeedbacks(response.data)
               setFeedbackPagination({
                 page: response.page,
@@ -392,6 +440,11 @@ const Feedbacks: React.FC = () => {
               setSnackbar({ open: true, message: 'Failed to fetch feedbacks', severity: 'error' as const })
             })
           }}
+          sortingMode="server"
+          onSortModelChange={(model) => {
+            setSortModel(model)
+            setFeedbackPagination(prev => ({ ...prev, page: 1 }))
+          }}
           disableRowSelectionOnClick
         />
       </Paper>
@@ -401,7 +454,7 @@ const Feedbacks: React.FC = () => {
         <DialogTitle>Edit Feedback</DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={2} sx={{ '& > *': { minWidth: 0 } }}>
               <FormControl fullWidth>
                 <InputLabel>Attendance Score</InputLabel>
                 <Select

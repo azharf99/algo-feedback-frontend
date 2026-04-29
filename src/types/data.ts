@@ -9,8 +9,17 @@ export interface Student {
   is_active: boolean
 }
 
+export interface Course {
+  id: number
+  title: string
+  module: string
+  description: string
+  is_active: boolean
+}
+
 export interface Group {
   id: number
+  course_id: number
   name: string
   type: 'Group' | 'Private'
   description: string
@@ -21,20 +30,31 @@ export interface Group {
   first_lesson_time: string
   is_active: boolean
   students?: Student[]
+  course?: Course
+}
+
+export interface Session {
+  id: number
+  group_id: number
+  lesson_id: number
+  date_start: string
+  time_start: string
+  is_done: boolean
+  group?: Group
+  lesson?: Lesson
 }
 
 export interface Lesson {
   id: number
+  course_id: number
   title: string
+  category: string
   module: string
   level: string
   number: number
-  group_id: number
-  date_start: string
-  time_start: string
+  description: string
   is_active: boolean
-  students_attended: number[]
-  group?: Group
+  course?: Course
 }
 
 export interface Feedback {
@@ -83,4 +103,7 @@ export interface ApiError {
 export interface PaginationParams {
   page?: number
   limit?: number
+  search?: string
+  sort_by?: string
+  sort_dir?: string
 }

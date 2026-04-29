@@ -12,10 +12,6 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   useMediaQuery,
   useTheme,
 } from '@mui/material'
@@ -32,29 +28,24 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
-import { lessonApi, courseApi } from '../../api/services'
-import { Lesson, Course } from '../../types/data'
+import { courseApi } from '../../api/services'
+import { Course } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 
-const lessonSchema = z.object({
-  course_id: z.number().min(1, 'Course is required'),
+const courseSchema = z.object({
   title: z.string().min(1, 'Title is required'),
-  category: z.string().min(1, 'Category is required'),
   module: z.string().min(1, 'Module is required'),
-  level: z.string().min(1, 'Level is required'),
-  number: z.number().min(1, 'Number is required'),
   description: z.string().min(1, 'Description is required'),
   is_active: z.boolean(),
 })
 
-type LessonFormData = z.infer<typeof lessonSchema>
+type CourseFormData = z.infer<typeof courseSchema>
 
-const Lessons: React.FC = () => {
+const Courses: React.FC = () => {
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
-  const [lessons, setLessons] = useState<Lesson[]>([])
   const [courses, setCourses] = useState<Course[]>([])
-  const [lessonPagination, setLessonPagination] = useState({
+  const [coursePagination, setCoursePagination] = useState({
     page: 1,
     limit: 10,
     total: 0,
@@ -62,7 +53,7 @@ const Lessons: React.FC = () => {
   })
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' })
   const [search, setSearch] = useState('')
@@ -74,8 +65,8 @@ const Lessons: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<LessonFormData>({
-    resolver: zodResolver(lessonSchema),
+  } = useForm<CourseFormData>({
+    resolver: zodResolver(courseSchema),
   })
 
   useEffect(() => {
@@ -86,24 +77,20 @@ const Lessons: React.FC = () => {
     try {
       const sortBy = sortModel[0]?.field || 'id'
       const sortDir = sortModel[0]?.sort || 'desc'
-      const [lessonsRes, coursesRes] = await Promise.all([
-        lessonApi.getLessons({ 
-          page: lessonPagination.page, 
-          limit: lessonPagination.limit,
-          search: debouncedSearch,
-          sort_by: sortBy,
-          sort_dir: sortDir
-        }),
-        courseApi.getCourses(), // Courses without pagination for dropdown
-      ])
-      setLessons(lessonsRes.data)
-      setLessonPagination({
-        page: lessonsRes.page,
-        limit: lessonsRes.limit,
-        total: lessonsRes.total,
-        total_pages: lessonsRes.total_pages
+      const coursesRes = await courseApi.getCourses({ 
+        page: coursePagination.page, 
+        limit: coursePagination.limit,
+        search: debouncedSearch,
+        sort_by: sortBy,
+        sort_dir: sortDir
       })
       setCourses(coursesRes.data)
+      setCoursePagination({
+        page: coursesRes.page,
+        limit: coursesRes.limit,
+        total: coursesRes.total,
+        total_pages: coursesRes.total_pages
+      })
     } catch (error) {
       setSnackbar({ open: true, message: 'Failed to fetch data', severity: 'error' as const })
     } finally {
@@ -111,14 +98,18 @@ const Lessons: React.FC = () => {
     }
   }
 
-  const onSubmit: SubmitHandler<LessonFormData> = async (data) => {
+  const onSubmit: SubmitHandler<CourseFormData> = async (data) => {
     try {
-      if (editingLesson) {
-        await lessonApi.updateLesson(editingLesson.id, data)
-        setSnackbar({ open: true, message: 'Lesson updated successfully', severity: 'success' })
+      if (editingCourse) {
+        await courseApi.updateCourse(editingCourse.id, {
+          ...data,
+        } as Partial<Course>)
+        setSnackbar({ open: true, message: 'Course updated successfully', severity: 'success' })
       } else {
-        await lessonApi.createLesson(data)
-        setSnackbar({ open: true, message: 'Lesson created successfully', severity: 'success' })
+        await courseApi.createCourse({
+          ...data,
+        } as Omit<Course, 'id'>)
+        setSnackbar({ open: true, message: 'Course created successfully', severity: 'success' })
       }
       fetchData()
       handleCloseDialog()
@@ -128,10 +119,10 @@ const Lessons: React.FC = () => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this lesson?')) {
+    if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        await lessonApi.deleteLesson(id)
-        setSnackbar({ open: true, message: 'Lesson deleted successfully', severity: 'success' })
+        await courseApi.deleteCourse(id)
+        setSnackbar({ open: true, message: 'Course deleted successfully', severity: 'success' })
         fetchData()
       } catch (error: any) {
         setSnackbar({ open: true, message: error.response?.data?.error || 'Delete failed', severity: 'error' as const })
@@ -139,15 +130,15 @@ const Lessons: React.FC = () => {
     }
   }
 
-  const handleEdit = (lesson: Lesson) => {
-    setEditingLesson(lesson)
-    reset(lesson)
+  const handleEdit = (course: Course) => {
+    setEditingCourse(course)
+    reset(course)
     setDialogOpen(true)
   }
 
   const handleCloseDialog = () => {
     setDialogOpen(false)
-    setEditingLesson(null)
+    setEditingCourse(null)
     reset()
   }
 
@@ -159,7 +150,7 @@ const Lessons: React.FC = () => {
     formData.append('file', file)
 
     try {
-      const result = await lessonApi.importLessons(formData)
+      const result = await courseApi.importCourses(formData)
       let message = `Import completed: ${result.created} created, ${result.updated} updated`
       if (result.errors.length > 0) {
         message += `, ${result.errors.length} errors`
@@ -180,24 +171,11 @@ const Lessons: React.FC = () => {
     multiple: false,
   })
 
-
   const allColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'title', headerName: 'Title', width: 200 },
     { field: 'module', headerName: 'Module', width: 150 },
-    { field: 'level', headerName: 'Level', width: 100 },
-    { field: 'number', headerName: 'Number', width: 80 },
-    {
-      field: 'course_name',
-      headerName: 'Course',
-      width: 150,
-      renderCell: (params) => params.row.course?.title || `Course ${params.row.course_id}`,
-    },
-    {
-      field: 'category',
-      headerName: 'Category',
-      width: 120,
-    },
+    { field: 'description', headerName: 'Description', width: 250 },
     {
       field: 'is_active',
       headerName: 'Status',
@@ -245,10 +223,10 @@ const Lessons: React.FC = () => {
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexDirection={{ xs: 'column', sm: 'row' }} gap={{ xs: 2, sm: 0 }}>
-        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' }, mb: { xs: 2, sm: 0 } }}>Lessons</Typography>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' }, mb: { xs: 2, sm: 0 } }}>Courses</Typography>
         <Box display="flex" gap={{ xs: 1, sm: 2 }} flexWrap="wrap" justifyContent={{ xs: 'stretch', sm: 'flex-start' }}>
           <TextField
-            placeholder="Search lessons..."
+            placeholder="Search courses..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             InputProps={{
@@ -277,47 +255,47 @@ const Lessons: React.FC = () => {
             onClick={() => setDialogOpen(true)}
             sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
-            Add Lesson
+            Add Course
           </Button>
         </Box>
       </Box>
 
       <Paper sx={{ height: 600, width: '100%' }}>
         <DataGrid
-          rows={lessons}
+          rows={courses}
           columns={columns}
           paginationMode="server"
-          paginationModel={{ page: lessonPagination.page - 1, pageSize: lessonPagination.limit }}
+          paginationModel={{ page: coursePagination.page - 1, pageSize: coursePagination.limit }}
           pageSizeOptions={[10, 25, 50, 100]}
-          rowCount={lessonPagination.total}
+          rowCount={coursePagination.total}
           onPaginationModelChange={(model) => {
             const newPage = model.page + 1
             const newLimit = model.pageSize
             const sortBy = sortModel[0]?.field || 'id'
             const sortDir = sortModel[0]?.sort || 'desc'
-            setLessonPagination(prev => ({ ...prev, page: newPage, limit: newLimit }))
-            lessonApi.getLessons({ 
+            setCoursePagination(prev => ({ ...prev, page: newPage, limit: newLimit }))
+            courseApi.getCourses({ 
               page: newPage, 
               limit: newLimit,
               search: debouncedSearch,
               sort_by: sortBy,
               sort_dir: sortDir
             }).then(response => {
-              setLessons(response.data)
-              setLessonPagination({
+              setCourses(response.data)
+              setCoursePagination({
                 page: response.page,
                 limit: response.limit,
                 total: response.total,
                 total_pages: response.total_pages
               })
             }).catch(() => {
-              setSnackbar({ open: true, message: 'Failed to fetch lessons', severity: 'error' as const })
+              setSnackbar({ open: true, message: 'Failed to fetch courses', severity: 'error' as const })
             })
           }}
           sortingMode="server"
           onSortModelChange={(model) => {
             setSortModel(model)
-            setLessonPagination(prev => ({ ...prev, page: 1 }))
+            setCoursePagination(prev => ({ ...prev, page: 1 }))
           }}
           disableRowSelectionOnClick
         />
@@ -325,7 +303,7 @@ const Lessons: React.FC = () => {
 
       {/* Add/Edit Dialog */}
       <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>{editingLesson ? 'Edit Lesson' : 'Add Lesson'}</DialogTitle>
+        <DialogTitle>{editingCourse ? 'Edit Course' : 'Add Course'}</DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>
             <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={2} sx={{ '& > *': { minWidth: 0 } }}>
@@ -344,42 +322,6 @@ const Lessons: React.FC = () => {
                 fullWidth
               />
               <TextField
-                label="Level"
-                {...register('level')}
-                error={!!errors.level}
-                helperText={errors.level?.message}
-                fullWidth
-              />
-              <TextField
-                label="Number"
-                type="number"
-                {...register('number', { valueAsNumber: true })}
-                error={!!errors.number}
-                helperText={errors.number?.message}
-                fullWidth
-              />
-              <FormControl fullWidth>
-                <InputLabel>Course</InputLabel>
-                <Select
-                  {...register('course_id', { valueAsNumber: true })}
-                  error={!!errors.course_id}
-                  defaultValue=""
-                >
-                  {courses.map((course) => (
-                    <MenuItem key={course.id} value={course.id}>
-                      {course.title}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <TextField
-                label="Category"
-                {...register('category')}
-                error={!!errors.category}
-                helperText={errors.category?.message}
-                fullWidth
-              />
-              <TextField
                 label="Description"
                 {...register('description')}
                 error={!!errors.description}
@@ -394,7 +336,7 @@ const Lessons: React.FC = () => {
           <DialogActions>
             <Button onClick={handleCloseDialog}>Cancel</Button>
             <Button type="submit" variant="contained">
-              {editingLesson ? 'Update' : 'Create'}
+              {editingCourse ? 'Update' : 'Create'}
             </Button>
           </DialogActions>
         </form>
@@ -402,7 +344,7 @@ const Lessons: React.FC = () => {
 
       {/* Import Dialog */}
       <Dialog open={importDialogOpen} onClose={() => setImportDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Import Lessons from CSV</DialogTitle>
+        <DialogTitle>Import Courses from CSV</DialogTitle>
         <DialogContent>
           <Box
             {...getRootProps()}
@@ -426,7 +368,7 @@ const Lessons: React.FC = () => {
                 : 'Drag & drop a CSV file here, or click to select'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              CSV headers: id, title, category, module, level, number, course_id, description, is_active
+              CSV headers: id, title, module, description, is_active
             </Typography>
           </Box>
         </DialogContent>
@@ -448,4 +390,4 @@ const Lessons: React.FC = () => {
   )
 }
 
-export default Lessons
+export default Courses

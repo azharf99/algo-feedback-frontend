@@ -23,6 +23,7 @@ import {
   People,
   Groups,
   School,
+  EventNote,
   Assessment,
   Logout,
 } from '@mui/icons-material'
@@ -35,7 +36,9 @@ const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/' },
   { text: 'Students', icon: <People />, path: '/students' },
   { text: 'Groups', icon: <Groups />, path: '/groups' },
-  { text: 'Lessons', icon: <School />, path: '/lessons' },
+  { text: 'Courses', icon: <School />, path: '/courses' },
+  { text: 'Lessons', icon: <EventNote />, path: '/lessons' },
+  { text: 'Sessions', icon: <Assessment />, path: '/sessions' },
   { text: 'Feedbacks', icon: <Assessment />, path: '/feedbacks' },
 ]
 

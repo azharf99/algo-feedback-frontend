@@ -1,5 +1,5 @@
 import api from './axios'
-import { Student, Group, Lesson, Feedback, PaginatedResponse, PaginationParams } from '../types/data'
+import { Student, Group, Lesson, Feedback, Course, Session, PaginatedResponse, PaginationParams } from '../types/data'
 
 // Build query string from pagination parameters
 const buildQueryParams = (params?: PaginationParams): string => {
@@ -13,9 +13,49 @@ const buildQueryParams = (params?: PaginationParams): string => {
   if (params.limit !== undefined) {
     queryParams.append('limit', params.limit.toString())
   }
+  if (params.search !== undefined) {
+    queryParams.append('search', params.search)
+  }
+  if (params.sort_by !== undefined) {
+    queryParams.append('sort_by', params.sort_by)
+  }
+  if (params.sort_dir !== undefined) {
+    queryParams.append('sort_dir', params.sort_dir)
+  }
   
   const queryString = queryParams.toString()
   return queryString ? `?${queryString}` : ''
+}
+
+// Course API with pagination
+export const courseApi = {
+  getCourses: async (params?: PaginationParams): Promise<PaginatedResponse<Course>> => {
+    const response = await api.get(`/courses${buildQueryParams(params)}`)
+    return response.data
+  },
+  
+  createCourse: async (course: Omit<Course, 'id'>): Promise<Course> => {
+    const response = await api.post('/courses', course)
+    return response.data.data
+  },
+  
+  updateCourse: async (id: number, course: Partial<Course>): Promise<Course> => {
+    const response = await api.put(`/courses/${id}`, course)
+    return response.data.data
+  },
+  
+  deleteCourse: async (id: number): Promise<void> => {
+    await api.delete(`/courses/${id}`)
+  },
+  
+  importCourses: async (formData: FormData) => {
+    const response = await api.post('/courses/import', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
+  }
 }
 
 // Student API with pagination
@@ -86,6 +126,11 @@ export const lessonApi = {
     const response = await api.get(`/lessons${buildQueryParams(params)}`)
     return response.data
   },
+
+  getLessonsByCourse: async (courseId: number): Promise<Lesson[]> => {
+    const response = await api.get(`/lessons/course/${courseId}`)
+    return response.data.data
+  },
   
   createLesson: async (lesson: Omit<Lesson, 'id'>): Promise<Lesson> => {
     const response = await api.post('/lessons', lesson)
@@ -108,6 +153,42 @@ export const lessonApi = {
       },
     })
     return response.data
+  }
+}
+
+// Session API with pagination
+export const sessionApi = {
+  getSessions: async (params?: PaginationParams): Promise<PaginatedResponse<Session>> => {
+    const response = await api.get(`/sessions${buildQueryParams(params)}`)
+    return response.data
+  },
+  
+  getSession: async (id: number): Promise<Session> => {
+    const response = await api.get(`/sessions/${id}`)
+    return response.data.data
+  },
+  
+  getSessionsByGroup: async (groupId: number): Promise<Session[]> => {
+    const response = await api.get(`/sessions/group/${groupId}`)
+    return response.data.data
+  },
+  
+  createSession: async (session: Omit<Session, 'id'>): Promise<Session> => {
+    const response = await api.post('/sessions', session)
+    return response.data.data
+  },
+  
+  updateSession: async (id: number, session: Partial<Session>): Promise<Session> => {
+    const response = await api.put(`/sessions/${id}`, session)
+    return response.data.data
+  },
+  
+  deleteSession: async (id: number): Promise<void> => {
+    await api.delete(`/sessions/${id}`)
+  },
+  
+  updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
+    await api.post(`/sessions/${id}/attendance`, studentIds)
   }
 }
 

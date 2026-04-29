@@ -19,22 +19,28 @@ import {
   Chip,
   Checkbox,
   ListItemText,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
   Edit,
   Delete,
   Upload,
+  Search,
+  Clear,
 } from '@mui/icons-material'
-import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridActionsCellItem, GridSortModel } from '@mui/x-data-grid'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
-import { groupApi, studentApi } from '../../api/services'
-import { Group, Student } from '../../types/data'
+import { groupApi, studentApi, courseApi } from '../../api/services'
+import { Group, Student, Course } from '../../types/data'
+import { useDebounce } from '../../hooks/useDebounce'
 
 const groupSchema = z.object({
+  course_id: z.number().min(1, 'Course is required'),
   name: z.string().min(1, 'Group name is required'),
   type: z.enum(['Group', 'Private']),
   description: z.string().min(1, 'Description is required'),
@@ -50,8 +56,11 @@ const groupSchema = z.object({
 type GroupFormData = z.infer<typeof groupSchema>
 
 const Groups: React.FC = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [groups, setGroups] = useState<Group[]>([])
   const [students, setStudents] = useState<Student[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [groupPagination, setGroupPagination] = useState({
     page: 1,
     limit: 10,
@@ -63,6 +72,9 @@ const Groups: React.FC = () => {
   const [editingGroup, setEditingGroup] = useState<Group | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' })
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 500)
+  const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'desc' }])
 
   const {
     register,
@@ -79,13 +91,22 @@ const Groups: React.FC = () => {
 
   useEffect(() => {
     fetchData()
-  }, [])
+  }, [debouncedSearch, sortModel])
 
   const fetchData = async () => {
     try {
-      const [groupsRes, studentsRes] = await Promise.all([
-        groupApi.getGroups({ page: groupPagination.page, limit: groupPagination.limit }),
+      const sortBy = sortModel[0]?.field || 'id'
+      const sortDir = sortModel[0]?.sort || 'desc'
+      const [groupsRes, studentsRes, coursesRes] = await Promise.all([
+        groupApi.getGroups({ 
+          page: groupPagination.page, 
+          limit: groupPagination.limit,
+          search: debouncedSearch,
+          sort_by: sortBy,
+          sort_dir: sortDir
+        }),
         studentApi.getStudents(), // Students without pagination for dropdown
+        courseApi.getCourses(), // Courses without pagination for dropdown
       ])
       setGroups(groupsRes.data)
       setGroupPagination({
@@ -95,6 +116,7 @@ const Groups: React.FC = () => {
         total_pages: groupsRes.total_pages
       })
       setStudents(studentsRes.data)
+      setCourses(coursesRes.data)
     } catch (error) {
       setSnackbar({ open: true, message: 'Failed to fetch data', severity: 'error' as const })
     } finally {
@@ -142,8 +164,31 @@ const Groups: React.FC = () => {
 
   const handleEdit = (group: Group) => {
     setEditingGroup(group)
+    
+    // Format date for HTML date input (YYYY-MM-DD)
+    const formattedDate = group.first_lesson_date 
+      ? new Date(group.first_lesson_date).toISOString().split('T')[0]
+      : ''
+    
+    // Format time for HTML time input (HH:MM)
+    let formattedTime = ''
+    if (group.first_lesson_time) {
+      try {
+        const timeDate = new Date(group.first_lesson_time)
+        if (!isNaN(timeDate.getTime())) {
+          const hours = timeDate.getHours().toString().padStart(2, '0')
+          const minutes = timeDate.getMinutes().toString().padStart(2, '0')
+          formattedTime = `${hours}:${minutes}`
+        }
+      } catch (e) {
+        console.error('Error parsing time:', group.first_lesson_time)
+      }
+    }
+    
     reset({
       ...group,
+      first_lesson_date: formattedDate,
+      first_lesson_time: formattedTime,
       students: group.students?.map(s => s.id) || [],
     })
     setDialogOpen(true)
@@ -189,8 +234,14 @@ const Groups: React.FC = () => {
     setValue('students', value)
   }
 
-  const columns: GridColDef[] = [
+  const allColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
+    {
+      field: 'course_name',
+      headerName: 'Course',
+      width: 150,
+      renderCell: (params) => params.row.course?.title || `Course ${params.row.course_id}`,
+    },
     { field: 'name', headerName: 'Name', width: 150 },
     { field: 'type', headerName: 'Type', width: 100 },
     { field: 'description', headerName: 'Description', width: 200 },
@@ -231,6 +282,12 @@ const Groups: React.FC = () => {
     },
   ]
 
+  const columns = isMobile 
+    ? allColumns.filter(col => 
+        ['id', 'name', 'type', 'students_count', 'is_active', 'actions'].includes(col.field)
+      )
+    : allColumns
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -241,14 +298,30 @@ const Groups: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Groups</Typography>
-        <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexDirection={{ xs: 'column', sm: 'row' }} gap={{ xs: 2, sm: 0 }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' }, mb: { xs: 2, sm: 0 } }}>Groups</Typography>
+        <Box display="flex" gap={{ xs: 1, sm: 2 }} flexWrap="wrap" justifyContent={{ xs: 'stretch', sm: 'flex-start' }}>
+          <TextField
+            placeholder="Search groups..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+              endAdornment: search && (
+                <Clear 
+                  sx={{ cursor: 'pointer', color: 'text.secondary' }} 
+                  onClick={() => setSearch('')} 
+                />
+              )
+            }}
+            sx={{ width: { xs: '100%', sm: 300 } }}
+            size="small"
+          />
           <Button
             variant="outlined"
             startIcon={<Upload />}
             onClick={() => setImportDialogOpen(true)}
-            sx={{ mr: 2 }}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Import CSV
           </Button>
@@ -256,6 +329,7 @@ const Groups: React.FC = () => {
             variant="contained"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Add Group
           </Button>
@@ -273,8 +347,16 @@ const Groups: React.FC = () => {
           onPaginationModelChange={(model) => {
             const newPage = model.page + 1
             const newLimit = model.pageSize
+            const sortBy = sortModel[0]?.field || 'id'
+            const sortDir = sortModel[0]?.sort || 'desc'
             setGroupPagination(prev => ({ ...prev, page: newPage, limit: newLimit }))
-            groupApi.getGroups({ page: newPage, limit: newLimit }).then(response => {
+            groupApi.getGroups({ 
+              page: newPage, 
+              limit: newLimit,
+              search: debouncedSearch,
+              sort_by: sortBy,
+              sort_dir: sortDir
+            }).then(response => {
               setGroups(response.data)
               setGroupPagination({
                 page: response.page,
@@ -286,6 +368,11 @@ const Groups: React.FC = () => {
               setSnackbar({ open: true, message: 'Failed to fetch groups', severity: 'error' as const })
             })
           }}
+          sortingMode="server"
+          onSortModelChange={(model) => {
+            setSortModel(model)
+            setGroupPagination(prev => ({ ...prev, page: 1 }))
+          }}
           disableRowSelectionOnClick
         />
       </Paper>
@@ -295,7 +382,21 @@ const Groups: React.FC = () => {
         <DialogTitle>{editingGroup ? 'Edit Group' : 'Add Group'}</DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={2} sx={{ '& > *': { minWidth: 0 } }}>
+              <FormControl fullWidth>
+                <InputLabel>Course</InputLabel>
+                <Select
+                  value={watch('course_id') || ''}
+                  onChange={(e) => setValue('course_id', Number(e.target.value))}
+                  error={!!errors.course_id}
+                >
+                  {courses.map((course) => (
+                    <MenuItem key={course.id} value={course.id}>
+                      {course.title}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
               <TextField
                 label="Group Name"
                 {...register('name')}
@@ -306,9 +407,9 @@ const Groups: React.FC = () => {
               <FormControl fullWidth>
                 <InputLabel>Type</InputLabel>
                 <Select
-                  {...register('type')}
+                  value={watch('type') || ''}
+                  onChange={(e) => setValue('type', e.target.value as 'Group' | 'Private')}
                   error={!!errors.type}
-                  defaultValue=""
                 >
                   <MenuItem value="Group">Group</MenuItem>
                   <MenuItem value="Private">Private</MenuItem>
@@ -423,7 +524,7 @@ const Groups: React.FC = () => {
                 : 'Drag & drop a CSV file here, or click to select'}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              CSV headers: id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active, students
+              CSV headers: id, course_id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active, students
             </Typography>
           </Box>
         </DialogContent>

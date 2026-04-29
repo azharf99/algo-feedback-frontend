@@ -12,20 +12,25 @@ import {
   Alert,
   Snackbar,
   CircularProgress,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material'
 import {
   Add,
   Edit,
   Delete,
   Upload,
+  Search,
+  Clear,
 } from '@mui/icons-material'
-import { DataGrid, GridColDef, GridActionsCellItem } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridActionsCellItem, GridSortModel } from '@mui/x-data-grid'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
 import { studentApi } from '../../api/services'
 import { Student } from '../../types/data'
+import { useDebounce } from '../../hooks/useDebounce'
 
 const studentSchema = z.object({
   fullname: z.string().min(1, 'Full name is required'),
@@ -41,6 +46,8 @@ const studentSchema = z.object({
 type StudentFormData = z.infer<typeof studentSchema>
 
 const Students: React.FC = () => {
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'))
   const [students, setStudents] = useState<Student[]>([])
   const [pagination, setPagination] = useState({
     page: 1,
@@ -53,6 +60,9 @@ const Students: React.FC = () => {
   const [editingStudent, setEditingStudent] = useState<Student | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' as 'success' | 'error' })
+  const [search, setSearch] = useState('')
+  const debouncedSearch = useDebounce(search, 500)
+  const [sortModel, setSortModel] = useState<GridSortModel>([{ field: 'id', sort: 'desc' }])
 
   const {
     register,
@@ -65,11 +75,19 @@ const Students: React.FC = () => {
 
   useEffect(() => {
     fetchStudents()
-  }, [])
+  }, [debouncedSearch, sortModel])
 
   const fetchStudents = async (page?: number, limit?: number) => {
     try {
-      const response = await studentApi.getStudents({ page: page || pagination.page, limit: limit || pagination.limit })
+      const sortBy = sortModel[0]?.field || 'id'
+      const sortDir = sortModel[0]?.sort || 'desc'
+      const response = await studentApi.getStudents({ 
+        page: page || pagination.page, 
+        limit: limit || pagination.limit,
+        search: debouncedSearch,
+        sort_by: sortBy,
+        sort_dir: sortDir
+      })
       setStudents(response.data)
       setPagination({
         page: response.page,
@@ -163,7 +181,7 @@ const Students: React.FC = () => {
     multiple: false,
   })
 
-  const columns: GridColDef[] = [
+  const allColumns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'fullname', headerName: 'Full Name', width: 150 },
     { field: 'surname', headerName: 'Surname', width: 150 },
@@ -201,6 +219,12 @@ const Students: React.FC = () => {
     },
   ]
 
+  const columns = isMobile 
+    ? allColumns.filter(col => 
+        ['id', 'fullname', 'phone_number', 'is_active', 'actions'].includes(col.field)
+      )
+    : allColumns
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -211,14 +235,30 @@ const Students: React.FC = () => {
 
   return (
     <Box>
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h4">Students</Typography>
-        <Box>
+      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3} flexDirection={{ xs: 'column', sm: 'row' }} gap={{ xs: 2, sm: 0 }}>
+        <Typography variant="h4" sx={{ fontSize: { xs: '1.5rem', sm: '2.125rem' }, mb: { xs: 2, sm: 0 } }}>Students</Typography>
+        <Box display="flex" gap={{ xs: 1, sm: 2 }} flexWrap="wrap" justifyContent={{ xs: 'stretch', sm: 'flex-start' }}>
+          <TextField
+            placeholder="Search students..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            InputProps={{
+              startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
+              endAdornment: search && (
+                <Clear 
+                  sx={{ cursor: 'pointer', color: 'text.secondary' }} 
+                  onClick={() => setSearch('')} 
+                />
+              )
+            }}
+            sx={{ width: { xs: '100%', sm: 300 } }}
+            size="small"
+          />
           <Button
             variant="outlined"
             startIcon={<Upload />}
             onClick={() => setImportDialogOpen(true)}
-            sx={{ mr: 2 }}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Import CSV
           </Button>
@@ -226,6 +266,7 @@ const Students: React.FC = () => {
             variant="contained"
             startIcon={<Add />}
             onClick={() => setDialogOpen(true)}
+            sx={{ flex: { xs: 1, sm: 'auto' } }}
           >
             Add Student
           </Button>
@@ -243,8 +284,31 @@ const Students: React.FC = () => {
           onPaginationModelChange={(model) => {
             const newPage = model.page + 1
             const newLimit = model.pageSize
+            const sortBy = sortModel[0]?.field || 'id'
+            const sortDir = sortModel[0]?.sort || 'desc'
             setPagination(prev => ({ ...prev, page: newPage, limit: newLimit }))
-            fetchStudents(newPage, newLimit)
+            studentApi.getStudents({ 
+              page: newPage, 
+              limit: newLimit,
+              search: debouncedSearch,
+              sort_by: sortBy,
+              sort_dir: sortDir
+            }).then(response => {
+              setStudents(response.data)
+              setPagination({
+                page: response.page,
+                limit: response.limit,
+                total: response.total,
+                total_pages: response.total_pages
+              })
+            }).catch(() => {
+              setSnackbar({ open: true, message: 'Failed to fetch students', severity: 'error' as const })
+            })
+          }}
+          sortingMode="server"
+          onSortModelChange={(model) => {
+            setSortModel(model)
+            setPagination(prev => ({ ...prev, page: 1 }))
           }}
           disableRowSelectionOnClick
         />
@@ -255,7 +319,7 @@ const Students: React.FC = () => {
         <DialogTitle>{editingStudent ? 'Edit Student' : 'Add Student'}</DialogTitle>
         <form onSubmit={handleSubmit(onSubmit)}>
           <DialogContent>
-            <Box display="grid" gridTemplateColumns="1fr 1fr" gap={2}>
+            <Box display="grid" gridTemplateColumns={{ xs: '1fr', sm: '1fr 1fr' }} gap={2} sx={{ '& > *': { minWidth: 0 } }}>
               <TextField
                 label="Full Name"
                 {...register('fullname')}
