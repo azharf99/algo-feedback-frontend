@@ -1,36 +1,19 @@
 import React, { useEffect, useState } from 'react'
 import {
-  Grid,
-  Card,
-  CardContent,
-  Typography,
-  Box,
-  Paper,
-  List,
-  ListItem,
-  ListItemText,
-  Button,
-  CircularProgress,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material'
-import {
-  People,
-  Groups,
-  School,
-  Assessment,
-  Add,
+  Users,
+  UsersRound,
+  GraduationCap,
+  LineChart,
+  Plus,
   Upload,
   Search,
-  Clear,
-} from '@mui/icons-material'
+  X
+} from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import api from '../../api/axios'
 import { Student, Group, Lesson, Feedback } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
+import clsx from 'clsx'
 
 interface DashboardStats {
   totalStudents: number
@@ -140,233 +123,214 @@ const Dashboard: React.FC = () => {
     {
       title: 'Total Students',
       value: stats.totalStudents,
-      icon: <People sx={{ fontSize: 40 }} />,
-      color: '#1976d2',
+      icon: <Users className="w-8 h-8" />,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100',
       action: () => navigate('/students'),
     },
     {
       title: 'Total Groups',
       value: stats.totalGroups,
-      icon: <Groups sx={{ fontSize: 40 }} />,
-      color: '#388e3c',
+      icon: <UsersRound className="w-8 h-8" />,
+      color: 'text-green-600',
+      bgColor: 'bg-green-100',
       action: () => navigate('/groups'),
     },
     {
       title: 'Total Lessons',
       value: stats.totalLessons,
-      icon: <School sx={{ fontSize: 40 }} />,
-      color: '#f57c00',
+      icon: <GraduationCap className="w-8 h-8" />,
+      color: 'text-orange-600',
+      bgColor: 'bg-orange-100',
       action: () => navigate('/lessons'),
     },
     {
       title: 'Total Feedbacks',
       value: stats.totalFeedbacks,
-      icon: <Assessment sx={{ fontSize: 40 }} />,
-      color: '#7b1fa2',
+      icon: <LineChart className="w-8 h-8" />,
+      color: 'text-purple-600',
+      bgColor: 'bg-purple-100',
       action: () => navigate('/feedbacks'),
     },
   ]
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
-        <CircularProgress />
-      </Box>
+      <div className="flex justify-center items-center min-h-[60vh]">
+        <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      </div>
     )
   }
 
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Dashboard
-      </Typography>
-      <Typography variant="body1" color="text.secondary" gutterBottom>
-        Welcome to Algo Feedback System
-      </Typography>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500">Welcome to Algo Feedback System</p>
+      </div>
 
       {/* Statistics Cards */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {statCards.map((card, index) => (
-          <Grid item xs={12} sm={6} md={3} key={index}>
-            <Card
-              sx={{
-                cursor: 'pointer',
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: 4,
-                },
-              }}
-              onClick={card.action}
-            >
-              <CardContent>
-                <Box display="flex" alignItems="center" justifyContent="space-between">
-                  <Box>
-                    <Typography color="textSecondary" gutterBottom variant="h6">
-                      {card.title}
-                    </Typography>
-                    <Typography variant="h4" component="div">
-                      {card.value}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ color: card.color }}>{card.icon}</Box>
-                </Box>
-              </CardContent>
-            </Card>
-          </Grid>
+          <div
+            key={index}
+            onClick={card.action}
+            className="bg-white rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-200 border border-gray-100"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500 truncate">{card.title}</p>
+                <p className="mt-2 text-3xl font-semibold text-gray-900">{card.value}</p>
+              </div>
+              <div className={clsx("p-3 rounded-lg", card.bgColor, card.color)}>
+                {card.icon}
+              </div>
+            </div>
+          </div>
         ))}
-      </Grid>
+      </div>
 
       {/* Recent Activities */}
-      <Grid container spacing={3}>
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6">Recent Lessons</Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Add />}
-                onClick={() => navigate('/lessons')}
-              >
-                Add Lesson
-              </Button>
-            </Box>
-            <Box display="flex" gap={1} mb={2} flexDirection={{ xs: 'column', sm: 'row' }}>
-              <TextField
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Lessons */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Lessons</h2>
+            <button
+              onClick={() => navigate('/lessons')}
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Plus className="-ml-1 mr-2 h-4 w-4" />
+              Add Lesson
+            </button>
+          </div>
+          <div className="p-4 bg-gray-50 border-b border-gray-100 flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
                 placeholder="Search lessons..."
                 value={lessonsSearch}
                 onChange={(e) => setLessonsSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                  endAdornment: lessonsSearch && (
-                    <Clear 
-                      sx={{ cursor: 'pointer', color: 'text.secondary' }} 
-                      onClick={() => setLessonsSearch('')} 
-                    />
-                  )
-                }}
-                size="small"
-                sx={{ flex: { xs: 1, sm: 'auto' }, width: { xs: '100%', sm: 'auto' } }}
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
-              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 100 } }}>
-                <InputLabel>Sort By</InputLabel>
-                <Select
-                  value={lessonsSort}
-                  label="Sort By"
-                  onChange={(e) => setLessonsSort(e.target.value as any)}
+              {lessonsSearch && (
+                <button
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                  onClick={() => setLessonsSearch('')}
                 >
-                  <MenuItem value="id">ID</MenuItem>
-                  <MenuItem value="title">Title</MenuItem>
-                  <MenuItem value="module">Module</MenuItem>
-                  <MenuItem value="level">Level</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 100 } }}>
-                <InputLabel>Order</InputLabel>
-                <Select
-                  value={lessonsSortDir}
-                  label="Order"
-                  onChange={(e) => setLessonsSortDir(e.target.value as 'asc' | 'desc')}
-                >
-                  <MenuItem value="asc">Ascending</MenuItem>
-                  <MenuItem value="desc">Descending</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            <List>
-              {filteredAndSortedLessons.length === 0 ? (
-                <ListItem>
-                  <ListItemText primary="No lessons found" />
-                </ListItem>
-              ) : (
-                filteredAndSortedLessons.map((lesson) => (
-                  <ListItem key={lesson.id} divider>
-                    <ListItemText
-                      primary={lesson.title}
-                      secondary={`${lesson.module} - ${lesson.level}`}
-                    />
-                  </ListItem>
-                ))
+                  <X className="h-4 w-4" />
+                </button>
               )}
-            </List>
-          </Paper>
-        </Grid>
+            </div>
+            <select
+              value={lessonsSort}
+              onChange={(e) => setLessonsSort(e.target.value as any)}
+              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="id">Sort by ID</option>
+              <option value="title">Sort by Title</option>
+              <option value="module">Sort by Module</option>
+              <option value="level">Sort by Level</option>
+            </select>
+            <select
+              value={lessonsSortDir}
+              onChange={(e) => setLessonsSortDir(e.target.value as 'asc' | 'desc')}
+              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+          <ul className="divide-y divide-gray-200">
+            {filteredAndSortedLessons.length === 0 ? (
+              <li className="p-6 text-center text-gray-500">No lessons found</li>
+            ) : (
+              filteredAndSortedLessons.map((lesson) => (
+                <li key={lesson.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <p className="text-sm font-medium text-gray-900">{lesson.title}</p>
+                  <p className="text-sm text-gray-500 mt-1">{lesson.module} - {lesson.level}</p>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
 
-        <Grid item xs={12} md={6}>
-          <Paper sx={{ p: 2 }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
-              <Typography variant="h6">Recent Feedbacks</Typography>
-              <Button
-                variant="outlined"
-                size="small"
-                startIcon={<Upload />}
-                onClick={() => navigate('/feedbacks')}
-              >
-                Generate Feedback
-              </Button>
-            </Box>
-            <Box display="flex" gap={1} mb={2} flexDirection={{ xs: 'column', sm: 'row' }}>
-              <TextField
+        {/* Recent Feedbacks */}
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-gray-900">Recent Feedbacks</h2>
+            <button
+              onClick={() => navigate('/feedbacks')}
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            >
+              <Upload className="-ml-1 mr-2 h-4 w-4" />
+              Generate
+            </button>
+          </div>
+          <div className="p-4 bg-gray-50 border-b border-gray-100 flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 text-gray-400" />
+              </div>
+              <input
+                type="text"
                 placeholder="Search feedbacks..."
                 value={feedbacksSearch}
                 onChange={(e) => setFeedbacksSearch(e.target.value)}
-                InputProps={{
-                  startAdornment: <Search sx={{ mr: 1, color: 'text.secondary' }} />,
-                  endAdornment: feedbacksSearch && (
-                    <Clear 
-                      sx={{ cursor: 'pointer', color: 'text.secondary' }} 
-                      onClick={() => setFeedbacksSearch('')} 
-                    />
-                  )
-                }}
-                size="small"
-                sx={{ flex: { xs: 1, sm: 'auto' }, width: { xs: '100%', sm: 'auto' } }}
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
               />
-              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 100 } }}>
-                <InputLabel>Sort By</InputLabel>
-                <Select
-                  value={feedbacksSort}
-                  label="Sort By"
-                  onChange={(e) => setFeedbacksSort(e.target.value as any)}
+              {feedbacksSearch && (
+                <button
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-500"
+                  onClick={() => setFeedbacksSearch('')}
                 >
-                  <MenuItem value="created_at">Date</MenuItem>
-                  <MenuItem value="course">Course</MenuItem>
-                  <MenuItem value="number">Number</MenuItem>
-                </Select>
-              </FormControl>
-              <FormControl size="small" sx={{ minWidth: { xs: '100%', sm: 100 } }}>
-                <InputLabel>Order</InputLabel>
-                <Select
-                  value={feedbacksSortDir}
-                  label="Order"
-                  onChange={(e) => setFeedbacksSortDir(e.target.value as 'asc' | 'desc')}
-                >
-                  <MenuItem value="asc">Ascending</MenuItem>
-                  <MenuItem value="desc">Descending</MenuItem>
-                </Select>
-              </FormControl>
-            </Box>
-            <List>
-              {filteredAndSortedFeedbacks.length === 0 ? (
-                <ListItem>
-                  <ListItemText primary="No feedbacks found" />
-                </ListItem>
-              ) : (
-                filteredAndSortedFeedbacks.map((feedback) => (
-                  <ListItem key={feedback.id} divider>
-                    <ListItemText
-                      primary={`${feedback.course} - Feedback #${feedback.number}`}
-                      secondary={`Student ID: ${feedback.student_id} - ${new Date(feedback.created_at).toLocaleDateString()}`}
-                    />
-                  </ListItem>
-                ))
+                  <X className="h-4 w-4" />
+                </button>
               )}
-            </List>
-          </Paper>
-        </Grid>
-      </Grid>
-    </Box>
+            </div>
+            <select
+              value={feedbacksSort}
+              onChange={(e) => setFeedbacksSort(e.target.value as any)}
+              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="created_at">Sort by Date</option>
+              <option value="course">Sort by Course</option>
+              <option value="number">Sort by Number</option>
+            </select>
+            <select
+              value={feedbacksSortDir}
+              onChange={(e) => setFeedbacksSortDir(e.target.value as 'asc' | 'desc')}
+              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+            >
+              <option value="asc">Ascending</option>
+              <option value="desc">Descending</option>
+            </select>
+          </div>
+          <ul className="divide-y divide-gray-200">
+            {filteredAndSortedFeedbacks.length === 0 ? (
+              <li className="p-6 text-center text-gray-500">No feedbacks found</li>
+            ) : (
+              filteredAndSortedFeedbacks.map((feedback) => (
+                <li key={feedback.id} className="p-4 hover:bg-gray-50 transition-colors">
+                  <p className="text-sm font-medium text-gray-900">
+                    {feedback.course} - Feedback #{feedback.number}
+                  </p>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Student ID: {feedback.student_id} - {new Date(feedback.created_at).toLocaleDateString()}
+                  </p>
+                </li>
+              ))
+            )}
+          </ul>
+        </div>
+      </div>
+    </div>
   )
 }
 

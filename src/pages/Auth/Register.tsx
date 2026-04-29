@@ -1,25 +1,11 @@
 import React, { useEffect } from 'react'
-import {
-  Container,
-  Paper,
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Alert,
-  CircularProgress,
-  Link,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-} from '@mui/material'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { RegisterCredentials } from '../../types/auth'
+import clsx from 'clsx'
 
 const registerSchema = z.object({
   fullname: z.string().min(1, 'Full name is required'),
@@ -61,101 +47,163 @@ const Register: React.FC = () => {
   }
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
-          <Typography component="h1" variant="h4" align="center" gutterBottom>
-            Algo Feedback System
-          </Typography>
-          <Typography component="h2" variant="h5" align="center" color="text.secondary" gutterBottom>
-            Sign Up
-          </Typography>
+    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900">
+          Algo Feedback System
+        </h1>
+        <h2 className="mt-2 text-center text-lg text-gray-600">
+          Sign Up
+        </h2>
+      </div>
 
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {authState.error && (
-            <Alert severity="error" sx={{ mb: 2 }} onClose={clearError}>
-              {authState.error}
-            </Alert>
+            <div className="rounded-md bg-red-50 p-4 mb-6 relative">
+              <div className="flex">
+                <div className="ml-3">
+                  <h3 className="text-sm font-medium text-red-800">
+                    {authState.error}
+                  </h3>
+                </div>
+                <button
+                  onClick={clearError}
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-700"
+                >
+                  <span className="sr-only">Dismiss</span>
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           )}
 
-          <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 1 }}>
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="fullname"
-              label="Full Name"
-              autoComplete="name"
-              autoFocus
-              {...register('fullname')}
-              error={!!errors.fullname}
-              helperText={errors.fullname?.message}
-              disabled={authState.loading}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              id="email"
-              label="Email Address"
-              autoComplete="email"
-              {...register('email')}
-              error={!!errors.email}
-              helperText={errors.email?.message}
-              disabled={authState.loading}
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
-              label="Password"
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              {...register('password')}
-              error={!!errors.password}
-              helperText={errors.password?.message}
-              disabled={authState.loading}
-            />
-            <FormControl fullWidth margin="normal" required>
-              <InputLabel id="role-label">Role</InputLabel>
-              <Select
-                labelId="role-label"
-                id="role"
-                label="Role"
-                {...register('role')}
-                error={!!errors.role}
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            <div>
+              <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">
+                Full Name
+              </label>
+              <div className="mt-1">
+                <input
+                  id="fullname"
+                  type="text"
+                  autoComplete="name"
+                  disabled={authState.loading}
+                  className={clsx(
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                    errors.fullname ? "border-red-300" : "border-gray-300"
+                  )}
+                  {...register('fullname')}
+                />
+              </div>
+              {errors.fullname && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.fullname.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email Address
+              </label>
+              <div className="mt-1">
+                <input
+                  id="email"
+                  type="email"
+                  autoComplete="email"
+                  disabled={authState.loading}
+                  className={clsx(
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                    errors.email ? "border-red-300" : "border-gray-300"
+                  )}
+                  {...register('email')}
+                />
+              </div>
+              {errors.email && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1">
+                <input
+                  id="password"
+                  type="password"
+                  autoComplete="new-password"
+                  disabled={authState.loading}
+                  className={clsx(
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
+                    errors.password ? "border-red-300" : "border-gray-300"
+                  )}
+                  {...register('password')}
+                />
+              </div>
+              {errors.password && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
+                Role
+              </label>
+              <div className="mt-1">
+                <select
+                  id="role"
+                  disabled={authState.loading}
+                  defaultValue=""
+                  className={clsx(
+                    "block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md",
+                    errors.role ? "border-red-300" : "border-gray-300"
+                  )}
+                  {...register('role')}
+                >
+                  <option value="" disabled>Select a role</option>
+                  <option value="admin">Admin</option>
+                  <option value="tutor">Tutor</option>
+                </select>
+              </div>
+              {errors.role && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.role.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <button
+                type="submit"
                 disabled={authState.loading}
-                defaultValue=""
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <MenuItem value="admin">Admin</MenuItem>
-                <MenuItem value="tutor">Tutor</MenuItem>
-              </Select>
-            </FormControl>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              sx={{ mt: 3, mb: 2 }}
-              disabled={authState.loading}
-            >
-              {authState.loading ? <CircularProgress size={24} /> : 'Sign Up'}
-            </Button>
-            <Box textAlign="center">
-              <Link component={RouterLink} to="/login" variant="body2">
-                Already have an account? Sign In
-              </Link>
-            </Box>
-          </Box>
-        </Paper>
-      </Box>
-    </Container>
+                {authState.loading ? (
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                ) : 'Sign Up'}
+              </button>
+            </div>
+          </form>
+
+          <div className="mt-6 text-center">
+            <RouterLink to="/login" className="font-medium text-blue-600 hover:text-blue-500 text-sm">
+              Already have an account? Sign In
+            </RouterLink>
+          </div>
+        </div>
+      </div>
+    </div>
   )
 }
 

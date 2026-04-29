@@ -1,45 +1,27 @@
-import React, { useState } from 'react'
-import {
-  AppBar,
-  Box,
-  CssBaseline,
-  Drawer,
-  IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemIcon,
-  ListItemText,
-  Toolbar,
-  Typography,
-  Avatar,
-  Menu,
-  MenuItem,
-  Divider,
-} from '@mui/material'
+import React, { useState, useRef, useEffect } from 'react'
 import {
   Menu as MenuIcon,
-  Dashboard,
-  People,
-  Groups,
-  School,
-  EventNote,
-  Assessment,
-  Logout,
-} from '@mui/icons-material'
+  LayoutDashboard,
+  Users,
+  UsersRound,
+  GraduationCap,
+  CalendarDays,
+  LineChart,
+  LogOut,
+  X
+} from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
-
-const drawerWidth = 240
+import clsx from 'clsx'
 
 const menuItems = [
-  { text: 'Dashboard', icon: <Dashboard />, path: '/' },
-  { text: 'Students', icon: <People />, path: '/students' },
-  { text: 'Groups', icon: <Groups />, path: '/groups' },
-  { text: 'Courses', icon: <School />, path: '/courses' },
-  { text: 'Lessons', icon: <EventNote />, path: '/lessons' },
-  { text: 'Sessions', icon: <Assessment />, path: '/sessions' },
-  { text: 'Feedbacks', icon: <Assessment />, path: '/feedbacks' },
+  { text: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/' },
+  { text: 'Students', icon: <Users className="w-5 h-5" />, path: '/students' },
+  { text: 'Groups', icon: <UsersRound className="w-5 h-5" />, path: '/groups' },
+  { text: 'Courses', icon: <GraduationCap className="w-5 h-5" />, path: '/courses' },
+  { text: 'Lessons', icon: <CalendarDays className="w-5 h-5" />, path: '/lessons' },
+  { text: 'Sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
+  { text: 'Feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
 ]
 
 interface LayoutProps {
@@ -48,7 +30,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false)
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null)
+  const [profileOpen, setProfileOpen] = useState(false)
+  const profileRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const { state: authState, logout } = useAuth()
@@ -57,150 +40,128 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setMobileOpen(!mobileOpen)
   }
 
-  const handleMenuClick = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget)
-  }
-
-  const handleMenuClose = () => {
-    setAnchorEl(null)
-  }
-
   const handleLogout = () => {
     logout()
-    handleMenuClose()
+    setProfileOpen(false)
   }
 
-  const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap component="div">
-          Algo Feedback
-        </Typography>
-      </Toolbar>
-      <Divider />
-      <List>
-        {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
-            <ListItemButton
-              selected={location.pathname === item.path}
-              onClick={() => navigate(item.path)}
-            >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </div>
-  )
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setProfileOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  const currentTitle = menuItems.find(item => item.path === location.pathname)?.text || 'Algo Feedback System'
+  const userInitial = authState.user?.fullname?.charAt(0)?.toUpperCase() || 'U'
 
   return (
-    <Box sx={{ display: 'flex' }}>
-      <CssBaseline />
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-          ml: { sm: `${drawerWidth}px` },
-        }}
-      >
-        <Toolbar>
-          <IconButton
-            color="inherit"
-            aria-label="open drawer"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {menuItems.find(item => item.path === location.pathname)?.text || 'Algo Feedback System'}
-          </Typography>
-          <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenuClick}
-            color="inherit"
-          >
-            <Avatar sx={{ width: 32, height: 32 }}>
-              {authState.user?.fullname?.charAt(0)?.toUpperCase() || 'U'}
-            </Avatar>
-          </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right',
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right',
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-          >
-            <MenuItem disabled>
-              <Typography variant="body2">
-                {authState.user?.fullname} ({authState.user?.role})
-              </Typography>
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <ListItemIcon>
-                <Logout fontSize="small" />
-              </ListItemIcon>
-              <Typography variant="body2">Logout</Typography>
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-      <Box
-        component="nav"
-        sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        aria-label="mailbox folders"
-      >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{
-            keepMounted: true,
-          }}
-          sx={{
-            display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-        >
-          {drawer}
-        </Drawer>
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
-      </Box>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          p: 3,
-          width: { sm: `calc(100% - ${drawerWidth}px)` },
-        }}
-      >
-        <Toolbar />
-        {children}
-      </Box>
-    </Box>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile overlay */}
+      {mobileOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden transition-opacity"
+          onClick={handleDrawerToggle}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside className={clsx(
+        "fixed inset-y-0 left-0 bg-white w-64 border-r border-gray-200 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static flex flex-col",
+        mobileOpen ? "translate-x-0" : "-translate-x-full"
+      )}>
+        <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 shrink-0">
+          <span className="text-xl font-bold text-gray-800">Algo Feedback</span>
+          <button onClick={handleDrawerToggle} className="lg:hidden text-gray-500 hover:text-gray-700">
+            <X className="w-6 h-6" />
+          </button>
+        </div>
+        <nav className="flex-1 overflow-y-auto py-4">
+          <ul className="space-y-1 px-3">
+            {menuItems.map((item) => {
+              const isActive = location.pathname === item.path
+              return (
+                <li key={item.text}>
+                  <button
+                    onClick={() => {
+                      navigate(item.path)
+                      setMobileOpen(false)
+                    }}
+                    className={clsx(
+                      "w-full flex items-center px-3 py-2 rounded-md transition-colors",
+                      isActive 
+                        ? "bg-blue-50 text-blue-700 font-medium" 
+                        : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                    )}
+                  >
+                    <span className={clsx("mr-3", isActive ? "text-blue-700" : "text-gray-400")}>
+                      {item.icon}
+                    </span>
+                    {item.text}
+                  </button>
+                </li>
+              )
+            })}
+          </ul>
+        </nav>
+      </aside>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Header */}
+        <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 z-30 shrink-0">
+          <div className="flex items-center">
+            <button
+              onClick={handleDrawerToggle}
+              className="mr-4 text-gray-500 hover:text-gray-700 lg:hidden"
+            >
+              <MenuIcon className="w-6 h-6" />
+            </button>
+            <h1 className="text-xl font-semibold text-gray-800">{currentTitle}</h1>
+          </div>
+
+          {/* Profile Dropdown */}
+          <div className="relative" ref={profileRef}>
+            <button
+              onClick={() => setProfileOpen(!profileOpen)}
+              className="flex items-center focus:outline-none"
+            >
+              <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-medium shadow-sm">
+                {userInitial}
+              </div>
+            </button>
+
+            {profileOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-gray-100 z-50">
+                <div className="px-4 py-2 border-b border-gray-100">
+                  <p className="text-sm font-medium text-gray-900 truncate">
+                    {authState.user?.fullname}
+                  </p>
+                  <p className="text-xs text-gray-500 capitalize">
+                    {authState.user?.role}
+                  </p>
+                </div>
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-50 flex items-center"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          {children}
+        </main>
+      </div>
+    </div>
   )
 }
 
