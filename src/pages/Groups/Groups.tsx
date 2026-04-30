@@ -117,7 +117,7 @@ const Groups: React.FC = () => {
           ...data,
           meeting_link: data.meeting_link || '',
           recordings_link: data.recordings_link || '',
-          students: data.students ? [] : undefined
+          students: data.students
         } as Partial<Group>)
         toast.success('Group updated successfully')
       } else {
@@ -125,7 +125,7 @@ const Groups: React.FC = () => {
           ...data,
           meeting_link: data.meeting_link || '',
           recordings_link: data.recordings_link || '',
-          students: data.students ? [] : undefined
+          students: data.students
         } as Omit<Group, 'id'>)
         toast.success('Group created successfully')
       }
