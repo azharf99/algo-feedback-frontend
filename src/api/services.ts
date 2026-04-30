@@ -188,13 +188,9 @@ export const sessionApi = {
   },
   
   updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
-    const formData = new FormData()
-    studentIds.forEach(sid => {
-      formData.append('student_ids', sid.toString())
-    })
-    await api.post(`/sessions/${id}/attendance`, formData, {
+    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds }, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        'Content-Type': 'application/json',
       },
     })
   }
