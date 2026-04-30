@@ -188,7 +188,7 @@ export const sessionApi = {
   },
   
   updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
-    await api.post(`/sessions/${id}/attendance`, studentIds)
+    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds })
   }
 }
 
