@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import {
   Edit2,
+  Trash2,
   BarChart2,
   FileText,
   MessageCircle,
@@ -127,6 +128,18 @@ const Feedbacks: React.FC = () => {
       handleCloseDialog()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Update failed')
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm('Are you sure you want to delete this feedback?')) {
+      try {
+        await feedbackApi.deleteFeedback(id)
+        toast.success('Feedback deleted successfully')
+        fetchData(feedbackPagination.page)
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Delete failed')
+      }
     }
   }
 
@@ -418,6 +431,13 @@ const Feedbacks: React.FC = () => {
                         title="Send WhatsApp"
                       >
                         <MessageCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleDelete(feedback.id)}
+                        className="text-red-600 hover:text-red-900 mx-1 p-1 rounded-md hover:bg-red-50"
+                        title="Delete"
+                      >
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </td>
                   </tr>

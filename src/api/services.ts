@@ -208,6 +208,10 @@ export const feedbackApi = {
     return response.data.data
   },
   
+  deleteFeedback: async (id: number): Promise<void> => {
+    await api.delete(`/feedbacks/${id}`)
+  },
+  
   generateFeedbacks: async (params?: { all?: boolean; group_id?: number }): Promise<void> => {
     await api.post('/feedbacks/seeder', {}, { params })
   },
