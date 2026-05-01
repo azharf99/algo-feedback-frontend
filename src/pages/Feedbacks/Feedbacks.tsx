@@ -218,7 +218,7 @@ const Feedbacks: React.FC = () => {
   const getScoreLabel = (score: string, type: 'attendance' | 'activity' | 'task') => {
     const labels = {
       attendance: ['None', 'Rarely', 'Sometimes', 'Often', 'Always'],
-      activity: ['Inactive', 'Slightly Active', 'Active'],
+      activity: ['Inactive', 'Slightly Active', 'Active', 'Very Active'],
       task: ['None', 'Some', 'All'],
     }
     const parsed = parseInt(score)
