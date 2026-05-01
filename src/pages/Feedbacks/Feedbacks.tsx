@@ -28,7 +28,7 @@ const feedbackSchema = z.object({
   attendance_score: z.string().min(1, 'Attendance score is required'),
   activity_score: z.string().min(1, 'Activity score is required'),
   task_score: z.string().min(1, 'Task score is required'),
-  tutor_comments: z.string().optional(),
+  tutor_feedback: z.string().optional(),
 })
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>
@@ -199,7 +199,7 @@ const Feedbacks: React.FC = () => {
       attendance_score: feedback.attendance_score,
       activity_score: feedback.activity_score,
       task_score: feedback.task_score,
-      tutor_comments: feedback.tutor_comments,
+      tutor_feedback: feedback.tutor_feedback,
     })
     setDialogOpen(true)
   }
@@ -549,7 +549,7 @@ const Feedbacks: React.FC = () => {
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Tutor Comments</label>
-              <textarea {...register('tutor_comments')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.tutor_comments ? "border-red-300" : "border-gray-300")}></textarea>
+              <textarea {...register('tutor_feedback')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.tutor_feedback ? "border-red-300" : "border-gray-300")}></textarea>
             </div>
           </div>
           <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
