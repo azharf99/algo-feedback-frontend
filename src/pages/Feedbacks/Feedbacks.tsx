@@ -534,6 +534,7 @@ const Feedbacks: React.FC = () => {
                 <option value="0">Inactive (0)</option>
                 <option value="1">Slightly Active (1)</option>
                 <option value="2">Active (2)</option>
+                <option value="3">Super Active (3)</option>
               </select>
               {errors.activity_score && <p className="mt-1 text-sm text-red-600">{errors.activity_score.message}</p>}
             </div>
