@@ -16,8 +16,8 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { feedbackApi } from '../../api/services'
-import { Feedback } from '../../types/data'
+import { feedbackApi, groupApi } from '../../api/services'
+import { Feedback, Group } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -34,12 +34,14 @@ type FeedbackFormData = z.infer<typeof feedbackSchema>
 
 const generateFeedbackSchema = z.object({
   all: z.boolean().default(false),
+  group_id: z.number().optional(),
 })
 
 type GenerateFeedbackFormData = z.infer<typeof generateFeedbackSchema>
 
 const Feedbacks: React.FC = () => {
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
+  const [groups, setGroups] = useState<Group[]>([])
   const [feedbackPagination, setFeedbackPagination] = useState({
     page: 1,
     limit: 10,
@@ -70,11 +72,14 @@ const Feedbacks: React.FC = () => {
     register: registerGenerate,
     handleSubmit: handleGenerateSubmit,
     reset: resetGenerate,
+    watch: watchGenerate,
     formState: { errors: generateErrors },
   } = useForm<GenerateFeedbackFormData>({
     resolver: zodResolver(generateFeedbackSchema),
     defaultValues: { all: false }
   })
+
+  const isAllStudents = watchGenerate('all')
 
   useEffect(() => {
     fetchData(1)
@@ -87,14 +92,18 @@ const Feedbacks: React.FC = () => {
   const fetchData = async (page: number, limit: number = feedbackPagination.limit) => {
     setLoading(true)
     try {
-      const feedbacksRes = await feedbackApi.getFeedbacks({ 
-        page, 
-        limit,
-        search: debouncedSearch,
-        sort_by: sortField,
-        sort_dir: sortDir
-      })
+      const [feedbacksRes, groupsRes] = await Promise.all([
+        feedbackApi.getFeedbacks({ 
+          page, 
+          limit,
+          search: debouncedSearch,
+          sort_by: sortField,
+          sort_dir: sortDir
+        }),
+        groupApi.getGroups()
+      ])
       setFeedbacks(feedbacksRes.data)
+      setGroups(groupsRes.data)
       setFeedbackPagination({
         page: feedbacksRes.page,
         limit: feedbacksRes.limit,
@@ -124,7 +133,10 @@ const Feedbacks: React.FC = () => {
   const onGenerateSubmit: SubmitHandler<GenerateFeedbackFormData> = async (data) => {
     const loadingToast = toast.loading('Starting feedback generation...')
     try {
-      await feedbackApi.generateFeedbacks({ all: data.all })
+      await feedbackApi.generateFeedbacks({ 
+        all: data.all,
+        group_id: data.group_id 
+      })
       toast.success('Feedback generation started', { id: loadingToast })
       fetchData(1)
       handleCloseGenerateDialog()
@@ -544,10 +556,25 @@ const Feedbacks: React.FC = () => {
                 {...registerGenerate('all', { setValueAs: v => v === 'true' || v === true })}
                 className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", generateErrors.all ? "border-red-300" : "border-gray-300")}
               >
-                <option value="false">Specific Student</option>
+                <option value="false">Specific Group</option>
                 <option value="true">All Students</option>
               </select>
             </div>
+            {!isAllStudents && (
+              <div className="mt-4">
+                <label className="block text-sm font-medium text-gray-700">Group</label>
+                <select
+                  {...registerGenerate('group_id', { valueAsNumber: true })}
+                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", generateErrors.group_id ? "border-red-300" : "border-gray-300")}
+                >
+                  <option value="">Select a group</option>
+                  {groups.map(g => (
+                    <option key={g.id} value={g.id}>{g.name}</option>
+                  ))}
+                </select>
+                {generateErrors.group_id && <p className="mt-1 text-sm text-red-600">{generateErrors.group_id.message}</p>}
+              </div>
+            )}
           </div>
           <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
             <button type="button" onClick={handleCloseGenerateDialog} className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">Cancel</button>

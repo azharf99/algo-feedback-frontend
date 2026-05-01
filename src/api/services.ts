@@ -208,7 +208,7 @@ export const feedbackApi = {
     return response.data.data
   },
   
-  generateFeedbacks: async (params?: { all?: boolean }): Promise<void> => {
+  generateFeedbacks: async (params?: { all?: boolean; group_id?: number }): Promise<void> => {
     await api.post('/feedbacks/seeder', {}, { params })
   },
   
