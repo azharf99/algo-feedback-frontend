@@ -295,19 +295,19 @@ const Feedbacks: React.FC = () => {
         <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 truncate">PDFs Generated</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => f.pdf_path).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => f.url_pdf).length}</dd>
           </div>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 truncate">WhatsApp Scheduled</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => f.wa_scheduled).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => f.is_sent).length}</dd>
           </div>
         </div>
         <div className="bg-white overflow-hidden shadow rounded-lg border border-gray-200">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 truncate">Pending PDFs</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => !f.pdf_path).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900">{feedbacks.filter(f => !f.url_pdf).length}</dd>
           </div>
         </div>
       </div>
@@ -352,9 +352,9 @@ const Feedbacks: React.FC = () => {
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
-                  onClick={() => toggleSort('wa_scheduled')}
+                  onClick={() => toggleSort('is_sent')}
                 >
-                  <div className="flex items-center gap-1">WhatsApp {renderSortIcon('wa_scheduled')}</div>
+                  <div className="flex items-center gap-1">WhatsApp {renderSortIcon('is_sent')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
@@ -392,7 +392,7 @@ const Feedbacks: React.FC = () => {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      {feedback.pdf_path ? (
+                      {feedback.url_pdf ? (
                         <span className="text-blue-600 bg-blue-50 p-1 rounded inline-flex" title="PDF Generated">
                           <FileText className="w-5 h-5" />
                         </span>
@@ -403,9 +403,9 @@ const Feedbacks: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={clsx(
                         "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
-                        feedback.wa_scheduled ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
+                        feedback.is_sent ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"
                       )}>
-                        {feedback.wa_scheduled ? 'Scheduled' : 'Not Scheduled'}
+                        {feedback.is_sent ? 'Scheduled' : 'Not Scheduled'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -426,7 +426,7 @@ const Feedbacks: React.FC = () => {
                       </button>
                       <button
                         onClick={() => handleSendWhatsApp(feedback.id)}
-                        disabled={waScheduling === feedback.id || !feedback.pdf_path}
+                        disabled={waScheduling === feedback.id || !feedback.url_pdf}
                         className="text-green-600 hover:text-green-900 mx-1 p-1 rounded-md hover:bg-green-50 disabled:opacity-50"
                         title="Send WhatsApp"
                       >

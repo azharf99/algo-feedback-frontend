@@ -66,8 +66,8 @@ export interface Feedback {
   activity_score: string
   task_score: string
   tutor_feedback: string
-  pdf_path?: string
-  wa_scheduled?: boolean
+  url_pdf?: string
+  is_sent?: boolean
   created_at: string
   updated_at: string
   student?: Student
