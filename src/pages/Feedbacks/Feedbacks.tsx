@@ -94,8 +94,8 @@ const Feedbacks: React.FC = () => {
     setLoading(true)
     try {
       const [feedbacksRes, groupsRes] = await Promise.all([
-        feedbackApi.getFeedbacks({ 
-          page, 
+        feedbackApi.getFeedbacks({
+          page,
           limit,
           search: debouncedSearch,
           sort_by: sortField,
@@ -146,9 +146,9 @@ const Feedbacks: React.FC = () => {
   const onGenerateSubmit: SubmitHandler<GenerateFeedbackFormData> = async (data) => {
     const loadingToast = toast.loading('Starting feedback generation...')
     try {
-      await feedbackApi.generateFeedbacks({ 
+      await feedbackApi.generateFeedbacks({
         all: data.all,
-        group_id: data.group_id 
+        group_id: data.group_id
       })
       toast.success('Feedback generation started', { id: loadingToast })
       fetchData(1)
@@ -323,8 +323,8 @@ const Feedbacks: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => toggleSort('id')}
                 >
@@ -336,8 +336,8 @@ const Feedbacks: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Course
                 </th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => toggleSort('number')}
                 >
@@ -349,8 +349,8 @@ const Feedbacks: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   PDF
                 </th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
                   onClick={() => toggleSort('is_sent')}
                 >
@@ -393,9 +393,17 @@ const Feedbacks: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {feedback.url_pdf ? (
-                        <span className="text-blue-600 bg-blue-50 p-1 rounded inline-flex" title="PDF Generated">
-                          <FileText className="w-5 h-5" />
-                        </span>
+                        <a
+                          href={feedback.url_pdf}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-900"
+                          title="View PDF"
+                        >
+                          <span className="text-blue-600 bg-blue-50 p-1 rounded inline-flex" title="PDF Generated">
+                            <FileText className="w-5 h-5" /> View PDF
+                          </span>
+                        </a>
                       ) : (
                         <span className="text-gray-400">-</span>
                       )}
@@ -446,7 +454,7 @@ const Feedbacks: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
         <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
           <div className="flex-1 flex justify-between sm:hidden">
