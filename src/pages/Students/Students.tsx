@@ -18,6 +18,7 @@ import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
 import { studentApi } from '../../api/services'
 import { Student } from '../../types/data'
+import { sanitizePhoneNumber } from '../../utils/phone'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -96,20 +97,27 @@ const Students: React.FC = () => {
   }
 
   const onSubmit: SubmitHandler<StudentFormData> = async (data) => {
+    // Sanitize phone numbers before sending to backend
+    const sanitizedData = {
+      ...data,
+      phone_number: sanitizePhoneNumber(data.phone_number),
+      parent_contact: sanitizePhoneNumber(data.parent_contact)
+    }
+
     try {
       if (editingStudent) {
-        const updateData = { ...data }
+        const updateData = { ...sanitizedData }
         if (!updateData.password) {
           delete updateData.password
         }
         await studentApi.updateStudent(editingStudent.id, updateData)
         toast.success('Student updated successfully')
       } else {
-        if (!data.password) {
+        if (!sanitizedData.password) {
           toast.error('Password is required for new students')
           return
         }
-        await studentApi.createStudent(data)
+        await studentApi.createStudent(sanitizedData)
         toast.success('Student created successfully')
       }
       fetchStudents(pagination.page)

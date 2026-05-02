@@ -18,6 +18,7 @@ import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
 import { groupApi, studentApi, courseApi } from '../../api/services'
 import { Group, Student, Course } from '../../types/data'
+import { sanitizePhoneNumber } from '../../utils/phone'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -111,21 +112,27 @@ const Groups: React.FC = () => {
   }
 
   const onSubmit: SubmitHandler<GroupFormData> = async (data) => {
+    // Sanitize group phone before sending to backend
+    const sanitizedData = {
+      ...data,
+      group_phone: sanitizePhoneNumber(data.group_phone)
+    }
+
     try {
       if (editingGroup) {
         await groupApi.updateGroup(editingGroup.id, {
-          ...data,
-          meeting_link: data.meeting_link || '',
-          recordings_link: data.recordings_link || '',
-          students: data.students
+          ...sanitizedData,
+          meeting_link: sanitizedData.meeting_link || '',
+          recordings_link: sanitizedData.recordings_link || '',
+          students: sanitizedData.students
         } as Partial<Group>)
         toast.success('Group updated successfully')
       } else {
         await groupApi.createGroup({
-          ...data,
-          meeting_link: data.meeting_link || '',
-          recordings_link: data.recordings_link || '',
-          students: data.students
+          ...sanitizedData,
+          meeting_link: sanitizedData.meeting_link || '',
+          recordings_link: sanitizedData.recordings_link || '',
+          students: sanitizedData.students
         } as Omit<Group, 'id'>)
         toast.success('Group created successfully')
       }
