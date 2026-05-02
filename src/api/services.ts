@@ -220,7 +220,7 @@ export const feedbackApi = {
     await api.post('/feedbacks/generate-pdf', params)
   },
   
-  sendWhatsApp: async (params?: { feedback_id?: number }): Promise<void> => {
+  sendWhatsApp: async (params?: { student_id?: number }): Promise<void> => {
     await api.post('/feedbacks/send-wa', {}, { params })
   }
 }

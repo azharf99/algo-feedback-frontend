@@ -183,10 +183,10 @@ const Feedbacks: React.FC = () => {
     }
   }
 
-  const handleSendWhatsApp = async (feedbackId?: number) => {
+  const handleSendWhatsApp = async (studentId?: number) => {
     try {
-      setWaScheduling(feedbackId || 0)
-      await feedbackApi.sendWhatsApp({ feedback_id: feedbackId })
+      setWaScheduling(studentId || 0)
+      await feedbackApi.sendWhatsApp({ student_id: studentId })
       toast.success('WhatsApp scheduling started')
       fetchData(feedbackPagination.page)
     } catch (error: any) {
@@ -439,8 +439,8 @@ const Feedbacks: React.FC = () => {
                         <FileText className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleSendWhatsApp(feedback.id)}
-                        disabled={waScheduling === feedback.id || !feedback.url_pdf}
+                        onClick={() => handleSendWhatsApp(feedback.student_id)}
+                        disabled={waScheduling === feedback.student_id || !feedback.url_pdf}
                         className="text-green-600 hover:text-green-900 mx-1 p-1 rounded-md hover:bg-green-50 disabled:opacity-50"
                         title="Send WhatsApp"
                       >
