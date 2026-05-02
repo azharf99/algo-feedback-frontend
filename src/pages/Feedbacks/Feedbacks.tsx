@@ -29,6 +29,9 @@ const feedbackSchema = z.object({
   activity_score: z.string().min(1, 'Activity score is required'),
   task_score: z.string().min(1, 'Task score is required'),
   tutor_feedback: z.string().optional(),
+  lesson_date: z.string().optional(),
+  lesson_time: z.string().optional(),
+  project_link: z.string().optional(),
 })
 
 type FeedbackFormData = z.infer<typeof feedbackSchema>
@@ -200,6 +203,9 @@ const Feedbacks: React.FC = () => {
       activity_score: feedback.activity_score,
       task_score: feedback.task_score,
       tutor_feedback: feedback.tutor_feedback,
+      lesson_date: feedback.lesson_date ? new Date(feedback.lesson_date).toISOString().split('T')[0] : '',
+      lesson_time: feedback.lesson_time ? feedback.lesson_time.substring(0, 5) : '',
+      project_link: feedback.project_link || '',
     })
     setDialogOpen(true)
   }
@@ -554,6 +560,21 @@ const Feedbacks: React.FC = () => {
                 <option value="2">All (2)</option>
               </select>
               {errors.task_score && <p className="mt-1 text-sm text-red-600">{errors.task_score.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Lesson Date</label>
+              <input type="date" {...register('lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_date ? "border-red-300" : "border-gray-300")} />
+              {errors.lesson_date && <p className="mt-1 text-sm text-red-600">{errors.lesson_date.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Lesson Time</label>
+              <input type="time" {...register('lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_time ? "border-red-300" : "border-gray-300")} />
+              {errors.lesson_time && <p className="mt-1 text-sm text-red-600">{errors.lesson_time.message}</p>}
+            </div>
+            <div className="sm:col-span-2">
+              <label className="block text-sm font-medium text-gray-700">Project Link</label>
+              <input type="url" {...register('project_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.project_link ? "border-red-300" : "border-gray-300")} />
+              {errors.project_link && <p className="mt-1 text-sm text-red-600">{errors.project_link.message}</p>}
             </div>
             <div className="sm:col-span-2">
               <label className="block text-sm font-medium text-gray-700">Tutor Comments</label>
