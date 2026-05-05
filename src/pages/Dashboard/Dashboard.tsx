@@ -124,32 +124,32 @@ const Dashboard: React.FC = () => {
       title: 'Total Students',
       value: stats.totalStudents,
       icon: <Users className="w-8 h-8" />,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100',
+      color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
       action: () => navigate('/students'),
     },
     {
       title: 'Total Groups',
       value: stats.totalGroups,
       icon: <UsersRound className="w-8 h-8" />,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100',
+      color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-100 dark:bg-green-900/30',
       action: () => navigate('/groups'),
     },
     {
       title: 'Total Lessons',
       value: stats.totalLessons,
       icon: <GraduationCap className="w-8 h-8" />,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100',
+      color: 'text-orange-600 dark:text-orange-400',
+      bgColor: 'bg-orange-100 dark:bg-orange-900/30',
       action: () => navigate('/lessons'),
     },
     {
       title: 'Total Feedbacks',
       value: stats.totalFeedbacks,
       icon: <LineChart className="w-8 h-8" />,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100',
+      color: 'text-purple-600 dark:text-purple-400',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
       action: () => navigate('/feedbacks'),
     },
   ]
@@ -157,7 +157,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
-        <svg className="animate-spin h-8 w-8 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <svg className="animate-spin h-8 w-8 text-blue-600 dark:text-blue-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
           <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
         </svg>
@@ -166,10 +166,10 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="transition-colors duration-200">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">Welcome to Algo Feedback System</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Welcome to Algo Feedback System</p>
       </div>
 
       {/* Statistics Cards */}
@@ -178,14 +178,14 @@ const Dashboard: React.FC = () => {
           <div
             key={index}
             onClick={card.action}
-            className="bg-white rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-md hover:-translate-y-1 transition-all duration-200 border border-gray-100"
+            className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 cursor-pointer hover:shadow-md dark:hover:shadow-gray-900/50 hover:-translate-y-1 transition-all duration-200 border border-gray-100 dark:border-gray-700"
           >
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500 truncate">{card.title}</p>
-                <p className="mt-2 text-3xl font-semibold text-gray-900">{card.value}</p>
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{card.title}</p>
+                <p className="mt-2 text-3xl font-semibold text-gray-900 dark:text-white">{card.value}</p>
               </div>
-              <div className={clsx("p-3 rounded-lg", card.bgColor, card.color)}>
+              <div className={clsx("p-3 rounded-lg transition-colors", card.bgColor, card.color)}>
                 {card.icon}
               </div>
             </div>
@@ -194,30 +194,30 @@ const Dashboard: React.FC = () => {
       </div>
 
       {/* Recent Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
         {/* Recent Lessons */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Lessons</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Lessons</h2>
             <button
               onClick={() => navigate('/lessons')}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <Plus className="-ml-1 mr-2 h-4 w-4" />
               Add Lesson
             </button>
           </div>
-          <div className="p-4 bg-gray-50 border-b border-gray-100 flex flex-col sm:flex-row gap-3">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3 transition-colors duration-200">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search lessons..."
                 value={lessonsSearch}
                 onChange={(e) => setLessonsSearch(e.target.value)}
-                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
               />
               {lessonsSearch && (
                 <button
@@ -231,7 +231,7 @@ const Dashboard: React.FC = () => {
             <select
               value={lessonsSort}
               onChange={(e) => setLessonsSort(e.target.value as any)}
-              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
               <option value="id">Sort by ID</option>
               <option value="title">Sort by Title</option>
@@ -241,20 +241,20 @@ const Dashboard: React.FC = () => {
             <select
               value={lessonsSortDir}
               onChange={(e) => setLessonsSortDir(e.target.value as 'asc' | 'desc')}
-              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
           </div>
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAndSortedLessons.length === 0 ? (
-              <li className="p-6 text-center text-gray-500">No lessons found</li>
+              <li className="p-6 text-center text-gray-500 dark:text-gray-400">No lessons found</li>
             ) : (
               filteredAndSortedLessons.map((lesson) => (
-                <li key={lesson.id} className="p-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium text-gray-900">{lesson.title}</p>
-                  <p className="text-sm text-gray-500 mt-1">{lesson.module} - {lesson.level}</p>
+                <li key={lesson.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">{lesson.title}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{lesson.module} - {lesson.level}</p>
                 </li>
               ))
             )}
@@ -262,28 +262,28 @@ const Dashboard: React.FC = () => {
         </div>
 
         {/* Recent Feedbacks */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="p-6 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900">Recent Feedbacks</h2>
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
+          <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Feedbacks</h2>
             <button
               onClick={() => navigate('/feedbacks')}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <Upload className="-ml-1 mr-2 h-4 w-4" />
               Generate
             </button>
           </div>
-          <div className="p-4 bg-gray-50 border-b border-gray-100 flex flex-col sm:flex-row gap-3">
+          <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3 transition-colors duration-200">
             <div className="relative flex-1">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-4 w-4 text-gray-400" />
+                <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
               </div>
               <input
                 type="text"
                 placeholder="Search feedbacks..."
                 value={feedbacksSearch}
                 onChange={(e) => setFeedbacksSearch(e.target.value)}
-                className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
               />
               {feedbacksSearch && (
                 <button
@@ -297,7 +297,7 @@ const Dashboard: React.FC = () => {
             <select
               value={feedbacksSort}
               onChange={(e) => setFeedbacksSort(e.target.value as any)}
-              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              className="block w-full sm:w-32 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
               <option value="created_at">Sort by Date</option>
               <option value="course">Sort by Course</option>
@@ -306,22 +306,22 @@ const Dashboard: React.FC = () => {
             <select
               value={feedbacksSortDir}
               onChange={(e) => setFeedbacksSortDir(e.target.value as 'asc' | 'desc')}
-              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"
+              className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
               <option value="asc">Ascending</option>
               <option value="desc">Descending</option>
             </select>
           </div>
-          <ul className="divide-y divide-gray-200">
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAndSortedFeedbacks.length === 0 ? (
-              <li className="p-6 text-center text-gray-500">No feedbacks found</li>
+              <li className="p-6 text-center text-gray-500 dark:text-gray-400">No feedbacks found</li>
             ) : (
               filteredAndSortedFeedbacks.map((feedback) => (
-                <li key={feedback.id} className="p-4 hover:bg-gray-50 transition-colors">
-                  <p className="text-sm font-medium text-gray-900">
+                <li key={feedback.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {feedback.course} - Feedback #{feedback.number}
                   </p>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                     Student ID: {feedback.student_id} - {new Date(feedback.created_at).toLocaleDateString()}
                   </p>
                 </li>

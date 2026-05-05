@@ -7,4 +7,33 @@
   }
 }
 
+@layer base {
+  /* Global dark mode defaults */
+  .dark {
+    color-scheme: dark;
+  }
+
+  .dark body {
+    @apply bg-gray-900 text-gray-300;
+  }
+
+  /* Ensure headings are visible in dark mode by default if they lack specific dark:text-* classes */
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-white;
+  }
+  
+  /* Table defaults for dark mode */
+  .dark table {
+    @apply border-gray-700;
+  }
+  
+  .dark th {
+    @apply text-gray-400 border-gray-700;
+  }
+  
+  .dark td {
+    @apply text-gray-400 border-gray-700;
+  }
+}
+
 @custom-variant dark (&:where(.dark, .dark *));

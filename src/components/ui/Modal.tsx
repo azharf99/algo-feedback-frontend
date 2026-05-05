@@ -45,16 +45,16 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, maxWidth 
 
       {/* Panel */}
       <div
-        className={`relative bg-white rounded-xl shadow-2xl w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col`}
+        className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full ${maxWidthMap[maxWidth]} max-h-[90vh] flex flex-col border border-transparent dark:border-gray-700 transition-colors duration-200`}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 shrink-0">
-          <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{title}</h2>
           <button
             type="button"
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-md hover:bg-gray-100"
+            className="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 transition-colors p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -63,7 +63,7 @@ const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, maxWidth 
         </div>
 
         {/* Scrollable content area */}
-        <div className="overflow-y-auto flex-1">
+        <div className="overflow-y-auto flex-1 dark:text-gray-300">
           {children}
         </div>
       </div>

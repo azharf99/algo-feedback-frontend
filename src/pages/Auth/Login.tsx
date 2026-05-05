@@ -92,29 +92,29 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-extrabold text-gray-900">
+        <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
           Algo Feedback System
         </h1>
-        <h2 className="mt-2 text-center text-lg text-gray-600">
+        <h2 className="mt-2 text-center text-lg text-gray-600 dark:text-gray-400">
           Sign In
         </h2>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+        <div className="bg-white dark:bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-transparent dark:border-gray-700 transition-colors duration-200">
           {authState.error && (
-            <div className="rounded-md bg-red-50 p-4 mb-6 relative">
+            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 mb-6 relative">
               <div className="flex">
                 <div className="ml-3">
-                  <h3 className="text-sm font-medium text-red-800">
+                  <h3 className="text-sm font-medium text-red-800 dark:text-red-400">
                     {authState.error}
                   </h3>
                 </div>
                 <button
                   onClick={clearError}
-                  className="absolute top-4 right-4 text-red-500 hover:text-red-700"
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   <span className="sr-only">Dismiss</span>
                   <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -127,7 +127,7 @@ const Login: React.FC = () => {
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Email Address
               </label>
               <div className="mt-1">
@@ -137,21 +137,21 @@ const Login: React.FC = () => {
                   autoComplete="email"
                   disabled={authState.loading}
                   className={clsx(
-                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
-                    errors.email ? "border-red-300" : "border-gray-300"
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 transition-colors",
+                    errors.email ? "border-red-300 dark:border-red-500" : "border-gray-300"
                   )}
                   {...register('email')}
                 />
               </div>
               {errors.email && (
-                <p className="mt-2 text-sm text-red-600" id="email-error">
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400" id="email-error">
                   {errors.email.message}
                 </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Password
               </label>
               <div className="mt-1">
@@ -161,14 +161,14 @@ const Login: React.FC = () => {
                   autoComplete="current-password"
                   disabled={authState.loading}
                   className={clsx(
-                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
-                    errors.password ? "border-red-300" : "border-gray-300"
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 transition-colors",
+                    errors.password ? "border-red-300 dark:border-red-500" : "border-gray-300"
                   )}
                   {...register('password')}
                 />
               </div>
               {errors.password && (
-                <p className="mt-2 text-sm text-red-600" id="password-error">
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400" id="password-error">
                   {errors.password.message}
                 </p>
               )}
@@ -181,7 +181,7 @@ const Login: React.FC = () => {
                 onChange={onCaptchaChange}
               />
               {errors.captcha_token && (
-                <p className="mt-2 text-sm text-red-600">
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
                   {errors.captcha_token.message}
                 </p>
               )}
@@ -191,7 +191,7 @@ const Login: React.FC = () => {
               <button
                 type="submit"
                 disabled={authState.loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
                 {authState.loading ? (
                   <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -206,17 +206,17 @@ const Login: React.FC = () => {
           <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300" />
+                <div className="w-full border-t border-gray-300 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
               </div>
             </div>
 
             <div className="mt-6">
               <button
                 onClick={handleGoogleLogin}
-                className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <GoogleIcon />
                 Sign in with Google
@@ -225,7 +225,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="mt-6 text-center">
-            <RouterLink to="/register" className="font-medium text-blue-600 hover:text-blue-500 text-sm">
+            <RouterLink to="/register" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm transition-colors">
               Don't have an account? Sign Up
             </RouterLink>
           </div>
