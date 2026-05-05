@@ -1,16 +1,15 @@
 import { Link } from 'react-router-dom'
-import { 
-  Users, 
-  BookOpen, 
-  Calendar, 
-  MessageSquare, 
-  FileText, 
-  MessageCircle, 
+import {
+  Users,
+  BookOpen,
+  Calendar,
+  MessageSquare,
+  FileText,
+  MessageCircle,
   ArrowRight,
   Star,
   Sun,
   Moon,
-  CheckCircle2
 } from 'lucide-react'
 import { useTheme } from '../../contexts/ThemeContext'
 
@@ -32,7 +31,7 @@ const Landing = () => {
                 <a href="#how-it-works" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">How it Works</a>
                 <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors font-medium">Login</Link>
               </div>
-              
+
               <button
                 onClick={toggleTheme}
                 className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
@@ -53,7 +52,7 @@ const Landing = () => {
       <section className="pt-32 sm:pt-40 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
         <div className="max-w-7xl mx-auto text-center relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-[120px] -z-10"></div>
-          
+
           <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-gray-900 dark:text-white tracking-tight mb-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
             Transform Your <span className="text-blue-600 dark:text-blue-500">Educational Feedback</span> Workflow
           </h1>
@@ -68,12 +67,12 @@ const Landing = () => {
               Watch Demo
             </Link>
           </div>
-          
+
           <div className="mt-16 sm:mt-20 relative px-4">
             <div className="relative rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-gray-200 dark:border-gray-700 max-w-5xl mx-auto aspect-[16/10] sm:aspect-auto">
-              <img 
-                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=2000" 
-                alt="Dashboard Preview" 
+              <img
+                src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&q=80&w=2000"
+                alt="Dashboard Preview"
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
