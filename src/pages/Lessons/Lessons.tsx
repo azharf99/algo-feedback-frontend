@@ -31,6 +31,7 @@ const lessonSchema = z.object({
   level: z.string().min(1, 'Level is required'),
   number: z.number().min(1, 'Number is required'),
   description: z.string().min(1, 'Description is required'),
+  competency: z.string().optional(),
   is_active: z.boolean().default(true),
 })
 
@@ -444,6 +445,11 @@ const Lessons: React.FC = () => {
                   {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number.message}</p>}
                 </div>
                 <div className="sm:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700">Competency</label>
+                  <textarea {...register('competency')} rows={2} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.competency ? "border-red-300" : "border-gray-300")}></textarea>
+                  {errors.competency && <p className="mt-1 text-sm text-red-600">{errors.competency.message}</p>}
+                </div>
+                <div className="sm:col-span-2">
                   <label className="block text-sm font-medium text-gray-700">Description</label>
                   <textarea {...register('description')} rows={3} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
@@ -495,7 +501,7 @@ const Lessons: React.FC = () => {
                 {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
               </p>
               <p className="text-xs text-gray-500">
-                CSV headers: id, title, category, module, level, number, course_id, description, is_active
+                CSV headers: id, title, category, module, level, number, course_id, description, competency, is_active
               </p>
             </div>
           </div>

@@ -7,6 +7,7 @@ export interface Student {
   parent_name: string
   parent_contact: string
   is_active: boolean
+  password?: string
 }
 
 export interface Course {
@@ -30,6 +31,7 @@ export interface Group {
   first_lesson_time: string
   is_active: boolean
   students?: Student[]
+  student_ids?: number[]
   course?: Course
 }
 
@@ -42,6 +44,7 @@ export interface Session {
   is_done: boolean
   group?: Group
   lesson?: Lesson
+  attendances?: Student[]
 }
 
 export interface Lesson {
@@ -53,6 +56,7 @@ export interface Lesson {
   level: string
   number: number
   description: string
+  competency?: string
   is_active: boolean
   course?: Course
 }
@@ -71,9 +75,17 @@ export interface Feedback {
   project_link?: string
   url_pdf?: string
   is_sent?: boolean
+  schedule_id?: string
   created_at: string
   updated_at: string
   student?: Student
+}
+
+export interface User {
+  id: number
+  name: string
+  email: string
+  role: 'Admin' | 'Tutor' | 'Siswa'
 }
 
 export interface ImportResult {

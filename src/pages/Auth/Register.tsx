@@ -8,10 +8,10 @@ import { RegisterCredentials } from '../../types/auth'
 import clsx from 'clsx'
 
 const registerSchema = z.object({
-  fullname: z.string().min(1, 'Full name is required'),
+  name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['admin', 'tutor']),
+  role: z.enum(['Admin', 'Tutor']),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
@@ -82,25 +82,25 @@ const Register: React.FC = () => {
 
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
-              <label htmlFor="fullname" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
                 Full Name
               </label>
               <div className="mt-1">
                 <input
-                  id="fullname"
+                  id="name"
                   type="text"
                   autoComplete="name"
                   disabled={authState.loading}
                   className={clsx(
                     "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm",
-                    errors.fullname ? "border-red-300" : "border-gray-300"
+                    errors.name ? "border-red-300" : "border-gray-300"
                   )}
-                  {...register('fullname')}
+                  {...register('name')}
                 />
               </div>
-              {errors.fullname && (
+              {errors.name && (
                 <p className="mt-2 text-sm text-red-600">
-                  {errors.fullname.message}
+                  {errors.name.message}
                 </p>
               )}
             </div>
@@ -169,8 +169,8 @@ const Register: React.FC = () => {
                   {...register('role')}
                 >
                   <option value="" disabled>Select a role</option>
-                  <option value="admin">Admin</option>
-                  <option value="tutor">Tutor</option>
+                  <option value="Admin">Admin</option>
+                  <option value="Tutor">Tutor</option>
                 </select>
               </div>
               {errors.role && (

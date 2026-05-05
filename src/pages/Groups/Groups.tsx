@@ -35,7 +35,7 @@ const groupSchema = z.object({
   first_lesson_date: z.string().min(1, 'First lesson date is required'),
   first_lesson_time: z.string().min(1, 'First lesson time is required'),
   is_active: z.boolean().default(true),
-  students: z.array(z.number()).optional(),
+  student_ids: z.array(z.number()).optional(),
 })
 
 type GroupFormData = z.infer<typeof groupSchema>
@@ -71,7 +71,7 @@ const Groups: React.FC = () => {
     defaultValues: { is_active: true }
   })
 
-  const selectedStudents = watch('students') || []
+  const selectedStudents = watch('student_ids') || []
 
   useEffect(() => {
     fetchData(1) // Reset to page 1 on search or sort change
@@ -124,7 +124,6 @@ const Groups: React.FC = () => {
           ...sanitizedData,
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
-          students: sanitizedData.students
         } as Partial<Group>)
         toast.success('Group updated successfully')
       } else {
@@ -132,7 +131,6 @@ const Groups: React.FC = () => {
           ...sanitizedData,
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
-          students: sanitizedData.students
         } as Omit<Group, 'id'>)
         toast.success('Group created successfully')
       }
@@ -168,7 +166,7 @@ const Groups: React.FC = () => {
       ...group,
       first_lesson_date: formattedDate,
       first_lesson_time: formattedTime,
-      students: group.students?.map(s => s.id) || [],
+      student_ids: group.students?.map(s => s.id) || group.student_ids || [],
     })
     setDialogOpen(true)
   }
@@ -176,7 +174,7 @@ const Groups: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false)
     setEditingGroup(null)
-    reset({ is_active: true, students: [] })
+    reset({ is_active: true, student_ids: [] })
   }
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -222,11 +220,11 @@ const Groups: React.FC = () => {
   }
 
   const toggleStudent = (studentId: number) => {
-    const current = watch('students') || []
+    const current = watch('student_ids') || []
     if (current.includes(studentId)) {
-      setValue('students', current.filter(id => id !== studentId))
+      setValue('student_ids', current.filter(id => id !== studentId))
     } else {
-      setValue('students', [...current, studentId])
+      setValue('student_ids', [...current, studentId])
     }
   }
 

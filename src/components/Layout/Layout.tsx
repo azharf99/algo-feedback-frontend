@@ -12,6 +12,7 @@ import {
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { User as UserIcon } from 'lucide-react'
 import clsx from 'clsx'
 
 const menuItems = [
@@ -22,6 +23,7 @@ const menuItems = [
   { text: 'Lessons', icon: <CalendarDays className="w-5 h-5" />, path: '/lessons' },
   { text: 'Sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
   { text: 'Feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
+  { text: 'Users', icon: <UserIcon className="w-5 h-5" />, path: '/users', adminOnly: true },
 ]
 
 interface LayoutProps {
@@ -56,7 +58,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   }, [])
 
   const currentTitle = menuItems.find(item => item.path === location.pathname)?.text || 'Algo Feedback System'
-  const userInitial = authState.user?.fullname?.charAt(0)?.toUpperCase() || 'U'
+  const userInitial = authState.user?.name?.charAt(0)?.toUpperCase() || 'U'
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
@@ -81,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </div>
         <nav className="flex-1 overflow-y-auto py-4">
           <ul className="space-y-1 px-3">
-            {menuItems.map((item) => {
+            {menuItems.filter(item => !item.adminOnly || authState.user?.role === 'Admin').map((item) => {
               const isActive = location.pathname === item.path
               return (
                 <li key={item.text}>
@@ -138,7 +140,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 border border-gray-100 z-50">
                 <div className="px-4 py-2 border-b border-gray-100">
                   <p className="text-sm font-medium text-gray-900 truncate">
-                    {authState.user?.fullname}
+                    {authState.user?.name}
                   </p>
                   <p className="text-xs text-gray-500 capitalize">
                     {authState.user?.role}

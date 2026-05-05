@@ -195,9 +195,9 @@ const Sessions: React.FC = () => {
 
   const handleAttendance = (session: Session) => {
     setAttendanceSession(session)
-    const selectedGroup = groups.find(g => g.id === session.group_id)
-    const groupStudentIds = selectedGroup?.students?.map(s => s.id) || []
-    setSelectedStudents(groupStudentIds)
+    // Use existing attendances if available, otherwise default to empty or all group students
+    const attendedIds = session.attendances?.map(s => s.id) || []
+    setSelectedStudents(attendedIds)
     setAttendanceDialogOpen(true)
   }
 

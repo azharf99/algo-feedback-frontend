@@ -1,8 +1,8 @@
 export interface User {
   id: number
-  fullname: string
+  name: string
   email: string
-  role: 'admin' | 'tutor'
+  role: 'Admin' | 'Tutor' | 'Siswa'
 }
 
 export interface LoginCredentials {
@@ -11,10 +11,10 @@ export interface LoginCredentials {
 }
 
 export interface RegisterCredentials {
-  fullname: string
+  name: string
   email: string
   password: string
-  role: 'admin' | 'tutor'
+  role: 'Admin' | 'Tutor' | 'Siswa'
 }
 
 export interface AuthResponse {

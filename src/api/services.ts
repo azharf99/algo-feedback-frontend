@@ -1,5 +1,5 @@
 import api from './axios'
-import { Student, Group, Lesson, Feedback, Course, Session, PaginatedResponse, PaginationParams } from '../types/data'
+import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams } from '../types/data'
 
 // Build query string from pagination parameters
 const buildQueryParams = (params?: PaginationParams): string => {
@@ -25,6 +25,28 @@ const buildQueryParams = (params?: PaginationParams): string => {
   
   const queryString = queryParams.toString()
   return queryString ? `?${queryString}` : ''
+}
+
+// User API (Admin Only)
+export const userApi = {
+  getUsers: async (params?: PaginationParams): Promise<PaginatedResponse<User>> => {
+    const response = await api.get(`/users${buildQueryParams(params)}`)
+    return response.data
+  },
+  
+  createUser: async (user: Omit<User, 'id'> & { password?: string }): Promise<User> => {
+    const response = await api.post('/users', user)
+    return response.data.data
+  },
+  
+  updateUser: async (id: number, user: Partial<User> & { password?: string }): Promise<User> => {
+    const response = await api.put(`/users/${id}`, user)
+    return response.data.data
+  },
+  
+  deleteUser: async (id: number): Promise<void> => {
+    await api.delete(`/users/${id}`)
+  }
 }
 
 // Course API with pagination
@@ -188,11 +210,7 @@ export const sessionApi = {
   },
   
   updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
-    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds }, {
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    })
+    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds })
   }
 }
 

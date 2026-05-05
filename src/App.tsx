@@ -10,6 +10,8 @@ import Courses from './pages/Courses/Courses'
 import Lessons from './pages/Lessons/Lessons'
 import Sessions from './pages/Sessions/Sessions'
 import Feedbacks from './pages/Feedbacks/Feedbacks'
+import Users from './pages/Users/Users'
+import AuthSuccess from './pages/Auth/AuthSuccess'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -31,6 +33,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </>
@@ -49,6 +52,7 @@ function App() {
           <Route path="/lessons" element={<Lessons />} />
           <Route path="/sessions" element={<Sessions />} />
           <Route path="/feedbacks" element={<Feedbacks />} />
+          <Route path="/users" element={<Users />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </Layout>

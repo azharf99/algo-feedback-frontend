@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import {
+  Plus,
   Edit2,
   Trash2,
   BarChart2,
@@ -183,16 +184,37 @@ const Feedbacks: React.FC = () => {
     }
   }
 
-  const handleSendWhatsApp = async (studentId?: number) => {
+  const handleSendWhatsApp = async (feedback?: Feedback) => {
     try {
-      setWaScheduling(studentId || 0)
-      await feedbackApi.sendWhatsApp({ student_id: studentId })
-      toast.success('WhatsApp scheduling started')
+      setWaScheduling(feedback?.id || 0)
+      await feedbackApi.sendWhatsApp({ student_id: feedback?.student_id })
+      toast.success(feedback ? 'WhatsApp updated for student' : 'WhatsApp scheduling started for all')
       fetchData(feedbackPagination.page)
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'WhatsApp scheduling failed')
     } finally {
       setWaScheduling(null)
+    }
+  }
+
+  const handleSeedFeedbacks = async () => {
+    if (!window.confirm('This will seed initial feedback scores (all 3) for existing sessions. Continue?')) return
+
+    const loadingToast = toast.loading('Seeding feedbacks...')
+    try {
+      await feedbackApi.generateFeedbacks({ all: true })
+      toast.success('Feedbacks seeded successfully', { id: loadingToast })
+      fetchData(1)
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Seeding failed', { id: loadingToast })
+    }
+  }
+
+  const handleExportPdf = async (feedback: Feedback) => {
+    if (feedback.url_pdf) {
+      window.open(feedback.url_pdf, '_blank')
+    } else {
+      toast.error('PDF not yet generated')
     }
   }
 
@@ -281,8 +303,15 @@ const Feedbacks: React.FC = () => {
             Schedule All WhatsApp
           </button>
           <button
+            onClick={handleSeedFeedbacks}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            <Plus className="-ml-1 mr-2 h-4 w-4" />
+            Seed Feedbacks
+          </button>
+          <button
             onClick={() => setGenerateDialogOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-lg text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-xl active:scale-95"
           >
             <BarChart2 className="-ml-1 mr-2 h-4 w-4" />
             Generate Feedbacks
@@ -439,12 +468,19 @@ const Feedbacks: React.FC = () => {
                         <FileText className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => handleSendWhatsApp(feedback.student_id)}
-                        disabled={waScheduling === feedback.student_id || !feedback.url_pdf}
-                        className="text-green-600 hover:text-green-900 mx-1 p-1 rounded-md hover:bg-green-50 disabled:opacity-50"
+                        onClick={() => handleSendWhatsApp(feedback)}
+                        disabled={waScheduling === feedback.id || !feedback.url_pdf}
+                        className="text-green-600 hover:text-green-900 mx-1 p-1 rounded-md hover:bg-green-50 disabled:opacity-50 transition-all duration-200 hover:scale-110"
                         title="Send WhatsApp"
                       >
-                        <MessageCircle className="w-4 h-4" />
+                        <MessageCircle className={clsx("w-4 h-4", waScheduling === feedback.id && "animate-bounce")} />
+                      </button>
+                      <button
+                        onClick={() => handleExportPdf(feedback)}
+                        className="text-orange-600 hover:text-orange-900 mx-1 p-1 rounded-md hover:bg-orange-50 transition-all duration-200 hover:scale-110"
+                        title="Download PDF"
+                      >
+                        <FileText className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(feedback.id)}
