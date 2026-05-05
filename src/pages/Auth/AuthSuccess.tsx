@@ -23,7 +23,7 @@ const AuthSuccess: React.FC = () => {
         // Force a reload or update context state
         // Since useAuth initializeAuth only runs on mount, 
         // we might need a way to trigger it or just redirect to / which will re-mount App
-        window.location.href = '/'
+        window.location.href = '/dashboard'
       } catch (error) {
         console.error('Error parsing user data:', error)
         toast.error('Failed to process login data')

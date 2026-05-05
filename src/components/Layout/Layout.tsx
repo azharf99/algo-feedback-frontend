@@ -16,7 +16,7 @@ import { User as UserIcon } from 'lucide-react'
 import clsx from 'clsx'
 
 const menuItems = [
-  { text: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/' },
+  { text: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/dashboard' },
   { text: 'Students', icon: <Users className="w-5 h-5" />, path: '/students' },
   { text: 'Groups', icon: <UsersRound className="w-5 h-5" />, path: '/groups' },
   { text: 'Courses', icon: <GraduationCap className="w-5 h-5" />, path: '/courses' },

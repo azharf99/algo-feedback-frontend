@@ -12,6 +12,7 @@ import Sessions from './pages/Sessions/Sessions'
 import Feedbacks from './pages/Feedbacks/Feedbacks'
 import Users from './pages/Users/Users'
 import AuthSuccess from './pages/Auth/AuthSuccess'
+import Landing from './pages/Landing/Landing'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -26,36 +27,46 @@ function App() {
     )
   }
 
-  if (!isAuthenticated) {
-    return (
-      <>
-        <Toaster position="top-right" />
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/auth/success" element={<AuthSuccess />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
-        </Routes>
-      </>
-    )
-  }
-
   return (
     <>
       <Toaster position="top-right" />
-      <Layout>
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/students" element={<Students />} />
-          <Route path="/groups" element={<Groups />} />
-          <Route path="/courses" element={<Courses />} />
-          <Route path="/lessons" element={<Lessons />} />
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/feedbacks" element={<Feedbacks />} />
-          <Route path="/users" element={<Users />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Layout>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Landing />} />
+        <Route 
+          path="/login" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Login />} 
+        />
+        <Route 
+          path="/register" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+        />
+        <Route path="/auth/success" element={<AuthSuccess />} />
+
+        {/* Protected Routes */}
+        <Route
+          path="/*"
+          element={
+            isAuthenticated ? (
+              <Layout>
+                <Routes>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/students" element={<Students />} />
+                  <Route path="/groups" element={<Groups />} />
+                  <Route path="/courses" element={<Courses />} />
+                  <Route path="/lessons" element={<Lessons />} />
+                  <Route path="/sessions" element={<Sessions />} />
+                  <Route path="/feedbacks" element={<Feedbacks />} />
+                  <Route path="/users" element={<Users />} />
+                  <Route path="*" element={<Navigate to="/dashboard" replace />} />
+                </Routes>
+              </Layout>
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />
+      </Routes>
     </>
   )
 }

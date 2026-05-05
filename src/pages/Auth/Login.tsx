@@ -59,7 +59,7 @@ const Login: React.FC = () => {
 
   useEffect(() => {
     if (authState.isAuthenticated) {
-      navigate('/')
+      navigate('/dashboard')
     }
   }, [authState.isAuthenticated, navigate])
 
