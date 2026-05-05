@@ -67,7 +67,7 @@ const Dashboard: React.FC = () => {
         setRecentLessons(lessons)
         setRecentFeedbacks(feedbacks)
       } catch (error) {
-        console.error('Failed to fetch dashboard data:', error)
+        console.error('Failed to fetch dashboard data:', error instanceof Error ? error.message : 'Unknown error')
       } finally {
         setLoading(false)
       }
