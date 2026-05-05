@@ -8,6 +8,7 @@ import { LoginCredentials } from '../../types/auth'
 import { API_BASE_URL } from '../../api/axios'
 import clsx from 'clsx'
 import ReCAPTCHA from 'react-google-recaptcha'
+import toast from 'react-hot-toast'
 
 const loginSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -78,10 +79,13 @@ const Login: React.FC = () => {
   }
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
+    const loadingToast = toast.loading('Signing in...')
     try {
       await login(data as LoginCredentials)
+      toast.success('Successfully logged in!', { id: loadingToast })
     } catch {
-      // Reset recaptcha on error
+      // Global interceptor handles the error toast
+      toast.dismiss(loadingToast)
       recaptchaRef.current?.reset()
       setValue('captcha_token', '')
     }

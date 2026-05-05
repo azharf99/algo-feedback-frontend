@@ -115,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Login failed'
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Login failed'
       dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage })
       throw error
     }
@@ -133,7 +133,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       dispatch({ type: 'LOGIN_SUCCESS', payload: user })
     } catch (error: any) {
-      const errorMessage = error.response?.data?.error || 'Registration failed'
+      const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Registration failed'
       dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage })
       throw error
     }

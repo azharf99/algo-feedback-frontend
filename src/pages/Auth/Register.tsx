@@ -7,6 +7,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { RegisterCredentials } from '../../types/auth'
 import clsx from 'clsx'
 import ReCAPTCHA from 'react-google-recaptcha'
+import toast from 'react-hot-toast'
 
 const registerSchema = z.object({
   name: z.string().min(1, 'Full name is required'),
@@ -50,10 +51,13 @@ const Register: React.FC = () => {
   }
 
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+    const loadingToast = toast.loading('Creating account...')
     try {
       await registerUser(data as RegisterCredentials)
+      toast.success('Account created successfully!', { id: loadingToast })
     } catch {
-      // Reset recaptcha on error
+      // Global interceptor handles the error toast
+      toast.dismiss(loadingToast)
       recaptchaRef.current?.reset()
       setValue('captcha_token', '')
     }

@@ -1,4 +1,5 @@
 import axios from 'axios'
+import toast from 'react-hot-toast'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
@@ -23,13 +24,26 @@ api.interceptors.request.use(
   }
 )
 
-// Response interceptor to handle token refresh
+// Response interceptor to handle token refresh and global error messaging
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Show success message if the response contains one
+    const successMsg = response.data?.message || response.data?.data?.message
+    if (successMsg && response.config.method !== 'get') {
+      toast.success(successMsg)
+    }
+    return response
+  },
   async (error) => {
     const originalRequest = error.config
 
+    // Handle Token Refresh (401 Unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // Don't retry if we are already on the login or refresh endpoints
+      if (originalRequest.url?.includes('/auth/login') || originalRequest.url?.includes('/auth/refresh')) {
+        return Promise.reject(error)
+      }
+
       originalRequest._retry = true
 
       try {
@@ -50,8 +64,22 @@ api.interceptors.response.use(
         // Refresh token failed, logout user
         localStorage.removeItem('accessToken')
         localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
         window.location.href = '/login'
         return Promise.reject(refreshError)
+      }
+    }
+
+    // Global Error Handling
+    if (!error.response) {
+      toast.error('Network error. Please check your connection.')
+    } else {
+      const status = error.response.status
+      const errorMsg = error.response.data?.error || error.response.data?.message || 'Something went wrong'
+      
+      // Specifically avoid double toast for 401 as it's handled by refresh logic or redirect
+      if (status !== 401) {
+        toast.error(errorMsg)
       }
     }
 
