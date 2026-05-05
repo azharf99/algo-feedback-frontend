@@ -173,7 +173,7 @@ const Register: React.FC = () => {
             <div className="flex flex-col items-center">
               <ReCAPTCHA
                 ref={recaptchaRef}
-                sitekey="6LcoVtosAAAAAOdJ6poBZy1Zst3mJOqN2-KIWvHB"
+                sitekey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}
                 onChange={onCaptchaChange}
               />
               {errors.captcha_token && (
