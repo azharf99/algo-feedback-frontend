@@ -11,7 +11,7 @@ const registerSchema = z.object({
   name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  role: z.enum(['Admin', 'Tutor']),
+  role: z.enum(['Tutor', 'Siswa']),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
@@ -26,6 +26,7 @@ const Register: React.FC = () => {
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
+    defaultValues: { role: 'Tutor' }
   })
 
   useEffect(() => {
@@ -153,32 +154,6 @@ const Register: React.FC = () => {
               )}
             </div>
 
-            <div>
-              <label htmlFor="role" className="block text-sm font-medium text-gray-700">
-                Role
-              </label>
-              <div className="mt-1">
-                <select
-                  id="role"
-                  disabled={authState.loading}
-                  defaultValue=""
-                  className={clsx(
-                    "block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md",
-                    errors.role ? "border-red-300" : "border-gray-300"
-                  )}
-                  {...register('role')}
-                >
-                  <option value="" disabled>Select a role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Tutor">Tutor</option>
-                </select>
-              </div>
-              {errors.role && (
-                <p className="mt-2 text-sm text-red-600">
-                  {errors.role.message}
-                </p>
-              )}
-            </div>
 
             <div>
               <button
