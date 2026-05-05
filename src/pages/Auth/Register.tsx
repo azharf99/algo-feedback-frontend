@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -6,12 +6,14 @@ import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { RegisterCredentials } from '../../types/auth'
 import clsx from 'clsx'
+import ReCAPTCHA from 'react-google-recaptcha'
 
 const registerSchema = z.object({
   name: z.string().min(1, 'Full name is required'),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['Tutor', 'Siswa']),
+  captcha_token: z.string().min(1, 'Please complete the CAPTCHA'),
 })
 
 type RegisterFormData = z.infer<typeof registerSchema>
@@ -19,10 +21,13 @@ type RegisterFormData = z.infer<typeof registerSchema>
 const Register: React.FC = () => {
   const navigate = useNavigate()
   const { state: authState, register: registerUser, clearError } = useAuth()
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   const {
     register,
     handleSubmit,
+    setValue,
+    trigger,
     formState: { errors },
   } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -31,7 +36,7 @@ const Register: React.FC = () => {
 
   useEffect(() => {
     clearError()
-  }, [])
+  }, [clearError])
 
   useEffect(() => {
     if (authState.isAuthenticated) {
@@ -39,11 +44,18 @@ const Register: React.FC = () => {
     }
   }, [authState.isAuthenticated, navigate])
 
+  const onCaptchaChange = (token: string | null) => {
+    setValue('captcha_token', token || '')
+    trigger('captcha_token')
+  }
+
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     try {
       await registerUser(data as RegisterCredentials)
-    } catch (error) {
-      // Error is handled in the auth context
+    } catch {
+      // Reset recaptcha on error
+      recaptchaRef.current?.reset()
+      setValue('captcha_token', '')
     }
   }
 
@@ -154,6 +166,18 @@ const Register: React.FC = () => {
               )}
             </div>
 
+            <div className="flex flex-col items-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey="6LcoVtosAAAAAOdJ6poBZy1Zst3mJOqN2-KIWvHB"
+                onChange={onCaptchaChange}
+              />
+              {errors.captcha_token && (
+                <p className="mt-2 text-sm text-red-600">
+                  {errors.captcha_token.message}
+                </p>
+              )}
+            </div>
 
             <div>
               <button

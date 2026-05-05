@@ -103,7 +103,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth()
   }, [])
 
-  const login = async (credentials: LoginCredentials) => {
+  const login = React.useCallback(async (credentials: LoginCredentials) => {
     try {
       dispatch({ type: 'LOGIN_START' })
       const response = await api.post<AuthResponse>('/auth/login', credentials)
@@ -119,9 +119,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage })
       throw error
     }
-  }
+  }, [])
 
-  const register = async (credentials: RegisterCredentials) => {
+  const register = React.useCallback(async (credentials: RegisterCredentials) => {
     try {
       dispatch({ type: 'LOGIN_START' })
       const response = await api.post<AuthResponse>('/auth/register', credentials)
@@ -137,26 +137,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       dispatch({ type: 'LOGIN_FAILURE', payload: errorMessage })
       throw error
     }
-  }
+  }, [])
 
-  const logout = () => {
+  const logout = React.useCallback(() => {
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('user')
     dispatch({ type: 'LOGOUT' })
-  }
+  }, [])
 
-  const clearError = () => {
+  const clearError = React.useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' })
-  }
+  }, [])
 
-  const value: AuthContextType = {
+  const value: AuthContextType = React.useMemo(() => ({
     state,
     login,
     register,
     logout,
     clearError,
-  }
+  }), [state, login, register, logout, clearError])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

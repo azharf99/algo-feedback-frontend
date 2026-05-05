@@ -8,6 +8,7 @@ export interface User {
 export interface LoginCredentials {
   email: string
   password: string
+  captcha_token: string
 }
 
 export interface RegisterCredentials {
@@ -15,6 +16,7 @@ export interface RegisterCredentials {
   email: string
   password: string
   role: 'Admin' | 'Tutor' | 'Siswa'
+  captcha_token: string
 }
 
 export interface AuthResponse {
