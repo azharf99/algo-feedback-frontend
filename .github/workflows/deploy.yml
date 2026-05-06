@@ -29,6 +29,7 @@ jobs:
         # Inject secret dari GitHub ke dalam environment build
         VITE_GOOGLE_CLIENT_ID: ${{ secrets.VITE_GOOGLE_CLIENT_ID }}
         VITE_RECAPTCHA_SITE_KEY: ${{ secrets.VITE_RECAPTCHA_SITE_KEY }}
+        VITE_BASE_URL: ${{ secrets.VITE_BASE_URL }}
 
     - name: Deploy to VPS
       uses: appleboy/scp-action@master
