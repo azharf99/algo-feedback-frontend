@@ -445,7 +445,7 @@ const Lessons: React.FC = () => {
                   <textarea {...register('competency')} rows={2} placeholder="Key competencies..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.competency ? "border-red-300" : "border-gray-300 dark:border-gray-700")}></textarea>
                   {errors.competency && <p className="mt-1 text-sm text-red-600">{errors.competency.message}</p>}
                 </div>
-                <div className="sm:col-span-2">
+                <div className={clsx("sm:col-span-2", editingLesson && "hidden")}>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
                   <textarea {...register('description')} rows={3} placeholder="Lesson description..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.description ? "border-red-300" : "border-gray-300 dark:border-gray-700")}></textarea>
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
