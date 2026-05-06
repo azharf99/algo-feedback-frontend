@@ -16,6 +16,7 @@ type AuthAction =
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' }
   | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'UPDATE_USER'; payload: User }
 
 const initialState: AuthState = {
   user: null,
@@ -56,6 +57,8 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return { ...state, error: null }
     case 'SET_LOADING':
       return { ...state, loading: action.payload }
+    case 'UPDATE_USER':
+      return { ...state, user: action.payload }
     default:
       return state
   }
@@ -67,6 +70,7 @@ interface AuthContextType {
   register: (credentials: RegisterCredentials) => Promise<void>
   logout: () => void
   clearError: () => void
+  updateUser: (user: User) => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -150,13 +154,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     dispatch({ type: 'CLEAR_ERROR' })
   }, [])
 
+  const updateUser = React.useCallback((user: User) => {
+    localStorage.setItem('user', JSON.stringify(user))
+    dispatch({ type: 'UPDATE_USER', payload: user })
+  }, [])
+
   const value: AuthContextType = React.useMemo(() => ({
     state,
     login,
     register,
     logout,
     clearError,
-  }), [state, login, register, logout, clearError])
+    updateUser,
+  }), [state, login, register, logout, clearError, updateUser])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

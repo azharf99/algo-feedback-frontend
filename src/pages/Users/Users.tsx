@@ -27,6 +27,8 @@ const userSchema = z.object({
   email: z.string().email('Invalid email address'),
   password: z.string().optional(),
   role: z.enum(['Admin', 'Tutor', 'Siswa']),
+  whatsapp_api_key: z.string().optional(),
+  whatsapp_device_id: z.string().optional(),
 })
 
 type UserFormData = z.infer<typeof userSchema>
@@ -132,7 +134,9 @@ const Users: React.FC = () => {
       name: user.name,
       email: user.email,
       role: user.role,
-      password: ''
+      password: '',
+      whatsapp_api_key: user.whatsapp_api_key || '',
+      whatsapp_device_id: user.whatsapp_device_id || ''
     })
     setDialogOpen(true)
   }
@@ -305,6 +309,16 @@ const Users: React.FC = () => {
               <input type="password" {...register('password')} placeholder="••••••••" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.password ? "border-red-300" : "border-gray-300")} />
               <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingUser ? 'Leave empty to keep current password' : 'Required for new users'}</p>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp API Key</label>
+                <input type="text" {...register('whatsapp_api_key')} placeholder="API Key" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp Device ID</label>
+                <input type="text" {...register('whatsapp_device_id')} placeholder="Device ID" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
+              </div>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">

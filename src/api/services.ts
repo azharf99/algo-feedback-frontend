@@ -49,6 +49,14 @@ export const userApi = {
   }
 }
 
+// Profile API (All Users)
+export const profileApi = {
+  updateProfile: async (profile: { name?: string; password?: string; whatsapp_api_key?: string; whatsapp_device_id?: string }): Promise<User> => {
+    const response = await api.put('/profile', profile)
+    return response.data.data
+  }
+}
+
 // Course API with pagination
 export const courseApi = {
   getCourses: async (params?: PaginationParams): Promise<PaginatedResponse<Course>> => {

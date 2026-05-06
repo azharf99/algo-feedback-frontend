@@ -13,6 +13,7 @@ import Feedbacks from './pages/Feedbacks/Feedbacks'
 import Users from './pages/Users/Users'
 import AuthSuccess from './pages/Auth/AuthSuccess'
 import Landing from './pages/Landing/Landing'
+import Profile from './pages/Profile/Profile'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -58,6 +59,7 @@ function App() {
                   <Route path="/sessions" element={<Sessions />} />
                   <Route path="/feedbacks" element={<Feedbacks />} />
                   <Route path="/users" element={<Users />} />
+                  <Route path="/profile" element={<Profile />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Layout>

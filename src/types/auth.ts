@@ -3,6 +3,8 @@ export interface User {
   name: string
   email: string
   role: 'Admin' | 'Tutor' | 'Siswa'
+  whatsapp_api_key?: string
+  whatsapp_device_id?: string
 }
 
 export interface LoginCredentials {
