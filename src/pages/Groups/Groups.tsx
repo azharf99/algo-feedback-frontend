@@ -459,7 +459,7 @@ const Groups: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Name</label>
-                <input type="text" {...register('name')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.name ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('name')} placeholder="e.g. Group A" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.name ? "border-red-300" : "border-gray-300")} />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
               </div>
               <div>
@@ -475,22 +475,22 @@ const Groups: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Phone</label>
-                <input type="text" {...register('group_phone')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.group_phone ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('group_phone')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.group_phone ? "border-red-300" : "border-gray-300")} />
                 {errors.group_phone && <p className="mt-1 text-sm text-red-600">{errors.group_phone.message}</p>}
               </div>
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-                <textarea {...register('description')} rows={2} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
+                <textarea {...register('description')} rows={2} placeholder="Brief description of the group" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
                 {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Meeting Link</label>
-                <input type="text" {...register('meeting_link')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.meeting_link ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('meeting_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.meeting_link ? "border-red-300" : "border-gray-300")} />
                 {errors.meeting_link && <p className="mt-1 text-sm text-red-600">{errors.meeting_link.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Recordings Link</label>
-                <input type="text" {...register('recordings_link')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.recordings_link ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('recordings_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.recordings_link ? "border-red-300" : "border-gray-300")} />
                 {errors.recordings_link && <p className="mt-1 text-sm text-red-600">{errors.recordings_link.message}</p>}
               </div>
               <div>

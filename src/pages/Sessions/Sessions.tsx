@@ -262,7 +262,7 @@ const Sessions: React.FC = () => {
               placeholder="Search sessions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             />
             {search && (
               <button
@@ -459,10 +459,10 @@ const Sessions: React.FC = () => {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Group</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group</label>
                   <select 
                     {...register('group_id', { valueAsNumber: true })} 
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.group_id ? "border-red-300" : "border-gray-300")}
+                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.group_id ? "border-red-300" : "border-gray-300")}
                   >
                     <option value="">Select a group</option>
                     {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
@@ -470,11 +470,11 @@ const Sessions: React.FC = () => {
                   {errors.group_id && <p className="mt-1 text-sm text-red-600">{errors.group_id.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Lesson</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson</label>
                   <select 
                     {...register('lesson_id', { valueAsNumber: true })} 
                     disabled={!selectedGroupId}
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_id ? "border-red-300" : "border-gray-300", !selectedGroupId && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed")}
+                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_id ? "border-red-300" : "border-gray-300", !selectedGroupId && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed")}
                   >
                     <option value="">{loadingLessons ? 'Loading lessons...' : selectedGroupId ? 'Select a lesson' : 'Select a group first'}</option>
                     {!loadingLessons && filteredLessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
@@ -482,13 +482,13 @@ const Sessions: React.FC = () => {
                   {errors.lesson_id && <p className="mt-1 text-sm text-red-600">{errors.lesson_id.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Date</label>
-                  <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.date_start ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
+                  <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.date_start ? "border-red-300" : "border-gray-300")} />
                   {errors.date_start && <p className="mt-1 text-sm text-red-600">{errors.date_start.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Time</label>
-                  <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.time_start ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
+                  <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.time_start ? "border-red-300" : "border-gray-300")} />
                   {errors.time_start && <p className="mt-1 text-sm text-red-600">{errors.time_start.message}</p>}
                 </div>
                 <div className="flex items-center mt-2">

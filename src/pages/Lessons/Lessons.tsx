@@ -197,7 +197,7 @@ const Lessons: React.FC = () => {
               placeholder="Search lessons..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             />
             {search && (
               <button
@@ -401,10 +401,10 @@ const Lessons: React.FC = () => {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Course</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label>
                   <select 
                     {...register('course_id', { valueAsNumber: true })} 
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.course_id ? "border-red-300" : "border-gray-300")}
+                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.course_id ? "border-red-300" : "border-gray-300 dark:border-gray-700")}
                   >
                     <option value="">Select a course</option>
                     {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
@@ -412,38 +412,38 @@ const Lessons: React.FC = () => {
                   {errors.course_id && <p className="mt-1 text-sm text-red-600">{errors.course_id.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Title</label>
-                  <input type="text" {...register('title')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.title ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+                  <input type="text" {...register('title')} placeholder="Enter lesson title" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.title ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />
                   {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Module</label>
-                  <input type="text" {...register('module')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.module ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Module</label>
+                  <input type="text" {...register('module')} placeholder="e.g. Module 1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.module ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />
                   {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Level</label>
-                  <input type="text" {...register('level')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.level ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Level</label>
+                  <input type="text" {...register('level')} placeholder="e.g. Beginner" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.level ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />
                   {errors.level && <p className="mt-1 text-sm text-red-600">{errors.level.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Category</label>
-                  <input type="text" {...register('category')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.category ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Category</label>
+                  <input type="text" {...register('category')} placeholder="e.g. Algorithm" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.category ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />
                   {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Lesson Number</label>
-                  <input type="number" {...register('number', { valueAsNumber: true })} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.number ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Number</label>
+                  <input type="number" {...register('number', { valueAsNumber: true })} placeholder="1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.number ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />
                   {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number.message}</p>}
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Competency</label>
-                  <textarea {...register('competency')} rows={2} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.competency ? "border-red-300" : "border-gray-300")}></textarea>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Competency</label>
+                  <textarea {...register('competency')} rows={2} placeholder="Key competencies..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.competency ? "border-red-300" : "border-gray-300 dark:border-gray-700")}></textarea>
                   {errors.competency && <p className="mt-1 text-sm text-red-600">{errors.competency.message}</p>}
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700">Description</label>
-                  <textarea {...register('description')} rows={3} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                  <textarea {...register('description')} rows={3} placeholder="Lesson description..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.description ? "border-red-300" : "border-gray-300 dark:border-gray-700")}></textarea>
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
                 <div className="sm:col-span-2 flex items-center mt-2">

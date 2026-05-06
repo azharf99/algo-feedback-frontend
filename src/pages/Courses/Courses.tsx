@@ -387,17 +387,17 @@ const Courses: React.FC = () => {
           <div className="px-6 py-4 bg-white dark:bg-gray-800 grid grid-cols-1 gap-4 transition-colors duration-200">
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
-              <input type="text" {...register('title')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
+              <input type="text" {...register('title')} placeholder="e.g. Logic Programming" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
               {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Module</label>
-              <input type="text" {...register('module')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.module ? "border-red-300" : "border-gray-300")} />
+              <input type="text" {...register('module')} placeholder="e.g. Module 1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.module ? "border-red-300" : "border-gray-300")} />
               {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
-              <textarea {...register('description')} rows={3} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
+              <textarea {...register('description')} rows={3} placeholder="Course details..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
               {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
             </div>
             <div className="flex items-center">

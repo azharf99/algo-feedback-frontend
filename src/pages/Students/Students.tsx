@@ -415,32 +415,32 @@ const Students: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
-                <input type="text" {...register('fullname')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.fullname ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('fullname')} placeholder="e.g. John Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.fullname ? "border-red-300" : "border-gray-300")} />
                 {errors.fullname && <p className="mt-1 text-sm text-red-600">{errors.fullname.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Surname</label>
-                <input type="text" {...register('surname')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.surname ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('surname')} placeholder="e.g. Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.surname ? "border-red-300" : "border-gray-300")} />
                 {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
-                <input type="text" {...register('username')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.username ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('username')} placeholder="johndoe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.username ? "border-red-300" : "border-gray-300")} />
                 {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
-                <input type="text" {...register('phone_number')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.phone_number ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('phone_number')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.phone_number ? "border-red-300" : "border-gray-300")} />
                 {errors.phone_number && <p className="mt-1 text-sm text-red-600">{errors.phone_number.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Name</label>
-                <input type="text" {...register('parent_name')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.parent_name ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('parent_name')} placeholder="e.g. Jane Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.parent_name ? "border-red-300" : "border-gray-300")} />
                 {errors.parent_name && <p className="mt-1 text-sm text-red-600">{errors.parent_name.message}</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Contact</label>
-                <input type="text" {...register('parent_contact')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.parent_contact ? "border-red-300" : "border-gray-300")} />
+                <input type="text" {...register('parent_contact')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.parent_contact ? "border-red-300" : "border-gray-300")} />
                 {errors.parent_contact && <p className="mt-1 text-sm text-red-600">{errors.parent_contact.message}</p>}
               </div>
               <div>

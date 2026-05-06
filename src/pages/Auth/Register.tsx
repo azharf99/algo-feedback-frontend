@@ -109,7 +109,7 @@ const Register: React.FC = () => {
                   autoComplete="name"
                   disabled={authState.loading}
                   className={clsx(
-                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 transition-colors",
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 transition-colors",
                     errors.name ? "border-red-300 dark:border-red-500" : "border-gray-300"
                   )}
                   {...register('name')}
@@ -133,7 +133,7 @@ const Register: React.FC = () => {
                   autoComplete="email"
                   disabled={authState.loading}
                   className={clsx(
-                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 transition-colors",
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 transition-colors",
                     errors.email ? "border-red-300 dark:border-red-500" : "border-gray-300"
                   )}
                   {...register('email')}
@@ -157,7 +157,7 @@ const Register: React.FC = () => {
                   autoComplete="new-password"
                   disabled={authState.loading}
                   className={clsx(
-                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-500 transition-colors",
+                    "appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400 transition-colors",
                     errors.password ? "border-red-300 dark:border-red-500" : "border-gray-300"
                   )}
                   {...register('password')}

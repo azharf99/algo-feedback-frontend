@@ -283,7 +283,7 @@ const Feedbacks: React.FC = () => {
               placeholder="Search feedbacks..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
             />
             {search && (
               <button
@@ -568,8 +568,8 @@ const Feedbacks: React.FC = () => {
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Attendance Score</label>
-              <select {...register('attendance_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.attendance_score ? "border-red-300" : "border-gray-300")}>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Attendance Score</label>
+              <select {...register('attendance_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.attendance_score ? "border-red-300" : "border-gray-300")}>
                 <option value="0">None (0)</option>
                 <option value="1">Rarely (1)</option>
                 <option value="2">Sometimes (2)</option>
@@ -579,8 +579,8 @@ const Feedbacks: React.FC = () => {
               {errors.attendance_score && <p className="mt-1 text-sm text-red-600">{errors.attendance_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Activity Score</label>
-              <select {...register('activity_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.activity_score ? "border-red-300" : "border-gray-300")}>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Activity Score</label>
+              <select {...register('activity_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.activity_score ? "border-red-300" : "border-gray-300")}>
                 <option value="0">Inactive (0)</option>
                 <option value="1">Slightly Active (1)</option>
                 <option value="2">Active (2)</option>
@@ -589,8 +589,8 @@ const Feedbacks: React.FC = () => {
               {errors.activity_score && <p className="mt-1 text-sm text-red-600">{errors.activity_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Task Score</label>
-              <select {...register('task_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.task_score ? "border-red-300" : "border-gray-300")}>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task Score</label>
+              <select {...register('task_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.task_score ? "border-red-300" : "border-gray-300")}>
                 <option value="0">None (0)</option>
                 <option value="1">Some (1)</option>
                 <option value="2">All (2)</option>
@@ -598,23 +598,23 @@ const Feedbacks: React.FC = () => {
               {errors.task_score && <p className="mt-1 text-sm text-red-600">{errors.task_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Lesson Date</label>
-              <input type="date" {...register('lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_date ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Date</label>
+              <input type="date" {...register('lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_date ? "border-red-300" : "border-gray-300")} />
               {errors.lesson_date && <p className="mt-1 text-sm text-red-600">{errors.lesson_date.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Lesson Time</label>
-              <input type="time" {...register('lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_time ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Time</label>
+              <input type="time" {...register('lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_time ? "border-red-300" : "border-gray-300")} />
               {errors.lesson_time && <p className="mt-1 text-sm text-red-600">{errors.lesson_time.message}</p>}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Project Link</label>
-              <input type="url" {...register('project_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.project_link ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Link</label>
+              <input type="url" {...register('project_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.project_link ? "border-red-300" : "border-gray-300")} />
               {errors.project_link && <p className="mt-1 text-sm text-red-600">{errors.project_link.message}</p>}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700">Tutor Comments</label>
-              <textarea {...register('tutor_feedback')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.tutor_feedback ? "border-red-300" : "border-gray-300")}></textarea>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tutor Comments</label>
+              <textarea {...register('tutor_feedback')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.tutor_feedback ? "border-red-300" : "border-gray-300")}></textarea>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
@@ -637,10 +637,10 @@ const Feedbacks: React.FC = () => {
               This will generate feedback records for every 4 lessons completed by students.
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Generate For</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Generate For</label>
               <select
                 {...registerGenerate('all', { setValueAs: v => v === 'true' || v === true })}
-                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", generateErrors.all ? "border-red-300" : "border-gray-300")}
+                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", generateErrors.all ? "border-red-300" : "border-gray-300")}
               >
                 <option value="false">Specific Group</option>
                 <option value="true">All Students</option>
@@ -648,10 +648,10 @@ const Feedbacks: React.FC = () => {
             </div>
             {!isAllStudents && (
               <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700">Group</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group</label>
                 <select
                   {...registerGenerate('group_id', { valueAsNumber: true })}
-                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", generateErrors.group_id ? "border-red-300" : "border-gray-300")}
+                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", generateErrors.group_id ? "border-red-300" : "border-gray-300")}
                 >
                   <option value="">Select a group</option>
                   {groups.map(g => (
