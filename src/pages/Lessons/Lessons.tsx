@@ -31,7 +31,7 @@ const lessonSchema = z.object({
   module: z.string().min(1, 'Module is required'),
   level: z.string().min(1, 'Level is required'),
   number: z.number().min(1, 'Number is required'),
-  description: z.string().min(1, 'Description is required'),
+  description: z.string().optional(),
   competency: z.string().optional(),
   is_active: z.boolean().default(true),
 })
