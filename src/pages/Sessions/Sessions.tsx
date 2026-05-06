@@ -198,7 +198,7 @@ const Sessions: React.FC = () => {
   const handleAttendance = (session: Session) => {
     setAttendanceSession(session)
     // Use existing attendances if available, otherwise default to empty or all group students
-    const attendedIds = session.attendances?.map(s => s.id) || []
+    const attendedIds = session.students_attended?.map(s => s.id) || []
     setSelectedStudents(attendedIds)
     setAttendanceDialogOpen(true)
   }
@@ -321,6 +321,9 @@ const Sessions: React.FC = () => {
                 >
                   <div className="flex items-center gap-1">Status {renderSortIcon('is_done')}</div>
                 </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Attendees
+                </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Actions
                 </th>
@@ -356,6 +359,11 @@ const Sessions: React.FC = () => {
                         <span className={clsx("text-sm", session.is_done ? "text-green-600 font-medium" : "text-gray-500")}>
                           {session.is_done ? 'Done' : 'Pending'}
                         </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      <div className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200">
+                        {session.students_attended?.length || 0}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">

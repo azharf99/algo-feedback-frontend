@@ -44,7 +44,7 @@ export interface Session {
   is_done: boolean
   group?: Group
   lesson?: Lesson
-  attendances?: Student[]
+  students_attended?: Student[]
 }
 
 export interface Lesson {
