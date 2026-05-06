@@ -22,6 +22,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import SearchableSelect from '../../components/ui/SearchableSelect'
 
 const lessonSchema = z.object({
   course_id: z.number().min(1, 'Course is required'),
@@ -60,6 +61,7 @@ const Lessons: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
+    control,
   } = useForm<LessonFormData>({
     resolver: zodResolver(lessonSchema),
     defaultValues: { is_active: true }
@@ -400,17 +402,14 @@ const Lessons: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label>
-                  <select 
-                    {...register('course_id', { valueAsNumber: true })} 
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.course_id ? "border-red-300" : "border-gray-300 dark:border-gray-700")}
-                  >
-                    <option value="">Select a course</option>
-                    {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                  </select>
-                  {errors.course_id && <p className="mt-1 text-sm text-red-600">{errors.course_id.message}</p>}
-                </div>
+                <SearchableSelect
+                  name="course_id"
+                  control={control}
+                  label="Course"
+                  placeholder="Search for a course..."
+                  options={courses.map(c => ({ value: c.id, label: c.title }))}
+                  error={errors.course_id?.message}
+                />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
                   <input type="text" {...register('title')} placeholder="Enter lesson title" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:placeholder-gray-400", errors.title ? "border-red-300" : "border-gray-300 dark:border-gray-700")} />

@@ -24,6 +24,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import SearchableSelect from '../../components/ui/SearchableSelect'
 
 const feedbackSchema = z.object({
   attendance_score: z.string().min(1, 'Attendance score is required'),
@@ -79,6 +80,7 @@ const Feedbacks: React.FC = () => {
     reset: resetGenerate,
     watch: watchGenerate,
     formState: { errors: generateErrors },
+    control: generateControl,
   } = useForm<GenerateFeedbackFormData>({
     resolver: zodResolver(generateFeedbackSchema),
     defaultValues: { all: false }
@@ -647,19 +649,14 @@ const Feedbacks: React.FC = () => {
               </select>
             </div>
             {!isAllStudents && (
-              <div className="mt-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group</label>
-                <select
-                  {...registerGenerate('group_id', { valueAsNumber: true })}
-                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", generateErrors.group_id ? "border-red-300" : "border-gray-300")}
-                >
-                  <option value="">Select a group</option>
-                  {groups.map(g => (
-                    <option key={g.id} value={g.id}>{g.name}</option>
-                  ))}
-                </select>
-                {generateErrors.group_id && <p className="mt-1 text-sm text-red-600">{generateErrors.group_id.message}</p>}
-              </div>
+                <SearchableSelect
+                  name="group_id"
+                  control={generateControl}
+                  label="Group"
+                  placeholder="Search for a group..."
+                  options={groups.map(g => ({ value: g.id, label: g.name }))}
+                  error={generateErrors.group_id?.message}
+                />
             )}
           </div>
           <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">

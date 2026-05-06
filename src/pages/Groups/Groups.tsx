@@ -23,6 +23,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import SearchableSelect from '../../components/ui/SearchableSelect'
 
 const groupSchema = z.object({
   course_id: z.number().min(1, 'Course is required'),
@@ -64,14 +65,12 @@ const Groups: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
-    watch,
-    setValue,
+    control,
   } = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
     defaultValues: { is_active: true }
   })
 
-  const selectedStudents = watch('student_ids') || []
 
   useEffect(() => {
     fetchData(1) // Reset to page 1 on search or sort change
@@ -219,14 +218,6 @@ const Groups: React.FC = () => {
     return sortDir === 'asc' ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />
   }
 
-  const toggleStudent = (studentId: number) => {
-    const current = watch('student_ids') || []
-    if (current.includes(studentId)) {
-      setValue('student_ids', current.filter(id => id !== studentId))
-    } else {
-      setValue('student_ids', [...current, studentId])
-    }
-  }
 
   return (
     <div className="transition-colors duration-200">
@@ -447,15 +438,14 @@ const Groups: React.FC = () => {
           <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Course</label>
-                <select
-                  {...register('course_id', { valueAsNumber: true })}
-                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.course_id ? "border-red-300" : "border-gray-300")}
-                >
-                  <option value="">Select a course</option>
-                  {courses.map(c => <option key={c.id} value={c.id}>{c.title}</option>)}
-                </select>
-                {errors.course_id && <p className="mt-1 text-sm text-red-600">{errors.course_id.message}</p>}
+                <SearchableSelect
+                  name="course_id"
+                  control={control}
+                  label="Course"
+                  placeholder="Search for a course..."
+                  options={courses.map(c => ({ value: c.id, label: c.title }))}
+                  error={errors.course_id?.message}
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Name</label>
@@ -504,38 +494,15 @@ const Groups: React.FC = () => {
                 {errors.first_lesson_time && <p className="mt-1 text-sm text-red-600">{errors.first_lesson_time.message}</p>}
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Students</label>
-                <div className="max-h-48 overflow-y-auto border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700 transition-colors">
-                  {studentsList.map(student => (
-                    <div key={student.id} className="flex items-center mb-1">
-                      <input
-                        type="checkbox"
-                        id={`student-${student.id}`}
-                        checked={selectedStudents.includes(student.id)}
-                        onChange={() => toggleStudent(student.id)}
-                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded"
-                      />
-                      <label htmlFor={`student-${student.id}`} className="ml-2 text-sm text-gray-900 dark:text-gray-300 cursor-pointer">
-                        {student.fullname} {student.surname}
-                      </label>
-                    </div>
-                  ))}
-                  {studentsList.length === 0 && <p className="text-sm text-gray-500 dark:text-gray-400">No students available.</p>}
-                </div>
-                <div className="mt-2 flex flex-wrap gap-1">
-                  {selectedStudents.map(id => {
-                    const student = studentsList.find(s => s.id === id)
-                    if (!student) return null
-                    return (
-                      <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400">
-                        {student.fullname}
-                        <button type="button" onClick={() => toggleStudent(id)} className="ml-1 text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200">
-                          <X className="h-3 w-3" />
-                        </button>
-                      </span>
-                    )
-                  })}
-                </div>
+                <SearchableSelect
+                  name="student_ids"
+                  control={control}
+                  label="Students"
+                  isMulti
+                  placeholder="Search for students..."
+                  options={studentsList.map(s => ({ value: s.id, label: `${s.fullname} ${s.surname}` }))}
+                  error={errors.student_ids?.message}
+                />
               </div>
               <div className="flex items-center mt-2">
                 <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded" />

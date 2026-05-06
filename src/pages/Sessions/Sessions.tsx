@@ -21,6 +21,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import SearchableSelect from '../../components/ui/SearchableSelect'
 
 const sessionSchema = z.object({
   group_id: z.number().min(1, 'Group is required'),
@@ -60,6 +61,7 @@ const Sessions: React.FC = () => {
     reset,
     formState: { errors },
     watch,
+    control,
   } = useForm<SessionFormData>({
     resolver: zodResolver(sessionSchema),
     defaultValues: { is_done: false }
@@ -458,29 +460,23 @@ const Sessions: React.FC = () => {
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group</label>
-                  <select 
-                    {...register('group_id', { valueAsNumber: true })} 
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.group_id ? "border-red-300" : "border-gray-300")}
-                  >
-                    <option value="">Select a group</option>
-                    {groups.map(g => <option key={g.id} value={g.id}>{g.name}</option>)}
-                  </select>
-                  {errors.group_id && <p className="mt-1 text-sm text-red-600">{errors.group_id.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson</label>
-                  <select 
-                    {...register('lesson_id', { valueAsNumber: true })} 
-                    disabled={!selectedGroupId}
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_id ? "border-red-300" : "border-gray-300", !selectedGroupId && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed")}
-                  >
-                    <option value="">{loadingLessons ? 'Loading lessons...' : selectedGroupId ? 'Select a lesson' : 'Select a group first'}</option>
-                    {!loadingLessons && filteredLessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
-                  </select>
-                  {errors.lesson_id && <p className="mt-1 text-sm text-red-600">{errors.lesson_id.message}</p>}
-                </div>
+                <SearchableSelect
+                  name="group_id"
+                  control={control}
+                  label="Group"
+                  placeholder="Search for a group..."
+                  options={groups.map(g => ({ value: g.id, label: g.name }))}
+                  error={errors.group_id?.message}
+                />
+                <SearchableSelect
+                  name="lesson_id"
+                  control={control}
+                  label="Lesson"
+                  placeholder={loadingLessons ? "Loading lessons..." : selectedGroupId ? "Search for a lesson..." : "Select a group first"}
+                  options={filteredLessons.map(l => ({ value: l.id, label: l.title }))}
+                  error={errors.lesson_id?.message}
+                  isDisabled={!selectedGroupId || loadingLessons}
+                />
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
                   <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.date_start ? "border-red-300" : "border-gray-300")} />

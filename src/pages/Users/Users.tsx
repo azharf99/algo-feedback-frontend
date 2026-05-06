@@ -20,6 +20,7 @@ import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import SearchableSelect from '../../components/ui/SearchableSelect'
 
 const userSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -51,6 +52,7 @@ const Users: React.FC = () => {
     handleSubmit,
     reset,
     formState: { errors },
+    control,
   } = useForm<UserFormData>({
     resolver: zodResolver(userSchema),
     defaultValues: { role: 'Tutor' }
@@ -286,13 +288,17 @@ const Users: React.FC = () => {
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Role</label>
-              <select {...register('role')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.role ? "border-red-300" : "border-gray-300")}>
-                <option value="Admin">Admin</option>
-                <option value="Tutor">Tutor</option>
-                <option value="Siswa">Siswa</option>
-              </select>
-              {errors.role && <p className="mt-1 text-sm text-red-600">{errors.role.message}</p>}
+              <SearchableSelect
+                name="role"
+                control={control}
+                label="Role"
+                options={[
+                  { value: 'Admin', label: 'Admin' },
+                  { value: 'Tutor', label: 'Tutor' },
+                  { value: 'Siswa', label: 'Siswa' }
+                ]}
+                error={errors.role?.message}
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
