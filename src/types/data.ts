@@ -41,6 +41,7 @@ export interface Session {
   lesson_id: number
   date_start: string
   time_start: string
+  after_session_feedback?: string
   is_done: boolean
   group?: Group
   lesson?: Lesson

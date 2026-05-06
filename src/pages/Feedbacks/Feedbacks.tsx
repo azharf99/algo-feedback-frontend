@@ -60,6 +60,7 @@ const Feedbacks: React.FC = () => {
   const [editingFeedback, setEditingFeedback] = useState<Feedback | null>(null)
   const [pdfGenerating, setPdfGenerating] = useState<number | null>(null)
   const [waScheduling, setWaScheduling] = useState<number | null>(null)
+  const [isRefreshing, setIsRefreshing] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('id')
@@ -96,8 +97,21 @@ const Feedbacks: React.FC = () => {
     fetchData(feedbackPagination.page, feedbackPagination.limit)
   }, [feedbackPagination.page, feedbackPagination.limit])
 
-  const fetchData = async (page: number, limit: number = feedbackPagination.limit) => {
-    setLoading(true)
+  // Auto-polling if there are pending PDFs
+  useEffect(() => {
+    const hasPendingPdf = feedbacks.some(f => !f.url_pdf)
+    if (!hasPendingPdf) return
+
+    const interval = setInterval(() => {
+      fetchData(feedbackPagination.page, feedbackPagination.limit, true)
+    }, 10000) // Poll every 10 seconds
+
+    return () => clearInterval(interval)
+  }, [feedbacks, feedbackPagination.page, feedbackPagination.limit])
+
+  const fetchData = async (page: number, limit: number = feedbackPagination.limit, silent: boolean = false) => {
+    if (!silent) setLoading(true)
+    setIsRefreshing(true)
     try {
       const [feedbacksRes, groupsRes] = await Promise.all([
         feedbackApi.getFeedbacks({
@@ -118,9 +132,10 @@ const Feedbacks: React.FC = () => {
         total_pages: feedbacksRes.total_pages
       })
     } catch (error) {
-      toast.error('Failed to fetch data')
+      if (!silent) toast.error('Failed to fetch data')
     } finally {
-      setLoading(false)
+      if (!silent) setLoading(false)
+      setIsRefreshing(false)
     }
   }
 
@@ -318,6 +333,14 @@ const Feedbacks: React.FC = () => {
             <BarChart2 className="-ml-1 mr-2 h-4 w-4" />
             Generate Feedbacks
           </button>
+          <button
+            onClick={() => fetchData(feedbackPagination.page)}
+            disabled={isRefreshing}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
+            title="Refresh list"
+          >
+            <RefreshCw className={clsx("h-4 w-4", isRefreshing && "animate-spin")} />
+          </button>
         </div>
       </div>
 
@@ -442,7 +465,10 @@ const Feedbacks: React.FC = () => {
                           </span>
                         </a>
                       ) : (
-                        <span className="text-gray-400 dark:text-gray-600">-</span>
+                        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 italic text-xs">
+                          <RefreshCw className="w-3 h-3 animate-spin" />
+                          Pending...
+                        </div>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">

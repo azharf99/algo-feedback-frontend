@@ -145,11 +145,16 @@ const Courses: React.FC = () => {
     const loadingToast = toast.loading('Importing courses...')
     try {
       const result = await courseApi.importCourses(formData)
-      let message = `Import completed: ${result.created} created, ${result.updated} updated`
-      if (result.errors && result.errors.length > 0) {
-        message += `, ${result.errors.length} errors`
+      const { created, updated, errors } = result
+      let message = `Import success: ${created} created, ${updated} updated`
+      
+      if (errors && errors.length > 0) {
+        message += `. ${errors.length} rows failed.`
+        console.error('Import Errors:', errors)
+        toast.error(message, { id: loadingToast, duration: 5000 })
+      } else {
+        toast.success(message, { id: loadingToast })
       }
-      toast.success(message, { id: loadingToast })
       fetchData(1)
       setImportDialogOpen(false)
     } catch (error: any) {

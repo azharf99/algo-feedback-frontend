@@ -28,6 +28,7 @@ const sessionSchema = z.object({
   lesson_id: z.number().min(1, 'Lesson is required'),
   date_start: z.string().min(1, 'Date is required'),
   time_start: z.string().min(1, 'Time is required'),
+  after_session_feedback: z.string().optional(),
   is_done: z.boolean().default(false),
 })
 
@@ -495,7 +496,20 @@ const Sessions: React.FC = () => {
                   <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.time_start ? "border-red-300" : "border-gray-300")} />
                   {errors.time_start && <p className="mt-1 text-sm text-red-600">{errors.time_start.message}</p>}
                 </div>
-                <div className="flex items-center mt-2">
+                <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">After Session Feedback</label>
+                <textarea 
+                  {...register('after_session_feedback')} 
+                  rows={3} 
+                  placeholder="Notes about the session, student performance, etc." 
+                  className={clsx(
+                    "mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors",
+                    errors.after_session_feedback ? "border-red-300" : "border-gray-300"
+                  )} 
+                />
+                {errors.after_session_feedback && <p className="mt-1 text-sm text-red-600">{errors.after_session_feedback.message}</p>}
+              </div>
+              <div className="flex items-center mt-2">
                   <input id="is_done" type="checkbox" {...register('is_done')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
                   <label htmlFor="is_done" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Mark as Done</label>
                 </div>
