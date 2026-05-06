@@ -251,7 +251,7 @@ const Sessions: React.FC = () => {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Sessions</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -262,7 +262,7 @@ const Sessions: React.FC = () => {
               placeholder="Search sessions..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             {search && (
               <button
@@ -275,7 +275,7 @@ const Sessions: React.FC = () => {
           </div>
           <button
             onClick={() => setDialogOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
             Add Session
@@ -284,37 +284,37 @@ const Sessions: React.FC = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('id')}
                 >
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Group
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Lesson
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('date_start')}
                 >
                   <div className="flex items-center gap-1">Date {renderSortIcon('date_start')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Time
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('is_done')}
                 >
                   <div className="flex items-center gap-1">Status {renderSortIcon('is_done')}</div>
@@ -324,7 +324,7 @@ const Sessions: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center">
@@ -342,12 +342,12 @@ const Sessions: React.FC = () => {
                 </tr>
               ) : (
                 sessions.map((session) => (
-                  <tr key={session.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{session.group?.name || `Group ${session.group_id}`}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 truncate max-w-[200px]" title={session.lesson?.title}>{session.lesson?.title || `Lesson ${session.lesson_id}`}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{new Date(session.date_start).toLocaleDateString()}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{session.time_start.substring(0, 5)}</td>
+                  <tr key={session.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.id}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{session.group?.name || `Group ${session.group_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title={session.lesson?.title}>{session.lesson?.title || `Lesson ${session.lesson_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(session.date_start).toLocaleDateString()}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.time_start.substring(0, 5)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         {session.is_done && <CheckCircle className="w-4 h-4 text-green-500" />}
@@ -359,21 +359,21 @@ const Sessions: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleAttendance(session)}
-                        className="text-green-600 hover:text-green-900 mx-1 p-1 rounded-md hover:bg-green-50"
+                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mx-1 p-1 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
                         title="Attendance"
                       >
                         <CheckCircle className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleEdit(session)}
-                        className="text-blue-600 hover:text-blue-900 mx-1 p-1 rounded-md hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mx-1 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(session.id)}
-                        className="text-red-600 hover:text-red-900 mx-1 p-1 rounded-md hover:bg-red-50"
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 mx-1 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -387,32 +387,32 @@ const Sessions: React.FC = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
               disabled={sessionPagination.page === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               Previous
             </button>
             <button
               onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
               disabled={sessionPagination.page >= sessionPagination.total_pages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               Next
             </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{(sessionPagination.page - 1) * sessionPagination.limit + (sessions.length > 0 ? 1 : 0)}</span> to <span className="font-medium">{(sessionPagination.page - 1) * sessionPagination.limit + sessions.length}</span> of <span className="font-medium">{sessionPagination.total}</span> results
+              <p className="text-sm text-gray-700 dark:text-gray-400">
+                Showing <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + (sessions.length > 0 ? 1 : 0)}</span> to <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + sessions.length}</span> of <span className="font-medium text-gray-900 dark:text-white">{sessionPagination.total}</span> results
               </p>
               <select
                 value={sessionPagination.limit}
                 onChange={(e) => setSessionPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
-                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
               >
                 <option value={10}>10 / page</option>
                 <option value={25}>25 / page</option>
@@ -425,18 +425,18 @@ const Sessions: React.FC = () => {
                 <button
                   onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                   disabled={sessionPagination.page === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">Previous</span>
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
-                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Page {sessionPagination.page} of {Math.max(1, sessionPagination.total_pages)}
                 </span>
                 <button
                   onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
                   disabled={sessionPagination.page >= sessionPagination.total_pages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">Next</span>
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -457,14 +457,6 @@ const Sessions: React.FC = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="px-6 py-4">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                  {editingSession ? 'Edit Session' : 'Add Session'}
-                </h3>
-                <button type="button" onClick={handleCloseDialog} className="text-gray-400 hover:text-gray-500">
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
               <div className="grid grid-cols-1 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Group</label>
@@ -482,7 +474,7 @@ const Sessions: React.FC = () => {
                   <select 
                     {...register('lesson_id', { valueAsNumber: true })} 
                     disabled={!selectedGroupId}
-                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_id ? "border-red-300" : "border-gray-300", !selectedGroupId && "bg-gray-100 cursor-not-allowed")}
+                    className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm", errors.lesson_id ? "border-red-300" : "border-gray-300", !selectedGroupId && "bg-gray-100 dark:bg-gray-700 cursor-not-allowed")}
                   >
                     <option value="">{loadingLessons ? 'Loading lessons...' : selectedGroupId ? 'Select a lesson' : 'Select a group first'}</option>
                     {!loadingLessons && filteredLessons.map(l => <option key={l.id} value={l.id}>{l.title}</option>)}
@@ -500,16 +492,16 @@ const Sessions: React.FC = () => {
                   {errors.time_start && <p className="mt-1 text-sm text-red-600">{errors.time_start.message}</p>}
                 </div>
                 <div className="flex items-center mt-2">
-                  <input id="is_done" type="checkbox" {...register('is_done')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                  <label htmlFor="is_done" className="ml-2 block text-sm text-gray-900">Mark as Done</label>
+                  <input id="is_done" type="checkbox" {...register('is_done')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
+                  <label htmlFor="is_done" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Mark as Done</label>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
-              <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+            <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+              <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 {editingSession ? 'Update' : 'Create'}
               </button>
-              <button type="button" onClick={handleCloseDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              <button type="button" onClick={handleCloseDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 Cancel
               </button>
             </div>
@@ -525,18 +517,10 @@ const Sessions: React.FC = () => {
       >
 
           <div className="px-6 py-4">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                Update Attendance
-              </h3>
-              <button type="button" onClick={handleCloseAttendanceDialog} className="text-gray-400 hover:text-gray-500">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
-            <p className="text-sm text-gray-500 mb-4">
+            <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
               Select students who attended this session.
             </p>
-            <div className="max-h-60 overflow-y-auto border border-gray-300 rounded-md p-2">
+            <div className="max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-gray-800">
               {getAvailableStudents().map(student => (
                 <div key={student.id} className="flex items-center mb-2">
                   <input
@@ -544,15 +528,15 @@ const Sessions: React.FC = () => {
                     id={`att-student-${student.id}`}
                     checked={selectedStudents.includes(student.id)}
                     onChange={() => toggleStudent(student.id)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800"
                   />
-                  <label htmlFor={`att-student-${student.id}`} className="ml-2 text-sm text-gray-900 cursor-pointer flex-1">
+                  <label htmlFor={`att-student-${student.id}`} className="ml-2 text-sm text-gray-900 dark:text-gray-300 cursor-pointer flex-1">
                     {student.fullname} {student.surname}
                   </label>
                 </div>
               ))}
               {getAvailableStudents().length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-2">No students available in this group.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No students available in this group.</p>
               )}
             </div>
             <div className="mt-3 flex flex-wrap gap-1">
@@ -560,18 +544,18 @@ const Sessions: React.FC = () => {
                 const student = getAvailableStudents().find(s => s.id === id)
                 if (!student) return null
                 return (
-                  <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800">
+                  <span key={id} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                     {student.fullname}
                   </span>
                 )
               })}
             </div>
           </div>
-          <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
-            <button type="button" onClick={onSubmitAttendance} className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onClick={onSubmitAttendance} className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
               Save Attendance
             </button>
-            <button type="button" onClick={handleCloseAttendanceDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+            <button type="button" onClick={handleCloseAttendanceDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
               Cancel
             </button>
           </div>

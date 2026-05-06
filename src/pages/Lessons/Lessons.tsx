@@ -186,7 +186,7 @@ const Lessons: React.FC = () => {
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900">Lessons</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Lessons</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -197,7 +197,7 @@ const Lessons: React.FC = () => {
               placeholder="Search lessons..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             {search && (
               <button
@@ -210,14 +210,14 @@ const Lessons: React.FC = () => {
           </div>
           <button
             onClick={() => setImportDialogOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
             Import CSV
           </button>
           <button
             onClick={() => setDialogOpen(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
             Add Lesson
@@ -226,43 +226,43 @@ const Lessons: React.FC = () => {
       </div>
 
       {/* Data Table */}
-      <div className="bg-white shadow-sm border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+            <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('id')}
                 >
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('title')}
                 >
                   <div className="flex items-center gap-1">Title {renderSortIcon('title')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Course
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('module')}
                 >
                   <div className="flex items-center gap-1">Module {renderSortIcon('module')}</div>
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('level')}
                 >
                   <div className="flex items-center gap-1">Level {renderSortIcon('level')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Status
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -270,7 +270,7 @@ const Lessons: React.FC = () => {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center">
@@ -288,13 +288,13 @@ const Lessons: React.FC = () => {
                 </tr>
               ) : (
                 lessons.map((lesson) => (
-                  <tr key={lesson.id} className="hover:bg-gray-50">
+                  <tr key={lesson.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.id}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{lesson.title}</div>
-                      <div className="text-sm text-gray-500">Number {lesson.number} - {lesson.category}</div>
+                      <div className="text-sm font-medium text-gray-900 dark:text-white">{lesson.title}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">Number {lesson.number} - {lesson.category}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{lesson.course?.title || `Course ${lesson.course_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{lesson.course?.title || `Course ${lesson.course_id}`}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.module}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.level}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -308,14 +308,14 @@ const Lessons: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleEdit(lesson)}
-                        className="text-blue-600 hover:text-blue-900 mx-2 p-1 rounded-md hover:bg-blue-50"
+                        className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mx-2 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(lesson.id)}
-                        className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
+                        className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -329,32 +329,32 @@ const Lessons: React.FC = () => {
         </div>
         
         {/* Pagination */}
-        <div className="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+        <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
           <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => setLessonPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
               disabled={lessonPagination.page === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               Previous
             </button>
             <button
               onClick={() => setLessonPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
               disabled={lessonPagination.page >= lessonPagination.total_pages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50"
+              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               Next
             </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-700">
-                Showing <span className="font-medium">{(lessonPagination.page - 1) * lessonPagination.limit + (lessons.length > 0 ? 1 : 0)}</span> to <span className="font-medium">{(lessonPagination.page - 1) * lessonPagination.limit + lessons.length}</span> of <span className="font-medium">{lessonPagination.total}</span> results
+              <p className="text-sm text-gray-700 dark:text-gray-400">
+                Showing <span className="font-medium text-gray-900 dark:text-white">{(lessonPagination.page - 1) * lessonPagination.limit + (lessons.length > 0 ? 1 : 0)}</span> to <span className="font-medium text-gray-900 dark:text-white">{(lessonPagination.page - 1) * lessonPagination.limit + lessons.length}</span> of <span className="font-medium text-gray-900 dark:text-white">{lessonPagination.total}</span> results
               </p>
               <select
                 value={lessonPagination.limit}
                 onChange={(e) => setLessonPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
-                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
               >
                 <option value={10}>10 / page</option>
                 <option value={25}>25 / page</option>
@@ -367,18 +367,18 @@ const Lessons: React.FC = () => {
                 <button
                   onClick={() => setLessonPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                   disabled={lessonPagination.page === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">Previous</span>
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
-                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700">
+                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
                   Page {lessonPagination.page} of {Math.max(1, lessonPagination.total_pages)}
                 </span>
                 <button
                   onClick={() => setLessonPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
                   disabled={lessonPagination.page >= lessonPagination.total_pages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">Next</span>
                   <ChevronRight className="h-5 w-5" aria-hidden="true" />
@@ -399,14 +399,6 @@ const Lessons: React.FC = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="px-6 py-4">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                  {editingLesson ? 'Edit Lesson' : 'Add Lesson'}
-                </h3>
-                <button type="button" onClick={handleCloseDialog} className="text-gray-400 hover:text-gray-500">
-                  <X className="h-6 w-6" />
-                </button>
-              </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">Course</label>
@@ -455,16 +447,16 @@ const Lessons: React.FC = () => {
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
                 <div className="sm:col-span-2 flex items-center mt-2">
-                  <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded" />
-                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900">Active Lesson</label>
+                  <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
+                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Active Lesson</label>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
-              <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm">
+            <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+              <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 {editingLesson ? 'Update' : 'Create'}
               </button>
-              <button type="button" onClick={handleCloseDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+              <button type="button" onClick={handleCloseDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
                 Cancel
               </button>
             </div>
@@ -480,33 +472,25 @@ const Lessons: React.FC = () => {
       >
 
           <div className="px-6 py-4">
-            <div className="flex justify-between items-center mb-5">
-              <h3 className="text-lg leading-6 font-medium text-gray-900" id="modal-title">
-                Import Lessons from CSV
-              </h3>
-              <button type="button" onClick={() => setImportDialogOpen(false)} className="text-gray-400 hover:text-gray-500">
-                <X className="h-6 w-6" />
-              </button>
-            </div>
             <div
               {...getRootProps()}
               className={clsx(
                 "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-                isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-blue-400"
+                isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500"
               )}
             >
               <input {...getInputProps()} />
               <UploadCloud className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-              <p className="text-gray-600 mb-2">
+              <p className="text-gray-600 dark:text-gray-400 mb-2">
                 {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="text-xs text-gray-500 dark:text-gray-500">
                 CSV headers: id, title, category, module, level, number, course_id, description, competency, is_active
               </p>
             </div>
           </div>
-          <div className="bg-gray-50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200">
-            <button type="button" onClick={() => setImportDialogOpen(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm">
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onClick={() => setImportDialogOpen(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors">
               Cancel
             </button>
           </div>
