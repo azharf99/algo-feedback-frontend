@@ -1,5 +1,6 @@
 import api from './axios'
 import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams } from '../types/data'
+import { ForgotPasswordData, ResetPasswordData } from '../types/auth'
 
 // Build query string from pagination parameters
 const buildQueryParams = (params?: PaginationParams): string => {
@@ -54,6 +55,17 @@ export const profileApi = {
   updateProfile: async (profile: { name?: string; password?: string; whatsapp_api_key?: string; whatsapp_device_id?: string }): Promise<User> => {
     const response = await api.put('/profile', profile)
     return response.data.data
+  }
+}
+
+// Auth API
+export const authApi = {
+  forgotPassword: async (data: ForgotPasswordData): Promise<void> => {
+    await api.post('/auth/forgot-password', data)
+  },
+  
+  resetPassword: async (data: ResetPasswordData): Promise<void> => {
+    await api.post('/auth/reset-password', data)
   }
 }
 

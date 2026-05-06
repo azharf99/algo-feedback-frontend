@@ -172,6 +172,14 @@ const Login: React.FC = () => {
                   {errors.password.message}
                 </p>
               )}
+              <div className="flex items-center justify-end mt-1">
+                <RouterLink
+                  to="/forgot-password"
+                  className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
+                >
+                  Forgot your password?
+                </RouterLink>
+              </div>
             </div>
 
             <div className="flex flex-col items-center">

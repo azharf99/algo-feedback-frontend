@@ -36,3 +36,12 @@ export interface RefreshTokenResponse {
     access_token: string
   }
 }
+
+export interface ForgotPasswordData {
+  email: string
+}
+
+export interface ResetPasswordData {
+  token: string
+  new_password: string
+}

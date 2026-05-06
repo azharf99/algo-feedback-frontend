@@ -14,6 +14,8 @@ import Users from './pages/Users/Users'
 import AuthSuccess from './pages/Auth/AuthSuccess'
 import Landing from './pages/Landing/Landing'
 import Profile from './pages/Profile/Profile'
+import ForgotPassword from './pages/Auth/ForgotPassword'
+import ResetPassword from './pages/Auth/ResetPassword'
 import { Toaster } from 'react-hot-toast'
 
 function App() {
@@ -41,6 +43,14 @@ function App() {
         <Route 
           path="/register" 
           element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <Register />} 
+        />
+        <Route 
+          path="/forgot-password" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ForgotPassword />} 
+        />
+        <Route 
+          path="/reset-password" 
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <ResetPassword />} 
         />
         <Route path="/auth/success" element={<AuthSuccess />} />
 
