@@ -51,6 +51,7 @@ const Lessons: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
   const [importDialogOpen, setImportDialogOpen] = useState(false)
+  const [importCompDialogOpen, setImportCompDialogOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('id')
@@ -170,8 +171,41 @@ const Lessons: React.FC = () => {
     }
   }
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+  const onDropCompetencies = async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0]
+    if (!file) return
+
+    const formData = new FormData()
+    formData.append('file', file)
+
+    const loadingToast = toast.loading('Importing competencies...')
+    try {
+      const result = await lessonApi.importCompetencies(formData)
+      const { updated, errors } = result
+      let message = `Import success: ${updated} lessons updated`
+      
+      if (errors && errors.length > 0) {
+        message += `. ${errors.length} rows failed.`
+        console.error('Import Errors:', errors)
+        toast.error(message, { id: loadingToast, duration: 5000 })
+      } else {
+        toast.success(message, { id: loadingToast })
+      }
+      fetchData(lessonPagination.page)
+      setImportCompDialogOpen(false)
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+    }
+  }
+
+  const { getRootProps: getImportRootProps, getInputProps: getImportInputProps, isDragActive: isImportDragActive } = useDropzone({
     onDrop,
+    accept: { 'text/csv': ['.csv'] },
+    multiple: false,
+  })
+
+  const { getRootProps: getCompRootProps, getInputProps: getCompInputProps, isDragActive: isCompDragActive } = useDropzone({
+    onDrop: onDropCompetencies,
     accept: { 'text/csv': ['.csv'] },
     multiple: false,
   })
@@ -220,7 +254,14 @@ const Lessons: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
-            Import CSV
+            Import Lessons
+          </button>
+          <button
+            onClick={() => setImportCompDialogOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
+            Import Competencies
           </button>
           <button
             onClick={() => setDialogOpen(true)}
@@ -477,16 +518,16 @@ const Lessons: React.FC = () => {
 
           <div className="px-6 py-4">
             <div
-              {...getRootProps()}
+              {...getImportRootProps()}
               className={clsx(
                 "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
-                isDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500"
+                isImportDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500"
               )}
             >
-              <input {...getInputProps()} />
+              <input {...getImportInputProps()} />
               <UploadCloud className="mx-auto h-12 w-12 text-gray-400 mb-4" />
               <p className="text-gray-600 dark:text-gray-400 mb-2">
-                {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
+                {isImportDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
               </p>
               <p className="text-xs text-gray-500 dark:text-gray-500">
                 CSV headers: id, title, category, module, level, number, course_id, description, competency, is_active
@@ -495,6 +536,46 @@ const Lessons: React.FC = () => {
           </div>
           <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
             <button type="button" onClick={() => setImportDialogOpen(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors">
+              Cancel
+            </button>
+          </div>
+      </Modal>
+
+      {/* Import Competencies Modal */}
+      <Modal
+        open={importCompDialogOpen}
+        onClose={() => setImportCompDialogOpen(false)}
+        title={'Import Lesson Competencies'}
+        maxWidth="sm"
+      >
+          <div className="px-6 py-4">
+            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-700 dark:text-blue-300">
+              <p className="font-semibold mb-1">CSV Format Requirements:</p>
+              <ul className="list-disc list-inside space-y-1">
+                <li>Header: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">ID</code>, <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">competencies</code></li>
+                <li><code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">ID</code> is the Course ID.</li>
+                <li>Rows must match the number of lessons in the course (sorted by Number).</li>
+              </ul>
+            </div>
+            <div
+              {...getCompRootProps()}
+              className={clsx(
+                "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors",
+                isCompDragActive ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" : "border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500"
+              )}
+            >
+              <input {...getCompInputProps()} />
+              <UploadCloud className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+              <p className="text-gray-600 dark:text-gray-400 mb-2">
+                {isCompDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                CSV headers: ID, competencies
+              </p>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="button" onClick={() => setImportCompDialogOpen(false)} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:w-auto sm:text-sm transition-colors">
               Cancel
             </button>
           </div>

@@ -195,6 +195,15 @@ export const lessonApi = {
       },
     })
     return response.data
+  },
+  
+  importCompetencies: async (formData: FormData) => {
+    const response = await api.post('/lessons/import-competencies', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    })
+    return response.data
   }
 }
 
