@@ -65,7 +65,7 @@ const Sessions: React.FC = () => {
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('date_start')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
-  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('ALL')
+  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('THIS_WEEK')
   const [summaryData, setSummaryData] = useState<{ last_week: Session[]; this_week: Session[]; next_week: Session[] } | null>(null)
 
   const fetchSummary = async () => {
