@@ -30,6 +30,7 @@ const sessionSchema = z.object({
   time_start: z.string().min(1, 'Time is required'),
   after_session_feedback: z.string().optional(),
   is_done: z.boolean().default(false),
+  shift_subsequent: z.boolean().optional(),
 })
 
 type SessionFormData = z.infer<typeof sessionSchema>
@@ -65,7 +66,7 @@ const Sessions: React.FC = () => {
     control,
   } = useForm<SessionFormData>({
     resolver: zodResolver(sessionSchema),
-    defaultValues: { is_done: false }
+    defaultValues: { is_done: false, shift_subsequent: false }
   })
 
   const selectedGroupId = watch('group_id')
@@ -170,7 +171,8 @@ const Sessions: React.FC = () => {
       ...session,
       date_start: new Date(session.date_start).toISOString().split('T')[0],
       time_start: session.time_start.substring(0, 5),
-      after_session_feedback: session.after_session_feedback || ''
+      after_session_feedback: session.after_session_feedback || '',
+      shift_subsequent: false
     })
     
     const selectedGroup = groups.find(g => g.id === session.group_id)
@@ -522,6 +524,12 @@ const Sessions: React.FC = () => {
                   <input id="is_done" type="checkbox" {...register('is_done')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
                   <label htmlFor="is_done" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Mark as Done</label>
                 </div>
+                {editingSession && (
+                  <div className="flex items-center mt-2">
+                    <input id="shift_subsequent" type="checkbox" {...register('shift_subsequent')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
+                    <label htmlFor="shift_subsequent" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Geser sesi berikutnya</label>
+                  </div>
+                )}
               </div>
             </div>
             <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">

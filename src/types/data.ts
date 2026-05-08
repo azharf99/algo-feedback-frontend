@@ -43,6 +43,7 @@ export interface Session {
   time_start: string
   after_session_feedback?: string
   is_done: boolean
+  shift_subsequent?: boolean
   group?: Group
   lesson?: Lesson
   students_attended?: Student[]
