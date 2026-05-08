@@ -7,7 +7,9 @@ const AuthSuccess: React.FC = () => {
   const location = useLocation()
 
   useEffect(() => {
-    const params = new URLSearchParams(location.search)
+    // Tokens are now in the hash fragment for security
+    const hash = window.location.hash.substring(1)
+    const params = new URLSearchParams(hash)
     const accessToken = params.get('access_token')
     const refreshToken = params.get('refresh_token')
     const userStr = params.get('user')

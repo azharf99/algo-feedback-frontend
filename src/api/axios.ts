@@ -24,6 +24,8 @@ api.interceptors.request.use(
   }
 )
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 // Response interceptor to handle token refresh and global error messaging
 api.interceptors.response.use(
   (response) => {
@@ -36,6 +38,16 @@ api.interceptors.response.use(
   },
   async (error) => {
     const originalRequest = error.config
+
+    // Handle Rate Limiting (429 Too Many Requests)
+    if (error.response?.status === 429 && (!originalRequest._retryCount || originalRequest._retryCount < 3)) {
+      originalRequest._retryCount = (originalRequest._retryCount || 0) + 1
+      const backoffDelay = Math.pow(2, originalRequest._retryCount) * 1000
+      
+      console.warn(`Rate limited. Retrying in ${backoffDelay}ms... (Attempt ${originalRequest._retryCount})`)
+      await sleep(backoffDelay)
+      return api(originalRequest)
+    }
 
     // Handle Token Refresh (401 Unauthorized)
     if (error.response?.status === 401 && !originalRequest._retry) {

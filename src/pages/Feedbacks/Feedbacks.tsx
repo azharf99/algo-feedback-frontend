@@ -229,7 +229,23 @@ const Feedbacks: React.FC = () => {
 
   const handleExportPdf = async (feedback: Feedback) => {
     if (feedback.url_pdf) {
-      window.open(feedback.url_pdf, '_blank')
+      const loadingToast = toast.loading('Downloading PDF...')
+      try {
+        const blob = await feedbackApi.downloadPdf(feedback.id)
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        // Use a descriptive filename
+        const filename = `Feedback_${feedback.student?.fullname || feedback.student_id}_${feedback.number}.pdf`.replace(/\s+/g, '_')
+        a.download = filename
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success('Download started', { id: loadingToast })
+      } catch (error: any) {
+        toast.error('Failed to download PDF', { id: loadingToast })
+      }
     } else {
       toast.error('PDF not yet generated')
     }
@@ -453,17 +469,15 @@ const Feedbacks: React.FC = () => {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {feedback.url_pdf ? (
-                        <a
-                          href={feedback.url_pdf}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                        <button
+                          onClick={() => handleExportPdf(feedback)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
                           title="View PDF"
                         >
                           <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-1 rounded inline-flex" title="PDF Generated">
                             <FileText className="w-5 h-5" /> View PDF
                           </span>
-                        </a>
+                        </button>
                       ) : (
                         <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 italic text-xs">
                           <RefreshCw className="w-3 h-3 animate-spin" />

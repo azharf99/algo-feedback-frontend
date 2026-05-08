@@ -266,6 +266,13 @@ export const feedbackApi = {
   generatePdf: async (params: { student_id: number; course: string; number: number; all?: boolean }): Promise<void> => {
     await api.post('/feedbacks/generate-pdf', params)
   },
+
+  downloadPdf: async (id: number): Promise<Blob> => {
+    const response = await api.get(`/feedbacks/${id}/download`, {
+      responseType: 'blob',
+    })
+    return response.data
+  },
   
   sendWhatsApp: async (params?: { student_id?: number }): Promise<void> => {
     await api.post('/feedbacks/send-wa', {}, { params })
