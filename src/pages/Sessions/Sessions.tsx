@@ -65,6 +65,17 @@ const Sessions: React.FC = () => {
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('date_start')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('ALL')
+  const [summaryData, setSummaryData] = useState<{ last_week: Session[]; this_week: Session[]; next_week: Session[] } | null>(null)
+
+  const fetchSummary = async () => {
+    try {
+      const res = await sessionApi.getSummary()
+      setSummaryData(res.data)
+    } catch (error) {
+      toast.error('Failed to fetch summary')
+    }
+  }
 
   const {
     register,
@@ -107,6 +118,16 @@ const Sessions: React.FC = () => {
   useEffect(() => {
     fetchData(sessionPagination.page, sessionPagination.limit)
   }, [sessionPagination.page, sessionPagination.limit])
+
+  useEffect(() => {
+    if (currentTab !== 'ALL') {
+      if (!summaryData) {
+        fetchSummary()
+      }
+    } else {
+      fetchData(1)
+    }
+  }, [currentTab])
 
   useEffect(() => {
     const fetchFilteredLessons = async () => {
@@ -176,6 +197,7 @@ const Sessions: React.FC = () => {
         toast.success('Session created successfully')
       }
       fetchData(sessionPagination.page)
+      fetchSummary()
       handleCloseDialog()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Operation failed')
@@ -188,6 +210,7 @@ const Sessions: React.FC = () => {
         await sessionApi.deleteSession(id)
         toast.success('Session deleted successfully')
         fetchData(sessionPagination.page)
+        fetchSummary()
       } catch (error: any) {
         toast.error(error.response?.data?.error || 'Delete failed')
       }
@@ -249,6 +272,7 @@ const Sessions: React.FC = () => {
       await sessionApi.updateAttendance(attendanceSession.id, selectedStudents)
       toast.success('Attendance updated successfully')
       fetchData(sessionPagination.page)
+      fetchSummary()
       handleCloseAttendanceDialog()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Update failed')
@@ -260,6 +284,7 @@ const Sessions: React.FC = () => {
       await sessionApi.markDone(data)
       toast.success('Sessions marked as done successfully')
       fetchData(sessionPagination.page)
+      fetchSummary()
       setMarkDoneDialogOpen(false)
       resetMarkDone()
     } catch (error: any) {
@@ -272,6 +297,7 @@ const Sessions: React.FC = () => {
       await sessionApi.autoFillAttendance(data)
       toast.success('Attendance filled successfully')
       fetchData(sessionPagination.page)
+      fetchSummary()
       setAutoFillAttendanceDialogOpen(false)
       resetAutoFill()
     } catch (error: any) {
@@ -306,6 +332,43 @@ const Sessions: React.FC = () => {
   const renderSortIcon = (field: string) => {
     if (sortField !== field) return <ArrowUpDown className="w-4 h-4 text-gray-400" />
     return sortDir === 'asc' ? <ArrowUp className="w-4 h-4 text-blue-600" /> : <ArrowDown className="w-4 h-4 text-blue-600" />
+  }
+
+  const getDisplaySessions = () => {
+    let source: Session[] = []
+    if (currentTab === 'ALL') {
+      source = sessions
+    } else if (summaryData) {
+      source = currentTab === 'LAST_WEEK' ? summaryData.last_week :
+               currentTab === 'THIS_WEEK' ? summaryData.this_week :
+               summaryData.next_week
+    }
+    
+    let filtered = source
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase()
+      filtered = source.filter(s => 
+        s.group?.name?.toLowerCase().includes(searchLower) ||
+        s.lesson?.title?.toLowerCase().includes(searchLower) ||
+        s.id.toString().includes(searchLower)
+      )
+    }
+    
+    if (currentTab !== 'ALL') {
+      filtered = [...filtered].sort((a, b) => {
+        const valA = a[sortField as keyof Session]
+        const valB = b[sortField as keyof Session]
+        
+        if (valA === valB) return 0
+        if (valA === null || valA === undefined) return 1
+        if (valB === null || valB === undefined) return -1
+        
+        const compare = valA < valB ? -1 : 1
+        return sortDir === 'asc' ? compare : -compare
+      })
+    }
+    
+    return filtered
   }
 
   return (
@@ -355,6 +418,29 @@ const Sessions: React.FC = () => {
             Add Session
           </button>
         </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {['ALL', 'LAST_WEEK', 'THIS_WEEK', 'NEXT_WEEK'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setCurrentTab(tab as any)}
+              className={clsx(
+                currentTab === tab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
+              )}
+            >
+              {tab === 'ALL' ? 'ALL' :
+               tab === 'LAST_WEEK' ? 'Session Last Week' :
+               tab === 'THIS_WEEK' ? 'Session This Week' :
+               'Session Next Week'}
+            </button>
+          ))}
+        </nav>
       </div>
 
       {/* Data Table */}
@@ -412,14 +498,14 @@ const Sessions: React.FC = () => {
                     </svg>
                   </td>
                 </tr>
-              ) : sessions.length === 0 ? (
+              ) : getDisplaySessions().length === 0 ? (
                 <tr>
                   <td colSpan={9} className="px-6 py-10 text-center text-gray-500">
                     No sessions found.
                   </td>
                 </tr>
               ) : (
-                sessions.map((session, index) => (
+                getDisplaySessions().map((session, index) => (
                   <tr key={session.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {(sessionPagination.page - 1) * sessionPagination.limit + index + 1}
@@ -474,62 +560,72 @@ const Sessions: React.FC = () => {
         
         {/* Pagination */}
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button
-              onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-              disabled={sessionPagination.page === 1}
-              className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            >
-              Previous
-            </button>
-            <button
-              onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
-              disabled={sessionPagination.page >= sessionPagination.total_pages}
-              className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
-            >
-              Next
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-700 dark:text-gray-400">
-                Showing <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + (sessions.length > 0 ? 1 : 0)}</span> to <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + sessions.length}</span> of <span className="font-medium text-gray-900 dark:text-white">{sessionPagination.total}</span> results
-              </p>
-              <select
-                value={sessionPagination.limit}
-                onChange={(e) => setSessionPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
-                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
-              >
-                <option value={10}>10 / page</option>
-                <option value={25}>25 / page</option>
-                <option value={50}>50 / page</option>
-                <option value={100}>100 / page</option>
-              </select>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+          {currentTab === 'ALL' ? (
+            <>
+              <div className="flex-1 flex justify-between sm:hidden">
                 <button
                   onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
                   disabled={sessionPagination.page === 1}
-                  className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                  className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
-                  <span className="sr-only">Previous</span>
-                  <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                  Previous
                 </button>
-                <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Page {sessionPagination.page} of {Math.max(1, sessionPagination.total_pages)}
-                </span>
                 <button
                   onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
                   disabled={sessionPagination.page >= sessionPagination.total_pages}
-                  className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                  className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
-                  <span className="sr-only">Next</span>
-                  <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                  Next
                 </button>
-              </nav>
+              </div>
+              <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+                <div className="flex items-center gap-4">
+                  <p className="text-sm text-gray-700 dark:text-gray-400">
+                    Showing <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + (getDisplaySessions().length > 0 ? 1 : 0)}</span> to <span className="font-medium text-gray-900 dark:text-white">{(sessionPagination.page - 1) * sessionPagination.limit + getDisplaySessions().length}</span> of <span className="font-medium text-gray-900 dark:text-white">{sessionPagination.total}</span> results
+                  </p>
+                  <select
+                    value={sessionPagination.limit}
+                    onChange={(e) => setSessionPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
+                    className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+                  >
+                    <option value={10}>10 / page</option>
+                    <option value={25}>25 / page</option>
+                    <option value={50}>50 / page</option>
+                    <option value={100}>100 / page</option>
+                  </select>
+                </div>
+                <div>
+                  <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+                    <button
+                      onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                      disabled={sessionPagination.page === 1}
+                      className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                    >
+                      <span className="sr-only">Previous</span>
+                      <ChevronLeft className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                    <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Page {sessionPagination.page} of {Math.max(1, sessionPagination.total_pages)}
+                    </span>
+                    <button
+                      onClick={() => setSessionPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
+                      disabled={sessionPagination.page >= sessionPagination.total_pages}
+                      className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
+                    >
+                      <span className="sr-only">Next</span>
+                      <ChevronRight className="h-5 w-5" aria-hidden="true" />
+                    </button>
+                  </nav>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex justify-between items-center">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
+                Showing <span className="font-medium text-gray-900 dark:text-white">{getDisplaySessions().length}</span> results
+              </p>
             </div>
-          </div>
+          )}
         </div>
       </div>
 
