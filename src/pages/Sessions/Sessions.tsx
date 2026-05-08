@@ -57,6 +57,7 @@ const Sessions: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false)
   const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false)
   const [markDoneDialogOpen, setMarkDoneDialogOpen] = useState(false)
+  const [autoFillAttendanceDialogOpen, setAutoFillAttendanceDialogOpen] = useState(false)
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [attendanceSession, setAttendanceSession] = useState<Session | null>(null)
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
@@ -83,6 +84,16 @@ const Sessions: React.FC = () => {
     reset: resetMarkDone,
     formState: { errors: errorsMarkDone },
     control: controlMarkDone,
+  } = useForm<MarkDoneFormData>({
+    resolver: zodResolver(markDoneSchema),
+  })
+
+  const {
+    register: registerAutoFill,
+    handleSubmit: handleSubmitAutoFill,
+    reset: resetAutoFill,
+    formState: { errors: errorsAutoFill },
+    control: controlAutoFill,
   } = useForm<MarkDoneFormData>({
     resolver: zodResolver(markDoneSchema),
   })
@@ -256,6 +267,18 @@ const Sessions: React.FC = () => {
     }
   }
 
+  const onAutoFillAttendanceSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
+    try {
+      await sessionApi.autoFillAttendance(data)
+      toast.success('Attendance filled successfully')
+      fetchData(sessionPagination.page)
+      setAutoFillAttendanceDialogOpen(false)
+      resetAutoFill()
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Operation failed')
+    }
+  }
+
 
   const toggleStudent = (studentId: number) => {
     if (selectedStudents.includes(studentId)) {
@@ -316,6 +339,13 @@ const Sessions: React.FC = () => {
           >
             <CheckCircle className="-ml-1 mr-2 h-4 w-4 text-green-500" />
             Auto Mark Done
+          </button>
+          <button
+            onClick={() => setAutoFillAttendanceDialogOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <CheckCircle className="-ml-1 mr-2 h-4 w-4 text-blue-500" />
+            Auto Fill Attendance
           </button>
           <button
             onClick={() => setDialogOpen(true)}
@@ -669,6 +699,47 @@ const Sessions: React.FC = () => {
               Mark Done
             </button>
             <button type="button" onClick={() => { setMarkDoneDialogOpen(false); resetMarkDone(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Auto Fill Attendance Modal */}
+      <Modal
+        open={autoFillAttendanceDialogOpen}
+        onClose={() => {
+          setAutoFillAttendanceDialogOpen(false)
+          resetAutoFill()
+        }}
+        title="Auto Fill Attendance Student"
+        maxWidth="sm"
+      >
+        <form onSubmit={handleSubmitAutoFill(onAutoFillAttendanceSubmit)}>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="min-w-0">
+                <SearchableSelect
+                  name="group_id"
+                  control={controlAutoFill}
+                  label="Group"
+                  placeholder="Search for a group..."
+                  options={groups.map(g => ({ value: g.id, label: g.name }))}
+                  error={errorsAutoFill.group_id?.message}
+                />
+              </div>
+              <div className="min-w-0">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Until Date</label>
+                <input type="date" {...registerAutoFill('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsAutoFill.until_date ? "border-red-300" : "border-gray-300")} />
+                {errorsAutoFill.until_date && <p className="mt-1 text-sm text-red-600">{errorsAutoFill.until_date.message}</p>}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Fill Attendance
+            </button>
+            <button type="button" onClick={() => { setAutoFillAttendanceDialogOpen(false); resetAutoFill(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
               Cancel
             </button>
           </div>

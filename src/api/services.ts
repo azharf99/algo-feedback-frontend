@@ -244,6 +244,9 @@ export const sessionApi = {
   
   markDone: async (data: { group_id: number; until_date: string }): Promise<void> => {
     await api.post('/sessions/mark-done', data)
+  },
+  autoFillAttendance: async (data: { group_id: number; until_date: string }): Promise<void> => {
+    await api.post('/sessions/auto-fill-attendance', data)
   }
 }
 
