@@ -240,6 +240,10 @@ export const sessionApi = {
   
   updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
     await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds })
+  },
+  
+  markDone: async (data: { group_id: number; until_date: string }): Promise<void> => {
+    await api.post('/sessions/mark-done', data)
   }
 }
 

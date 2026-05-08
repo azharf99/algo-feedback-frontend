@@ -35,6 +35,13 @@ const sessionSchema = z.object({
 
 type SessionFormData = z.infer<typeof sessionSchema>
 
+const markDoneSchema = z.object({
+  group_id: z.number().min(1, 'Group is required'),
+  until_date: z.string().min(1, 'Date is required'),
+})
+
+type MarkDoneFormData = z.infer<typeof markDoneSchema>
+
 const Sessions: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([])
   const [groups, setGroups] = useState<Group[]>([])
@@ -49,6 +56,7 @@ const Sessions: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false)
+  const [markDoneDialogOpen, setMarkDoneDialogOpen] = useState(false)
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [attendanceSession, setAttendanceSession] = useState<Session | null>(null)
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
@@ -67,6 +75,16 @@ const Sessions: React.FC = () => {
   } = useForm<SessionFormData>({
     resolver: zodResolver(sessionSchema),
     defaultValues: { is_done: false, shift_subsequent: false }
+  })
+
+  const {
+    register: registerMarkDone,
+    handleSubmit: handleSubmitMarkDone,
+    reset: resetMarkDone,
+    formState: { errors: errorsMarkDone },
+    control: controlMarkDone,
+  } = useForm<MarkDoneFormData>({
+    resolver: zodResolver(markDoneSchema),
   })
 
   const selectedGroupId = watch('group_id')
@@ -226,6 +244,19 @@ const Sessions: React.FC = () => {
     }
   }
 
+  const onMarkDoneSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
+    try {
+      await sessionApi.markDone(data)
+      toast.success('Sessions marked as done successfully')
+      fetchData(sessionPagination.page)
+      setMarkDoneDialogOpen(false)
+      resetMarkDone()
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Operation failed')
+    }
+  }
+
+
   const toggleStudent = (studentId: number) => {
     if (selectedStudents.includes(studentId)) {
       setSelectedStudents(prev => prev.filter(id => id !== studentId))
@@ -279,6 +310,13 @@ const Sessions: React.FC = () => {
               </button>
             )}
           </div>
+          <button
+            onClick={() => setMarkDoneDialogOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <CheckCircle className="-ml-1 mr-2 h-4 w-4 text-green-500" />
+            Auto Mark Done
+          </button>
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -594,6 +632,47 @@ const Sessions: React.FC = () => {
               Cancel
             </button>
           </div>
+      </Modal>
+
+      {/* Mark Done Modal */}
+      <Modal
+        open={markDoneDialogOpen}
+        onClose={() => {
+          setMarkDoneDialogOpen(false)
+          resetMarkDone()
+        }}
+        title="Auto Mark Done Sessions"
+        maxWidth="sm"
+      >
+        <form onSubmit={handleSubmitMarkDone(onMarkDoneSubmit)}>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="min-w-0">
+                <SearchableSelect
+                  name="group_id"
+                  control={controlMarkDone}
+                  label="Group"
+                  placeholder="Search for a group..."
+                  options={groups.map(g => ({ value: g.id, label: g.name }))}
+                  error={errorsMarkDone.group_id?.message}
+                />
+              </div>
+              <div className="min-w-0">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Until Date</label>
+                <input type="date" {...registerMarkDone('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkDone.until_date ? "border-red-300" : "border-gray-300")} />
+                {errorsMarkDone.until_date && <p className="mt-1 text-sm text-red-600">{errorsMarkDone.until_date.message}</p>}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Mark Done
+            </button>
+            <button type="button" onClick={() => { setMarkDoneDialogOpen(false); resetMarkDone(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Cancel
+            </button>
+          </div>
+        </form>
       </Modal>
     </div>
   )
