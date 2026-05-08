@@ -468,30 +468,34 @@ const Sessions: React.FC = () => {
 
           <form onSubmit={handleSubmit(onSubmit)}>
             <div className="px-6 py-4">
-              <div className="grid grid-cols-1 gap-4">
-                <SearchableSelect
-                  name="group_id"
-                  control={control}
-                  label="Group"
-                  placeholder="Search for a group..."
-                  options={groups.map(g => ({ value: g.id, label: g.name }))}
-                  error={errors.group_id?.message}
-                />
-                <SearchableSelect
-                  name="lesson_id"
-                  control={control}
-                  label="Lesson"
-                  placeholder={loadingLessons ? "Loading lessons..." : selectedGroupId ? "Search for a lesson..." : "Select a group first"}
-                  options={filteredLessons.map(l => ({ value: l.id, label: l.title }))}
-                  error={errors.lesson_id?.message}
-                  isDisabled={!selectedGroupId || loadingLessons}
-                />
-                <div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="min-w-0">
+                  <SearchableSelect
+                    name="group_id"
+                    control={control}
+                    label="Group"
+                    placeholder="Search for a group..."
+                    options={groups.map(g => ({ value: g.id, label: g.name }))}
+                    error={errors.group_id?.message}
+                  />
+                </div>
+                <div className="min-w-0">
+                  <SearchableSelect
+                    name="lesson_id"
+                    control={control}
+                    label="Lesson"
+                    placeholder={loadingLessons ? "Loading lessons..." : selectedGroupId ? "Search for a lesson..." : "Select a group first"}
+                    options={filteredLessons.map(l => ({ value: l.id, label: l.title }))}
+                    error={errors.lesson_id?.message}
+                    isDisabled={!selectedGroupId || loadingLessons}
+                  />
+                </div>
+                <div className="min-w-0">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
                   <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.date_start ? "border-red-300" : "border-gray-300")} />
                   {errors.date_start && <p className="mt-1 text-sm text-red-600">{errors.date_start.message}</p>}
                 </div>
-                <div>
+                <div className="min-w-0">
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
                   <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.time_start ? "border-red-300" : "border-gray-300")} />
                   {errors.time_start && <p className="mt-1 text-sm text-red-600">{errors.time_start.message}</p>}
