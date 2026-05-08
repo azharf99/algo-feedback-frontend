@@ -169,7 +169,8 @@ const Sessions: React.FC = () => {
     reset({
       ...session,
       date_start: new Date(session.date_start).toISOString().split('T')[0],
-      time_start: session.time_start.substring(0, 5)
+      time_start: session.time_start.substring(0, 5),
+      after_session_feedback: session.after_session_feedback || ''
     })
     
     const selectedGroup = groups.find(g => g.id === session.group_id)
