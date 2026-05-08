@@ -47,6 +47,10 @@ export const userApi = {
   
   deleteUser: async (id: number): Promise<void> => {
     await api.delete(`/users/${id}`)
+  },
+  
+  deleteUsersBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/users/bulk', { data: { ids } })
   }
 }
 
@@ -90,6 +94,10 @@ export const courseApi = {
     await api.delete(`/courses/${id}`)
   },
   
+  deleteCoursesBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/courses/bulk', { data: { ids } })
+  },
+  
   importCourses: async (formData: FormData) => {
     const response = await api.post('/courses/import', formData, {
       headers: {
@@ -121,6 +129,10 @@ export const studentApi = {
     await api.delete(`/students/${id}`)
   },
   
+  deleteStudentsBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/students/bulk', { data: { ids } })
+  },
+  
   importStudents: async (formData: FormData) => {
     const response = await api.post('/students/import', formData, {
       headers: {
@@ -150,6 +162,10 @@ export const groupApi = {
   
   deleteGroup: async (id: number): Promise<void> => {
     await api.delete(`/groups/${id}`)
+  },
+  
+  deleteGroupsBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/groups/bulk', { data: { ids } })
   },
   
   importGroups: async (formData: FormData) => {
@@ -186,6 +202,10 @@ export const lessonApi = {
   
   deleteLesson: async (id: number): Promise<void> => {
     await api.delete(`/lessons/${id}`)
+  },
+  
+  deleteLessonsBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/lessons/bulk', { data: { ids } })
   },
   
   importLessons: async (formData: FormData) => {
@@ -238,6 +258,10 @@ export const sessionApi = {
     await api.delete(`/sessions/${id}`)
   },
   
+  deleteSessionsBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/sessions/bulk', { data: { ids } })
+  },
+  
   updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
     await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds })
   },
@@ -268,6 +292,10 @@ export const feedbackApi = {
   
   deleteFeedback: async (id: number): Promise<void> => {
     await api.delete(`/feedbacks/${id}`)
+  },
+  
+  deleteFeedbacksBulk: async (ids: number[]): Promise<void> => {
+    await api.delete('/feedbacks/bulk', { data: { ids } })
   },
   
   generateFeedbacks: async (params?: { all?: boolean; group_id?: number }): Promise<void> => {

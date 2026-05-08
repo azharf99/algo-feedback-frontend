@@ -48,6 +48,7 @@ const Users: React.FC = () => {
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
 
   const {
     register,
@@ -70,6 +71,7 @@ const Users: React.FC = () => {
 
   const fetchUsers = async (page: number, limit: number = pagination.limit) => {
     setLoading(true)
+    setSelectedIds([])
     try {
       const response = await userApi.getUsers({ 
         page, 
@@ -124,6 +126,19 @@ const Users: React.FC = () => {
         fetchUsers(pagination.page)
       } catch (error: any) {
         toast.error(error.response?.data?.error || 'Delete failed')
+      }
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
+      try {
+        await userApi.deleteUsersBulk(selectedIds)
+        toast.success('Users deleted successfully')
+        setSelectedIds([])
+        fetchUsers(pagination.page)
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Bulk delete failed')
       }
     }
   }
@@ -186,6 +201,15 @@ const Users: React.FC = () => {
               </button>
             )}
           </div>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
+            >
+              <Trash2 className="-ml-1 mr-2 h-4 w-4" />
+              Delete ({selectedIds.length})
+            </button>
+          )}
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
@@ -201,6 +225,20 @@ const Users: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-800/50">
               <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                    checked={selectedIds.length === users.length && users.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(users.map(u => u.id))
+                      } else {
+                        setSelectedIds([])
+                      }
+                    }}
+                  />
+                </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => toggleSort('id')}>
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
@@ -218,17 +256,31 @@ const Users: React.FC = () => {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-200">
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center">
+                  <td colSpan={7} className="px-6 py-10 text-center">
                     <div className="w-8 h-8 border-4 border-blue-600 dark:border-blue-400 border-t-transparent rounded-full animate-spin mx-auto"></div>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">No users found.</td>
+                  <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">No users found.</td>
                 </tr>
               ) : (
                 users.map((user, index) => (
                   <tr key={user.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                        checked={selectedIds.includes(user.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds([...selectedIds, user.id])
+                          } else {
+                            setSelectedIds(selectedIds.filter(id => id !== user.id))
+                          }
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {(pagination.page - 1) * pagination.limit + index + 1}
                     </td>

@@ -56,6 +56,7 @@ const Lessons: React.FC = () => {
   const debouncedSearch = useDebounce(search, 500)
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [selectedIds, setSelectedIds] = useState<number[]>([])
 
   const {
     register,
@@ -78,6 +79,7 @@ const Lessons: React.FC = () => {
 
   const fetchData = async (page: number, limit: number = lessonPagination.limit) => {
     setLoading(true)
+    setSelectedIds([])
     try {
       const [lessonsRes, coursesRes] = await Promise.all([
         lessonApi.getLessons({ 
@@ -128,6 +130,19 @@ const Lessons: React.FC = () => {
         fetchData(lessonPagination.page)
       } catch (error: any) {
         toast.error(error.response?.data?.error || 'Delete failed')
+      }
+    }
+  }
+
+  const handleBulkDelete = async () => {
+    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} lessons?`)) {
+      try {
+        await lessonApi.deleteLessonsBulk(selectedIds)
+        toast.success('Lessons deleted successfully')
+        setSelectedIds([])
+        fetchData(lessonPagination.page)
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Bulk delete failed')
       }
     }
   }
@@ -249,6 +264,15 @@ const Lessons: React.FC = () => {
               </button>
             )}
           </div>
+          {selectedIds.length > 0 && (
+            <button
+              onClick={handleBulkDelete}
+              className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
+            >
+              <Trash2 className="-ml-1 mr-2 h-4 w-4" />
+              Delete ({selectedIds.length})
+            </button>
+          )}
           <button
             onClick={() => setImportDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
@@ -279,6 +303,20 @@ const Lessons: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  <input
+                    type="checkbox"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                    checked={selectedIds.length === lessons.length && lessons.length > 0}
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedIds(lessons.map(l => l.id))
+                      } else {
+                        setSelectedIds([])
+                      }
+                    }}
+                  />
+                </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
                 <th 
                   scope="col" 
@@ -322,7 +360,7 @@ const Lessons: React.FC = () => {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center">
+                  <td colSpan={9} className="px-6 py-10 text-center">
                     <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -331,13 +369,27 @@ const Lessons: React.FC = () => {
                 </tr>
               ) : lessons.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
+                  <td colSpan={9} className="px-6 py-10 text-center text-gray-500">
                     No lessons found.
                   </td>
                 </tr>
               ) : (
                 lessons.map((lesson, index) => (
                   <tr key={lesson.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <input
+                        type="checkbox"
+                        className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                        checked={selectedIds.includes(lesson.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) {
+                            setSelectedIds([...selectedIds, lesson.id])
+                          } else {
+                            setSelectedIds(selectedIds.filter(id => id !== lesson.id))
+                          }
+                        }}
+                      />
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {(lessonPagination.page - 1) * lessonPagination.limit + index + 1}
                     </td>
