@@ -66,6 +66,12 @@ const Feedbacks: React.FC = () => {
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
+  const [feedbackStats, setFeedbackStats] = useState({
+    total: 0,
+    pdf_generated: 0,
+    pdf_pending: 0,
+    is_sent: 0
+  })
 
   const {
     register,
@@ -122,16 +128,31 @@ const Feedbacks: React.FC = () => {
           search: debouncedSearch,
           sort_by: sortField,
           sort_dir: sortDir
-        }),
+        }) as unknown as Promise<{
+          data: Feedback[];
+          meta?: { total: number; page: number; limit: number; total_pages: number };
+          stats?: { total: number; pdf_generated: number; pdf_pending: number; is_sent: number };
+          page?: number; limit?: number; total?: number; total_pages?: number; // fallback
+        }>,
         groupApi.getGroups()
       ])
+      
       setFeedbacks(feedbacksRes.data)
       setGroups(groupsRes.data)
+      
+      const stats = feedbacksRes.stats || {
+        total: feedbacksRes.meta?.total || feedbacksRes.total || 0,
+        pdf_generated: 0,
+        pdf_pending: 0,
+        is_sent: 0
+      }
+      setFeedbackStats(stats)
+      
       setFeedbackPagination({
-        page: feedbacksRes.page,
-        limit: feedbacksRes.limit,
-        total: feedbacksRes.total,
-        total_pages: feedbacksRes.total_pages
+        page: feedbacksRes.meta?.page ?? feedbacksRes.page ?? 1,
+        limit: feedbacksRes.meta?.limit ?? feedbacksRes.limit ?? 10,
+        total: feedbacksRes.meta?.total ?? feedbacksRes.total ?? 0,
+        total_pages: feedbacksRes.meta?.total_pages ?? feedbacksRes.total_pages ?? 1
       })
     } catch (error) {
       if (!silent) toast.error('Failed to fetch data')
@@ -384,30 +405,54 @@ const Feedbacks: React.FC = () => {
         </div>
       </div>
 
+      {feedbackStats.pdf_pending > 0 && (
+        <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 p-4 rounded-r-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <FileText className="h-5 w-5 text-yellow-400" aria-hidden="true" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700 dark:text-yellow-300">
+                You have <span className="font-bold">{feedbackStats.pdf_pending}</span> PDFs left to generate.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Statistics Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Feedbacks</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbacks.length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackPagination.total}</dd>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">PDFs Generated</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbacks.filter(f => f.url_pdf).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.pdf_generated}</dd>
+            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.pdf_generated / feedbackStats.total * 100) : 0}%` }}></div>
+            </div>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">WhatsApp Scheduled</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbacks.filter(f => f.is_sent).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.is_sent}</dd>
+            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div className="bg-green-600 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.is_sent / feedbackStats.total * 100) : 0}%` }}></div>
+            </div>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
             <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending PDFs</dt>
-            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbacks.filter(f => !f.url_pdf).length}</dd>
+            <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.pdf_pending}</dd>
+            <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
+              <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.pdf_pending / feedbackStats.total * 100) : 0}%` }}></div>
+            </div>
           </div>
         </div>
       </div>
