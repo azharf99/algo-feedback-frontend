@@ -59,6 +59,7 @@ const Feedbacks: React.FC = () => {
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
   const [editingFeedback, setEditingFeedback] = useState<Feedback | null>(null)
   const [pdfGenerating, setPdfGenerating] = useState<number | null>(null)
+  const [isGeneratingAllPdf, setIsGeneratingAllPdf] = useState(false)
   const [waScheduling, setWaScheduling] = useState<number | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [search, setSearch] = useState('')
@@ -237,6 +238,19 @@ const Feedbacks: React.FC = () => {
     }
   }
 
+  const handleGenerateAllPdf = async () => {
+    try {
+      setIsGeneratingAllPdf(true)
+      const response = await feedbackApi.generateAllPdf()
+      toast.success(response.message || 'Mass PDF generation started in background')
+      fetchData(feedbackPagination.page)
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Mass PDF generation failed')
+    } finally {
+      setIsGeneratingAllPdf(false)
+    }
+  }
+
   const handleSendWhatsApp = async (feedback?: Feedback) => {
     try {
       setWaScheduling(feedback?.id || 0)
@@ -372,6 +386,14 @@ const Feedbacks: React.FC = () => {
               Delete ({selectedIds.length})
             </button>
           )}
+          <button
+            onClick={handleGenerateAllPdf}
+            disabled={isGeneratingAllPdf}
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
+          >
+            <FileText className={clsx("-ml-1 mr-2 h-4 w-4", isGeneratingAllPdf && "animate-pulse")} />
+            Generate All PDF
+          </button>
           <button
             onClick={() => handleSendWhatsApp()}
             disabled={waScheduling === 0}

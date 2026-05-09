@@ -306,6 +306,11 @@ export const feedbackApi = {
     await api.post('/feedbacks/generate-pdf', params)
   },
 
+  generateAllPdf: async (): Promise<{ message: string; tasks: any[] }> => {
+    const response = await api.post('/feedbacks/generate-all-pdf')
+    return response.data
+  },
+
   downloadPdf: async (id: number): Promise<Blob> => {
     const response = await api.get(`/feedbacks/${id}/download`, {
       responseType: 'blob',
