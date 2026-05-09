@@ -42,11 +42,11 @@ const Profile: React.FC = () => {
         delete filteredData.password
       }
       
-      const updatedUser = await profileApi.updateProfile(filteredData)
+      const updatedUser = await profileApi.updateProfile(filteredData, true)
       updateUser(updatedUser)
       toast.success('Profile updated successfully')
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Failed to update profile')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }

@@ -81,11 +81,11 @@ const Login: React.FC = () => {
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
     const loadingToast = toast.loading('Signing in...')
     try {
-      await login(data as LoginCredentials)
+      await login(data as LoginCredentials, true)
       toast.success('Successfully logged in!', { id: loadingToast })
-    } catch {
-      // Global interceptor handles the error toast
-      toast.dismiss(loadingToast)
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Login failed'
+      toast.error(errorMsg, { id: loadingToast })
       recaptchaRef.current?.reset()
       setValue('captcha_token', '')
     }

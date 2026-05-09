@@ -106,7 +106,7 @@ const Groups: React.FC = () => {
       setStudentsList(studentsRes.data)
       setCourses(coursesRes.data)
     } catch (error) {
-      toast.error('Failed to fetch data')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -125,31 +125,31 @@ const Groups: React.FC = () => {
           ...sanitizedData,
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
-        } as Partial<Group>)
+        } as Partial<Group>, true)
         toast.success('Group updated successfully')
       } else {
         await groupApi.createGroup({
           ...sanitizedData,
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
-        } as Omit<Group, 'id'>)
+        } as Omit<Group, 'id'>, true)
         toast.success('Group created successfully')
       }
       fetchData(groupPagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this group?')) {
       try {
-        await groupApi.deleteGroup(id)
+        await groupApi.deleteGroup(id, true)
         toast.success('Group deleted successfully')
         fetchData(groupPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -157,12 +157,12 @@ const Groups: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} groups?`)) {
       try {
-        await groupApi.deleteGroupsBulk(selectedIds)
+        await groupApi.deleteGroupsBulk(selectedIds, true)
         toast.success('Groups deleted successfully')
         setSelectedIds([])
         fetchData(groupPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -200,7 +200,7 @@ const Groups: React.FC = () => {
 
     const loadingToast = toast.loading('Importing groups...')
     try {
-      const result = await groupApi.importGroups(formData)
+      const result = await groupApi.importGroups(formData, true)
       const { created, updated, errors } = result
       let message = `Import success: ${created} created, ${updated} updated`
       
@@ -214,7 +214,8 @@ const Groups: React.FC = () => {
       fetchData(1)
       setImportDialogOpen(false)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Import failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 

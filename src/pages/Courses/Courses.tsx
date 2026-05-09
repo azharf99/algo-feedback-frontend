@@ -87,7 +87,7 @@ const Courses: React.FC = () => {
         total_pages: coursesRes.total_pages
       })
     } catch (error) {
-      toast.error('Failed to fetch courses')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -98,29 +98,29 @@ const Courses: React.FC = () => {
       if (editingCourse) {
         await courseApi.updateCourse(editingCourse.id, {
           ...data,
-        } as Partial<Course>)
+        } as Partial<Course>, true)
         toast.success('Course updated successfully')
       } else {
         await courseApi.createCourse({
           ...data,
-        } as Omit<Course, 'id'>)
+        } as Omit<Course, 'id'>, true)
         toast.success('Course created successfully')
       }
       fetchData(coursePagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this course?')) {
       try {
-        await courseApi.deleteCourse(id)
+        await courseApi.deleteCourse(id, true)
         toast.success('Course deleted successfully')
         fetchData(coursePagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -128,12 +128,12 @@ const Courses: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} courses?`)) {
       try {
-        await courseApi.deleteCoursesBulk(selectedIds)
+        await courseApi.deleteCoursesBulk(selectedIds, true)
         toast.success('Courses deleted successfully')
         setSelectedIds([])
         fetchData(coursePagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -159,7 +159,7 @@ const Courses: React.FC = () => {
 
     const loadingToast = toast.loading('Importing courses...')
     try {
-      const result = await courseApi.importCourses(formData)
+      const result = await courseApi.importCourses(formData, true)
       const { created, updated, errors } = result
       let message = `Import success: ${created} created, ${updated} updated`
       
@@ -173,7 +173,9 @@ const Courses: React.FC = () => {
       fetchData(1)
       setImportDialogOpen(false)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+      // Manual error toast to replace the loading toast
+      const errorMsg = error.response?.data?.error || 'Import failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 

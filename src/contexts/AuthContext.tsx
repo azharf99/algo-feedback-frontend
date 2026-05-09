@@ -107,10 +107,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     initializeAuth()
   }, [])
 
-  const login = React.useCallback(async (credentials: LoginCredentials) => {
+  const login = React.useCallback(async (credentials: LoginCredentials, skipToast?: boolean) => {
     try {
       dispatch({ type: 'LOGIN_START' })
-      const response = await api.post<AuthResponse>('/auth/login', credentials)
+      const response = await api.post<AuthResponse>('/auth/login', credentials, { skipToast })
       const { user, access_token, refresh_token } = response.data.data
 
       localStorage.setItem('accessToken', access_token)
@@ -125,10 +125,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [])
 
-  const register = React.useCallback(async (credentials: RegisterCredentials) => {
+  const register = React.useCallback(async (credentials: RegisterCredentials, skipToast?: boolean) => {
     try {
       dispatch({ type: 'LOGIN_START' })
-      const response = await api.post<AuthResponse>('/auth/register', credentials)
+      const response = await api.post<AuthResponse>('/auth/register', credentials, { skipToast })
       const { user, access_token, refresh_token } = response.data.data
 
       localStorage.setItem('accessToken', access_token)

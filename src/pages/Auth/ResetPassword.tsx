@@ -47,7 +47,7 @@ const ResetPassword: React.FC = () => {
       await authApi.resetPassword({
         token,
         new_password: data.new_password,
-      })
+      }, true)
       toast.success('Password successfully reset!', { id: loadingToast })
       setTimeout(() => navigate('/login'), 2000)
     } catch (error: any) {

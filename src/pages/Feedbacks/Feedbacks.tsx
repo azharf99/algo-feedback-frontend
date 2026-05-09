@@ -156,7 +156,7 @@ const Feedbacks: React.FC = () => {
         total_pages: feedbacksRes.meta?.total_pages ?? feedbacksRes.total_pages ?? 1
       })
     } catch (error) {
-      if (!silent) toast.error('Failed to fetch data')
+      // Global interceptor handles this
     } finally {
       if (!silent) setLoading(false)
       setIsRefreshing(false)
@@ -167,23 +167,23 @@ const Feedbacks: React.FC = () => {
     if (!editingFeedback) return
 
     try {
-      await feedbackApi.updateFeedback(editingFeedback.id, data)
+      await feedbackApi.updateFeedback(editingFeedback.id, data, true)
       toast.success('Feedback updated successfully')
       fetchData(feedbackPagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Update failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this feedback?')) {
       try {
-        await feedbackApi.deleteFeedback(id)
+        await feedbackApi.deleteFeedback(id, true)
         toast.success('Feedback deleted successfully')
         fetchData(feedbackPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -191,12 +191,12 @@ const Feedbacks: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} feedbacks?`)) {
       try {
-        await feedbackApi.deleteFeedbacksBulk(selectedIds)
+        await feedbackApi.deleteFeedbacksBulk(selectedIds, true)
         toast.success('Feedbacks deleted successfully')
         setSelectedIds([])
         fetchData(feedbackPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -207,12 +207,13 @@ const Feedbacks: React.FC = () => {
       await feedbackApi.generateFeedbacks({
         all: data.all,
         group_id: data.group_id
-      })
+      }, true)
       toast.success('Feedback generation started', { id: loadingToast })
       fetchData(1)
       handleCloseGenerateDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Generation failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Generation failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 
@@ -227,12 +228,12 @@ const Feedbacks: React.FC = () => {
         course: feedback.course,
         number: feedback.number,
         all: false,
-      })
+      }, true)
 
       toast.success('PDF generation started (background process)')
       fetchData(feedbackPagination.page)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'PDF generation failed')
+      // Global interceptor handles this
     } finally {
       setPdfGenerating(null)
     }
@@ -241,11 +242,11 @@ const Feedbacks: React.FC = () => {
   const handleGenerateAllPdf = async () => {
     try {
       setIsGeneratingAllPdf(true)
-      const response = await feedbackApi.generateAllPdf()
+      const response = await feedbackApi.generateAllPdf(true)
       toast.success(response.message || 'Mass PDF generation started in background')
       fetchData(feedbackPagination.page)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Mass PDF generation failed')
+      // Global interceptor handles this
     } finally {
       setIsGeneratingAllPdf(false)
     }
@@ -254,11 +255,11 @@ const Feedbacks: React.FC = () => {
   const handleSendWhatsApp = async (feedback?: Feedback) => {
     try {
       setWaScheduling(feedback?.id || 0)
-      await feedbackApi.sendWhatsApp({ student_id: feedback?.student_id })
+      await feedbackApi.sendWhatsApp({ student_id: feedback?.student_id }, true)
       toast.success(feedback ? 'WhatsApp updated for student' : 'WhatsApp scheduling started for all')
       fetchData(feedbackPagination.page)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'WhatsApp scheduling failed')
+      // Global interceptor handles this
     } finally {
       setWaScheduling(null)
     }
@@ -269,11 +270,12 @@ const Feedbacks: React.FC = () => {
 
     const loadingToast = toast.loading('Seeding feedbacks...')
     try {
-      await feedbackApi.generateFeedbacks({ all: true })
+      await feedbackApi.generateFeedbacks({ all: true }, true)
       toast.success('Feedbacks seeded successfully', { id: loadingToast })
       fetchData(1)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Seeding failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Seeding failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 
@@ -281,7 +283,7 @@ const Feedbacks: React.FC = () => {
     if (feedback.url_pdf) {
       const loadingToast = toast.loading('Downloading PDF...')
       try {
-        const blob = await feedbackApi.downloadPdf(feedback.id)
+        const blob = await feedbackApi.downloadPdf(feedback.id, true)
         const url = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url
@@ -294,7 +296,8 @@ const Feedbacks: React.FC = () => {
         document.body.removeChild(a)
         toast.success('Download started', { id: loadingToast })
       } catch (error: any) {
-        toast.error('Failed to download PDF', { id: loadingToast })
+        const errorMsg = error.response?.data?.error || 'Failed to download PDF'
+        toast.error(errorMsg, { id: loadingToast })
       }
     } else {
       toast.error('PDF not yet generated')

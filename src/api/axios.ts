@@ -1,7 +1,14 @@
-import axios from 'axios'
+import axios, { InternalAxiosRequestConfig } from 'axios'
 import toast from 'react-hot-toast'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
+
+// Extend Axios request config to include custom options
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipToast?: boolean
+  }
+}
 
 export const api = axios.create({
   baseURL: API_BASE_URL,
@@ -31,13 +38,13 @@ api.interceptors.response.use(
   (response) => {
     // Show success message if the response contains one
     const successMsg = response.data?.message || response.data?.data?.message
-    if (successMsg && response.config.method !== 'get') {
+    if (successMsg && response.config.method !== 'get' && !response.config.skipToast) {
       toast.success(successMsg)
     }
     return response
   },
   async (error) => {
-    const originalRequest = error.config
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number; skipToast?: boolean }
 
     // Handle Rate Limiting (429 Too Many Requests)
     if (error.response?.status === 429 && (!originalRequest._retryCount || originalRequest._retryCount < 3)) {
@@ -83,15 +90,17 @@ api.interceptors.response.use(
     }
 
     // Global Error Handling
-    if (!error.response) {
-      toast.error('Network error. Please check your connection.')
-    } else {
-      const status = error.response.status
-      const errorMsg = error.response.data?.error || error.response.data?.message || 'Something went wrong'
-      
-      // Specifically avoid double toast for 401 as it's handled by refresh logic or redirect
-      if (status !== 401) {
-        toast.error(errorMsg)
+    if (!originalRequest?.skipToast) {
+      if (!error.response) {
+        toast.error('Network error. Please check your connection.')
+      } else {
+        const status = error.response.status
+        const errorMsg = error.response.data?.error || error.response.data?.message || 'Something went wrong'
+        
+        // Specifically avoid double toast for 401 as it's handled by refresh logic or redirect
+        if (status !== 401) {
+          toast.error(errorMsg)
+        }
       }
     }
 

@@ -30,79 +30,80 @@ const buildQueryParams = (params?: PaginationParams): string => {
 
 // User API (Admin Only)
 export const userApi = {
-  getUsers: async (params?: PaginationParams): Promise<PaginatedResponse<User>> => {
-    const response = await api.get(`/users${buildQueryParams(params)}`)
+  getUsers: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<User>> => {
+    const response = await api.get(`/users${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  createUser: async (user: Omit<User, 'id'> & { password?: string }): Promise<User> => {
-    const response = await api.post('/users', user)
+  createUser: async (user: Omit<User, 'id'> & { password?: string }, skipToast?: boolean): Promise<User> => {
+    const response = await api.post('/users', user, { skipToast })
     return response.data.data
   },
   
-  updateUser: async (id: number, user: Partial<User> & { password?: string }): Promise<User> => {
-    const response = await api.put(`/users/${id}`, user)
+  updateUser: async (id: number, user: Partial<User> & { password?: string }, skipToast?: boolean): Promise<User> => {
+    const response = await api.put(`/users/${id}`, user, { skipToast })
     return response.data.data
   },
   
-  deleteUser: async (id: number): Promise<void> => {
-    await api.delete(`/users/${id}`)
+  deleteUser: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/users/${id}`, { skipToast })
   },
   
-  deleteUsersBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/users/bulk', { data: { ids } })
+  deleteUsersBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/users/bulk', { data: { ids }, skipToast })
   }
 }
 
 // Profile API (All Users)
 export const profileApi = {
-  updateProfile: async (profile: { name?: string; password?: string; whatsapp_api_key?: string; whatsapp_device_id?: string }): Promise<User> => {
-    const response = await api.put('/profile', profile)
+  updateProfile: async (profile: { name?: string; password?: string; whatsapp_api_key?: string; whatsapp_device_id?: string }, skipToast?: boolean): Promise<User> => {
+    const response = await api.put('/profile', profile, { skipToast })
     return response.data.data
   }
 }
 
 // Auth API
 export const authApi = {
-  forgotPassword: async (data: ForgotPasswordData): Promise<void> => {
-    await api.post('/auth/forgot-password', data)
+  forgotPassword: async (data: ForgotPasswordData, skipToast?: boolean): Promise<void> => {
+    await api.post('/auth/forgot-password', data, { skipToast })
   },
   
-  resetPassword: async (data: ResetPasswordData): Promise<void> => {
-    await api.post('/auth/reset-password', data)
+  resetPassword: async (data: ResetPasswordData, skipToast?: boolean): Promise<void> => {
+    await api.post('/auth/reset-password', data, { skipToast })
   }
 }
 
 // Course API with pagination
 export const courseApi = {
-  getCourses: async (params?: PaginationParams): Promise<PaginatedResponse<Course>> => {
-    const response = await api.get(`/courses${buildQueryParams(params)}`)
+  getCourses: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Course>> => {
+    const response = await api.get(`/courses${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  createCourse: async (course: Omit<Course, 'id'>): Promise<Course> => {
-    const response = await api.post('/courses', course)
+  createCourse: async (course: Omit<Course, 'id'>, skipToast?: boolean): Promise<Course> => {
+    const response = await api.post('/courses', course, { skipToast })
     return response.data.data
   },
   
-  updateCourse: async (id: number, course: Partial<Course>): Promise<Course> => {
-    const response = await api.put(`/courses/${id}`, course)
+  updateCourse: async (id: number, course: Partial<Course>), skipToast?: boolean): Promise<Course> => {
+    const response = await api.put(`/courses/${id}`, course, { skipToast })
     return response.data.data
   },
   
-  deleteCourse: async (id: number): Promise<void> => {
-    await api.delete(`/courses/${id}`)
+  deleteCourse: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/courses/${id}`, { skipToast })
   },
   
-  deleteCoursesBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/courses/bulk', { data: { ids } })
+  deleteCoursesBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/courses/bulk', { data: { ids }, skipToast })
   },
   
-  importCourses: async (formData: FormData) => {
+  importCourses: async (formData: FormData, skipToast?: boolean) => {
     const response = await api.post('/courses/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      skipToast
     })
     return response.data
   }
@@ -110,34 +111,35 @@ export const courseApi = {
 
 // Student API with pagination
 export const studentApi = {
-  getStudents: async (params?: PaginationParams): Promise<PaginatedResponse<Student>> => {
-    const response = await api.get(`/students${buildQueryParams(params)}`)
+  getStudents: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Student>> => {
+    const response = await api.get(`/students${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  createStudent: async (student: Omit<Student, 'id'>): Promise<Student> => {
-    const response = await api.post('/students', student)
+  createStudent: async (student: Omit<Student, 'id'>, skipToast?: boolean): Promise<Student> => {
+    const response = await api.post('/students', student, { skipToast })
     return response.data.data
   },
   
-  updateStudent: async (id: number, student: Partial<Student>): Promise<Student> => {
-    const response = await api.put(`/students/${id}`, student)
+  updateStudent: async (id: number, student: Partial<Student>), skipToast?: boolean): Promise<Student> => {
+    const response = await api.put(`/students/${id}`, student, { skipToast })
     return response.data.data
   },
   
-  deleteStudent: async (id: number): Promise<void> => {
-    await api.delete(`/students/${id}`)
+  deleteStudent: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/students/${id}`, { skipToast })
   },
   
-  deleteStudentsBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/students/bulk', { data: { ids } })
+  deleteStudentsBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/students/bulk', { data: { ids }, skipToast })
   },
   
-  importStudents: async (formData: FormData) => {
+  importStudents: async (formData: FormData, skipToast?: boolean) => {
     const response = await api.post('/students/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      skipToast
     })
     return response.data
   }
@@ -145,34 +147,35 @@ export const studentApi = {
 
 // Group API with pagination
 export const groupApi = {
-  getGroups: async (params?: PaginationParams): Promise<PaginatedResponse<Group>> => {
-    const response = await api.get(`/groups${buildQueryParams(params)}`)
+  getGroups: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Group>> => {
+    const response = await api.get(`/groups${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  createGroup: async (group: Omit<Group, 'id'>): Promise<Group> => {
-    const response = await api.post('/groups', group)
+  createGroup: async (group: Omit<Group, 'id'>, skipToast?: boolean): Promise<Group> => {
+    const response = await api.post('/groups', group, { skipToast })
     return response.data.data
   },
   
-  updateGroup: async (id: number, group: Partial<Group>): Promise<Group> => {
-    const response = await api.put(`/groups/${id}`, group)
+  updateGroup: async (id: number, group: Partial<Group>), skipToast?: boolean): Promise<Group> => {
+    const response = await api.put(`/groups/${id}`, group, { skipToast })
     return response.data.data
   },
   
-  deleteGroup: async (id: number): Promise<void> => {
-    await api.delete(`/groups/${id}`)
+  deleteGroup: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/groups/${id}`, { skipToast })
   },
   
-  deleteGroupsBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/groups/bulk', { data: { ids } })
+  deleteGroupsBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/groups/bulk', { data: { ids }, skipToast })
   },
   
-  importGroups: async (formData: FormData) => {
+  importGroups: async (formData: FormData, skipToast?: boolean) => {
     const response = await api.post('/groups/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      skipToast
     })
     return response.data
   }
@@ -180,48 +183,50 @@ export const groupApi = {
 
 // Lesson API with pagination
 export const lessonApi = {
-  getLessons: async (params?: PaginationParams): Promise<PaginatedResponse<Lesson>> => {
-    const response = await api.get(`/lessons${buildQueryParams(params)}`)
+  getLessons: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Lesson>> => {
+    const response = await api.get(`/lessons${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
 
-  getLessonsByCourse: async (courseId: number): Promise<Lesson[]> => {
-    const response = await api.get(`/lessons/course/${courseId}`)
+  getLessonsByCourse: async (courseId: number, skipToast?: boolean): Promise<Lesson[]> => {
+    const response = await api.get(`/lessons/course/${courseId}`, { skipToast })
     return response.data.data
   },
   
-  createLesson: async (lesson: Omit<Lesson, 'id'>): Promise<Lesson> => {
-    const response = await api.post('/lessons', lesson)
+  createLesson: async (lesson: Omit<Lesson, 'id'>, skipToast?: boolean): Promise<Lesson> => {
+    const response = await api.post('/lessons', lesson, { skipToast })
     return response.data.data
   },
   
-  updateLesson: async (id: number, lesson: Partial<Lesson>): Promise<Lesson> => {
-    const response = await api.put(`/lessons/${id}`, lesson)
+  updateLesson: async (id: number, lesson: Partial<Lesson>), skipToast?: boolean): Promise<Lesson> => {
+    const response = await api.put(`/lessons/${id}`, lesson, { skipToast })
     return response.data.data
   },
   
-  deleteLesson: async (id: number): Promise<void> => {
-    await api.delete(`/lessons/${id}`)
+  deleteLesson: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/lessons/${id}`, { skipToast })
   },
   
-  deleteLessonsBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/lessons/bulk', { data: { ids } })
+  deleteLessonsBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/lessons/bulk', { data: { ids }, skipToast })
   },
   
-  importLessons: async (formData: FormData) => {
+  importLessons: async (formData: FormData, skipToast?: boolean) => {
     const response = await api.post('/lessons/import', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      skipToast
     })
     return response.data
   },
   
-  importCompetencies: async (formData: FormData) => {
+  importCompetencies: async (formData: FormData, skipToast?: boolean) => {
     const response = await api.post('/lessons/import-competencies', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      skipToast
     })
     return response.data
   }
@@ -229,99 +234,100 @@ export const lessonApi = {
 
 // Session API with pagination
 export const sessionApi = {
-  getSessions: async (params?: PaginationParams): Promise<PaginatedResponse<Session>> => {
-    const response = await api.get(`/sessions${buildQueryParams(params)}`)
+  getSessions: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Session>> => {
+    const response = await api.get(`/sessions${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  getSession: async (id: number): Promise<Session> => {
-    const response = await api.get(`/sessions/${id}`)
+  getSession: async (id: number, skipToast?: boolean): Promise<Session> => {
+    const response = await api.get(`/sessions/${id}`, { skipToast })
     return response.data.data
   },
   
-  getSessionsByGroup: async (groupId: number): Promise<Session[]> => {
-    const response = await api.get(`/sessions/group/${groupId}`)
+  getSessionsByGroup: async (groupId: number, skipToast?: boolean): Promise<Session[]> => {
+    const response = await api.get(`/sessions/group/${groupId}`, { skipToast })
     return response.data.data
   },
   
-  createSession: async (session: Omit<Session, 'id'>): Promise<Session> => {
-    const response = await api.post('/sessions', session)
+  createSession: async (session: Omit<Session, 'id'>, skipToast?: boolean): Promise<Session> => {
+    const response = await api.post('/sessions', session, { skipToast })
     return response.data.data
   },
   
-  updateSession: async (id: number, session: Partial<Session>): Promise<Session> => {
-    const response = await api.put(`/sessions/${id}`, session)
+  updateSession: async (id: number, session: Partial<Session>), skipToast?: boolean): Promise<Session> => {
+    const response = await api.put(`/sessions/${id}`, session, { skipToast })
     return response.data.data
   },
   
-  deleteSession: async (id: number): Promise<void> => {
-    await api.delete(`/sessions/${id}`)
+  deleteSession: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/sessions/${id}`, { skipToast })
   },
   
-  deleteSessionsBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/sessions/bulk', { data: { ids } })
+  deleteSessionsBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/sessions/bulk', { data: { ids }, skipToast })
   },
   
-  updateAttendance: async (id: number, studentIds: number[]): Promise<void> => {
-    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds })
+  updateAttendance: async (id: number, studentIds: number[], skipToast?: boolean): Promise<void> => {
+    await api.post(`/sessions/${id}/attendance`, { student_ids: studentIds }, { skipToast })
   },
   
-  markDone: async (data: { group_id: number; until_date: string }): Promise<void> => {
-    await api.post('/sessions/mark-done', data)
+  markDone: async (data: { group_id: number; until_date: string }, skipToast?: boolean): Promise<void> => {
+    await api.post('/sessions/mark-done', data, { skipToast })
   },
-  autoFillAttendance: async (data: { group_id: number; until_date: string }): Promise<void> => {
-    await api.post('/sessions/auto-fill-attendance', data)
+  autoFillAttendance: async (data: { group_id: number; until_date: string }, skipToast?: boolean): Promise<void> => {
+    await api.post('/sessions/auto-fill-attendance', data, { skipToast })
   },
-  markCancelled: async (data: { group_id: number; from_date: string; before_date: string }): Promise<void> => {
-    await api.post('/sessions/mark-cancelled', data)
+  markCancelled: async (data: { group_id: number; from_date: string; before_date: string }, skipToast?: boolean): Promise<void> => {
+    await api.post('/sessions/mark-cancelled', data, { skipToast })
   },
-  getSummary: async (): Promise<{ data: { last_week: Session[]; this_week: Session[]; next_week: Session[] } }> => {
-    const response = await api.get('/sessions/summary')
+  getSummary: async (skipToast?: boolean): Promise<{ data: { last_week: Session[]; this_week: Session[]; next_week: Session[] } }> => {
+    const response = await api.get('/sessions/summary', { skipToast })
     return response.data
   }
 }
 
 // Feedback API with pagination
 export const feedbackApi = {
-  getFeedbacks: async (params?: PaginationParams): Promise<PaginatedResponse<Feedback>> => {
-    const response = await api.get(`/feedbacks${buildQueryParams(params)}`)
+  getFeedbacks: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<Feedback>> => {
+    const response = await api.get(`/feedbacks${buildQueryParams(params)}`, { skipToast })
     return response.data
   },
   
-  updateFeedback: async (id: number, feedback: Partial<Feedback>): Promise<Feedback> => {
-    const response = await api.put(`/feedbacks/${id}`, feedback)
+  updateFeedback: async (id: number, feedback: Partial<Feedback>), skipToast?: boolean): Promise<Feedback> => {
+    const response = await api.put(`/feedbacks/${id}`, feedback, { skipToast })
     return response.data.data
   },
   
-  deleteFeedback: async (id: number): Promise<void> => {
-    await api.delete(`/feedbacks/${id}`)
+  deleteFeedback: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/feedbacks/${id}`, { skipToast })
   },
   
-  deleteFeedbacksBulk: async (ids: number[]): Promise<void> => {
-    await api.delete('/feedbacks/bulk', { data: { ids } })
+  deleteFeedbacksBulk: async (ids: number[], skipToast?: boolean): Promise<void> => {
+    await api.delete('/feedbacks/bulk', { data: { ids }, skipToast })
   },
   
-  generateFeedbacks: async (params?: { all?: boolean; group_id?: number }): Promise<void> => {
-    await api.post('/feedbacks/seeder', {}, { params })
+  generateFeedbacks: async (params?: { all?: boolean; group_id?: number }, skipToast?: boolean): Promise<void> => {
+    await api.post('/feedbacks/seeder', {}, { params, skipToast })
   },
   
-  generatePdf: async (params: { student_id: number; course: string; number: number; all?: boolean }): Promise<void> => {
-    await api.post('/feedbacks/generate-pdf', params)
+  generatePdf: async (params: { student_id: number; course: string; number: number; all?: boolean }, skipToast?: boolean): Promise<void> => {
+    await api.post('/feedbacks/generate-pdf', params, { skipToast })
   },
 
-  generateAllPdf: async (): Promise<{ message: string; tasks: any[] }> => {
-    const response = await api.post('/feedbacks/generate-all-pdf')
+  generateAllPdf: async (skipToast?: boolean): Promise<{ message: string; tasks: any[] }> => {
+    const response = await api.post('/feedbacks/generate-all-pdf', {}, { skipToast })
     return response.data
   },
 
-  downloadPdf: async (id: number): Promise<Blob> => {
+  downloadPdf: async (id: number, skipToast?: boolean): Promise<Blob> => {
     const response = await api.get(`/feedbacks/${id}/download`, {
       responseType: 'blob',
+      skipToast
     })
     return response.data
   },
   
-  sendWhatsApp: async (params?: { student_id?: number }): Promise<void> => {
-    await api.post('/feedbacks/send-wa', {}, { params })
+  sendWhatsApp: async (params?: { student_id?: number }, skipToast?: boolean): Promise<void> => {
+    await api.post('/feedbacks/send-wa', {}, { params, skipToast })
   }
 }

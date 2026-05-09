@@ -83,7 +83,7 @@ const Sessions: React.FC = () => {
       const res = await sessionApi.getSummary()
       setSummaryData(res.data)
     } catch (error) {
-      toast.error('Failed to fetch summary')
+      // Global interceptor handles this
     }
   }
 
@@ -167,7 +167,7 @@ const Sessions: React.FC = () => {
         const lessons = await lessonApi.getLessonsByCourse(selectedGroup.course_id)
         setFilteredLessons(lessons)
       } catch (error) {
-        toast.error('Failed to fetch lessons')
+        // Global interceptor handles this
         setFilteredLessons([])
       } finally {
         setLoadingLessons(false)
@@ -202,7 +202,7 @@ const Sessions: React.FC = () => {
       setGroups(groupsRes.data)
       setFilteredLessons(lessonsRes.data)
     } catch (error) {
-      toast.error('Failed to fetch data')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -211,29 +211,29 @@ const Sessions: React.FC = () => {
   const onSubmit: SubmitHandler<SessionFormData> = async (data) => {
     try {
       if (editingSession) {
-        await sessionApi.updateSession(editingSession.id, data)
+        await sessionApi.updateSession(editingSession.id, data, true)
         toast.success('Session updated successfully')
       } else {
-        await sessionApi.createSession(data)
+        await sessionApi.createSession(data, true)
         toast.success('Session created successfully')
       }
       fetchData(sessionPagination.page)
       fetchSummary()
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this session?')) {
       try {
-        await sessionApi.deleteSession(id)
+        await sessionApi.deleteSession(id, true)
         toast.success('Session deleted successfully')
         fetchData(sessionPagination.page)
         fetchSummary()
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -241,12 +241,12 @@ const Sessions: React.FC = () => {
   const handleCancelSession = async (session: Session) => {
     if (window.confirm('Are you sure you want to cancel this session?')) {
       try {
-        await sessionApi.updateSession(session.id, { status: 'Cancelled' })
+        await sessionApi.updateSession(session.id, { status: 'Cancelled' }, true)
         toast.success('Session cancelled successfully')
         fetchData(sessionPagination.page)
         fetchSummary()
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Operation failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -254,13 +254,13 @@ const Sessions: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} sessions?`)) {
       try {
-        await sessionApi.deleteSessionsBulk(selectedIds)
+        await sessionApi.deleteSessionsBulk(selectedIds, true)
         toast.success('Sessions deleted successfully')
         setSelectedIds([])
         fetchData(sessionPagination.page)
         fetchSummary()
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -282,7 +282,7 @@ const Sessions: React.FC = () => {
         const lessons = await lessonApi.getLessonsByCourse(selectedGroup.course_id)
         setFilteredLessons(lessons)
       } catch (error) {
-        toast.error('Failed to fetch lessons')
+        // Global interceptor handles this
         setFilteredLessons([])
       } finally {
         setLoadingLessons(false)
@@ -317,52 +317,52 @@ const Sessions: React.FC = () => {
     if (!attendanceSession) return
 
     try {
-      await sessionApi.updateAttendance(attendanceSession.id, selectedStudents)
+      await sessionApi.updateAttendance(attendanceSession.id, selectedStudents, true)
       toast.success('Attendance updated successfully')
       fetchData(sessionPagination.page)
       fetchSummary()
       handleCloseAttendanceDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Update failed')
+      // Global interceptor handles this
     }
   }
 
   const onMarkDoneSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
     try {
-      await sessionApi.markDone(data)
+      await sessionApi.markDone(data, true)
       toast.success('Sessions marked as done successfully')
       fetchData(sessionPagination.page)
       fetchSummary()
       setMarkDoneDialogOpen(false)
       resetMarkDone()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const onAutoFillAttendanceSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
     try {
-      await sessionApi.autoFillAttendance(data)
+      await sessionApi.autoFillAttendance(data, true)
       toast.success('Attendance filled successfully')
       fetchData(sessionPagination.page)
       fetchSummary()
       setAutoFillAttendanceDialogOpen(false)
       resetAutoFill()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const onMarkCancelledSubmit: SubmitHandler<MarkCancelledFormData> = async (data) => {
     try {
-      await sessionApi.markCancelled(data)
+      await sessionApi.markCancelled(data, true)
       toast.success('Sessions marked as cancelled successfully')
       fetchData(sessionPagination.page)
       fetchSummary()
       setMarkCancelledDialogOpen(false)
       resetMarkCancelled()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 

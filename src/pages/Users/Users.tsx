@@ -88,7 +88,7 @@ const Users: React.FC = () => {
         total_pages: response.total_pages
       })
     } catch (error) {
-      toast.error('Failed to fetch users')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -101,31 +101,31 @@ const Users: React.FC = () => {
         if (!updateData.password) {
           delete updateData.password
         }
-        await userApi.updateUser(editingUser.id, updateData)
+        await userApi.updateUser(editingUser.id, updateData, true)
         toast.success('User updated successfully')
       } else {
         if (!data.password) {
           toast.error('Password is required for new users')
           return
         }
-        await userApi.createUser(data as any)
+        await userApi.createUser(data as any, true)
         toast.success('User created successfully')
       }
       fetchUsers(pagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this user?')) {
       try {
-        await userApi.deleteUser(id)
+        await userApi.deleteUser(id, true)
         toast.success('User deleted successfully')
         fetchUsers(pagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -133,12 +133,12 @@ const Users: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
       try {
-        await userApi.deleteUsersBulk(selectedIds)
+        await userApi.deleteUsersBulk(selectedIds, true)
         toast.success('Users deleted successfully')
         setSelectedIds([])
         fetchUsers(pagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }

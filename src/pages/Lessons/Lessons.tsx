@@ -100,7 +100,7 @@ const Lessons: React.FC = () => {
       })
       setCourses(coursesRes.data)
     } catch (error) {
-      toast.error('Failed to fetch data')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -109,27 +109,27 @@ const Lessons: React.FC = () => {
   const onSubmit: SubmitHandler<LessonFormData> = async (data) => {
     try {
       if (editingLesson) {
-        await lessonApi.updateLesson(editingLesson.id, data)
+        await lessonApi.updateLesson(editingLesson.id, data, true)
         toast.success('Lesson updated successfully')
       } else {
-        await lessonApi.createLesson(data)
+        await lessonApi.createLesson(data, true)
         toast.success('Lesson created successfully')
       }
       fetchData(lessonPagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this lesson?')) {
       try {
-        await lessonApi.deleteLesson(id)
+        await lessonApi.deleteLesson(id, true)
         toast.success('Lesson deleted successfully')
         fetchData(lessonPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -137,12 +137,12 @@ const Lessons: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} lessons?`)) {
       try {
-        await lessonApi.deleteLessonsBulk(selectedIds)
+        await lessonApi.deleteLessonsBulk(selectedIds, true)
         toast.success('Lessons deleted successfully')
         setSelectedIds([])
         fetchData(lessonPagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -168,7 +168,7 @@ const Lessons: React.FC = () => {
 
     const loadingToast = toast.loading('Importing lessons...')
     try {
-      const result = await lessonApi.importLessons(formData)
+      const result = await lessonApi.importLessons(formData, true)
       const { created, updated, errors } = result
       let message = `Import success: ${created} created, ${updated} updated`
       
@@ -182,7 +182,8 @@ const Lessons: React.FC = () => {
       fetchData(1)
       setImportDialogOpen(false)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Import failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 
@@ -195,7 +196,7 @@ const Lessons: React.FC = () => {
 
     const loadingToast = toast.loading('Importing competencies...')
     try {
-      const result = await lessonApi.importCompetencies(formData)
+      const result = await lessonApi.importCompetencies(formData, true)
       const { updated, errors } = result
       let message = `Import success: ${updated} lessons updated`
       
@@ -209,7 +210,8 @@ const Lessons: React.FC = () => {
       fetchData(lessonPagination.page)
       setImportCompDialogOpen(false)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Import failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 

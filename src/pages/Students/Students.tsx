@@ -92,7 +92,7 @@ const Students: React.FC = () => {
         total_pages: response.total_pages
       })
     } catch (error) {
-      toast.error('Failed to fetch students')
+      // Global interceptor handles this
     } finally {
       setLoading(false)
     }
@@ -112,31 +112,31 @@ const Students: React.FC = () => {
         if (!updateData.password) {
           delete updateData.password
         }
-        await studentApi.updateStudent(editingStudent.id, updateData)
+        await studentApi.updateStudent(editingStudent.id, updateData, true)
         toast.success('Student updated successfully')
       } else {
         if (!sanitizedData.password) {
           toast.error('Password is required for new students')
           return
         }
-        await studentApi.createStudent(sanitizedData)
+        await studentApi.createStudent(sanitizedData, true)
         toast.success('Student created successfully')
       }
       fetchStudents(pagination.page)
       handleCloseDialog()
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Operation failed')
+      // Global interceptor handles this
     }
   }
 
   const handleDelete = async (id: number) => {
     if (window.confirm('Are you sure you want to delete this student?')) {
       try {
-        await studentApi.deleteStudent(id)
+        await studentApi.deleteStudent(id, true)
         toast.success('Student deleted successfully')
         fetchStudents(pagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -144,12 +144,12 @@ const Students: React.FC = () => {
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} students?`)) {
       try {
-        await studentApi.deleteStudentsBulk(selectedIds)
+        await studentApi.deleteStudentsBulk(selectedIds, true)
         toast.success('Students deleted successfully')
         setSelectedIds([])
         fetchStudents(pagination.page)
       } catch (error: any) {
-        toast.error(error.response?.data?.error || 'Bulk delete failed')
+        // Global interceptor handles this
       }
     }
   }
@@ -178,7 +178,7 @@ const Students: React.FC = () => {
 
     const loadingToast = toast.loading('Importing students...')
     try {
-      const result = await studentApi.importStudents(formData)
+      const result = await studentApi.importStudents(formData, true)
       const { created, updated, errors } = result
       let message = `Import success: ${created} created, ${updated} updated`
       
@@ -192,7 +192,8 @@ const Students: React.FC = () => {
       fetchStudents(1)
       setImportDialogOpen(false)
     } catch (error: any) {
-      toast.error(error.response?.data?.error || 'Import failed', { id: loadingToast })
+      const errorMsg = error.response?.data?.error || 'Import failed'
+      toast.error(errorMsg, { id: loadingToast })
     }
   }
 

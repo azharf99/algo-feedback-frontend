@@ -29,7 +29,7 @@ const ForgotPassword: React.FC = () => {
     setLoading(true)
     const loadingToast = toast.loading('Sending reset link...')
     try {
-      await authApi.forgotPassword(data)
+      await authApi.forgotPassword(data, true)
       toast.success('Reset link sent to your email!', { id: loadingToast })
       setIsSubmitted(true)
     } catch (error: any) {

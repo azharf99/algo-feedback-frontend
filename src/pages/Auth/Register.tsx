@@ -53,11 +53,11 @@ const Register: React.FC = () => {
   const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
     const loadingToast = toast.loading('Creating account...')
     try {
-      await registerUser(data as RegisterCredentials)
+      await registerUser(data as RegisterCredentials, true)
       toast.success('Account created successfully!', { id: loadingToast })
-    } catch {
-      // Global interceptor handles the error toast
-      toast.dismiss(loadingToast)
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Registration failed'
+      toast.error(errorMsg, { id: loadingToast })
       recaptchaRef.current?.reset()
       setValue('captcha_token', '')
     }
