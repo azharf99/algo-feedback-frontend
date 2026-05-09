@@ -272,6 +272,9 @@ export const sessionApi = {
   autoFillAttendance: async (data: { group_id: number; until_date: string }): Promise<void> => {
     await api.post('/sessions/auto-fill-attendance', data)
   },
+  markCancelled: async (data: { group_id: number; from_date: string; before_date: string }): Promise<void> => {
+    await api.post('/sessions/mark-cancelled', data)
+  },
   getSummary: async (): Promise<{ data: { last_week: Session[]; this_week: Session[]; next_week: Session[] } }> => {
     const response = await api.get('/sessions/summary')
     return response.data

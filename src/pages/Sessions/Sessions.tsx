@@ -42,6 +42,14 @@ const markDoneSchema = z.object({
 
 type MarkDoneFormData = z.infer<typeof markDoneSchema>
 
+const markCancelledSchema = z.object({
+  group_id: z.number().min(1, 'Group is required'),
+  from_date: z.string().min(1, 'From Date is required'),
+  before_date: z.string().min(1, 'Before Date is required'),
+})
+
+type MarkCancelledFormData = z.infer<typeof markCancelledSchema>
+
 const Sessions: React.FC = () => {
   const [sessions, setSessions] = useState<Session[]>([])
   const [groups, setGroups] = useState<Group[]>([])
@@ -58,6 +66,7 @@ const Sessions: React.FC = () => {
   const [attendanceDialogOpen, setAttendanceDialogOpen] = useState(false)
   const [markDoneDialogOpen, setMarkDoneDialogOpen] = useState(false)
   const [autoFillAttendanceDialogOpen, setAutoFillAttendanceDialogOpen] = useState(false)
+  const [markCancelledDialogOpen, setMarkCancelledDialogOpen] = useState(false)
   const [editingSession, setEditingSession] = useState<Session | null>(null)
   const [attendanceSession, setAttendanceSession] = useState<Session | null>(null)
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
@@ -108,6 +117,16 @@ const Sessions: React.FC = () => {
     control: controlAutoFill,
   } = useForm<MarkDoneFormData>({
     resolver: zodResolver(markDoneSchema),
+  })
+
+  const {
+    register: registerMarkCancelled,
+    handleSubmit: handleSubmitMarkCancelled,
+    reset: resetMarkCancelled,
+    formState: { errors: errorsMarkCancelled },
+    control: controlMarkCancelled,
+  } = useForm<MarkCancelledFormData>({
+    resolver: zodResolver(markCancelledSchema),
   })
 
   const selectedGroupId = watch('group_id')
@@ -219,6 +238,19 @@ const Sessions: React.FC = () => {
     }
   }
 
+  const handleCancelSession = async (session: Session) => {
+    if (window.confirm('Are you sure you want to cancel this session?')) {
+      try {
+        await sessionApi.updateSession(session.id, { status: 'Cancelled' })
+        toast.success('Session cancelled successfully')
+        fetchData(sessionPagination.page)
+        fetchSummary()
+      } catch (error: any) {
+        toast.error(error.response?.data?.error || 'Operation failed')
+      }
+    }
+  }
+
   const handleBulkDelete = async () => {
     if (window.confirm(`Are you sure you want to delete ${selectedIds.length} sessions?`)) {
       try {
@@ -316,6 +348,19 @@ const Sessions: React.FC = () => {
       fetchSummary()
       setAutoFillAttendanceDialogOpen(false)
       resetAutoFill()
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Operation failed')
+    }
+  }
+
+  const onMarkCancelledSubmit: SubmitHandler<MarkCancelledFormData> = async (data) => {
+    try {
+      await sessionApi.markCancelled(data)
+      toast.success('Sessions marked as cancelled successfully')
+      fetchData(sessionPagination.page)
+      fetchSummary()
+      setMarkCancelledDialogOpen(false)
+      resetMarkCancelled()
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Operation failed')
     }
@@ -436,6 +481,13 @@ const Sessions: React.FC = () => {
             Auto Fill Attendance
           </button>
           <button
+            onClick={() => setMarkCancelledDialogOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <X className="-ml-1 mr-2 h-4 w-4 text-red-500" />
+            Mark Cancelled
+          </button>
+          <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
@@ -512,12 +564,15 @@ const Sessions: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Time
                 </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Status
+                </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('is_done')}
                 >
-                  <div className="flex items-center gap-1">Status {renderSortIcon('is_done')}</div>
+                  <div className="flex items-center gap-1">Done {renderSortIcon('is_done')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   Attendees
@@ -569,6 +624,14 @@ const Sessions: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(session.date_start).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.time_start.substring(0, 5)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={clsx(
+                        "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                        session.status === 'Cancelled' ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
+                      )}>
+                        {session.status || 'Active'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         {session.is_done && <CheckCircle className="w-4 h-4 text-green-500" />}
                         <span className={clsx("text-sm", session.is_done ? "text-green-600 font-medium" : "text-gray-500")}>
@@ -584,10 +647,29 @@ const Sessions: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleAttendance(session)}
-                        className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mx-1 p-1 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
-                        title="Attendance"
+                        className={clsx(
+                          "mx-1 p-1 rounded-md transition-colors",
+                          session.status === 'Cancelled' 
+                            ? "text-gray-400 cursor-not-allowed" 
+                            : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
+                        )}
+                        title={session.status === 'Cancelled' ? "Cannot update attendance for cancelled session" : "Attendance"}
+                        disabled={session.status === 'Cancelled'}
                       >
                         <CheckCircle className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => handleCancelSession(session)}
+                        className={clsx(
+                          "mx-1 p-1 rounded-md transition-colors",
+                          session.status === 'Cancelled' 
+                            ? "text-gray-400 cursor-not-allowed" 
+                            : "text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
+                        )}
+                        title={session.status === 'Cancelled' ? "Session is cancelled" : "Cancel Session"}
+                        disabled={session.status === 'Cancelled'}
+                      >
+                        <X className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleEdit(session)}
@@ -737,9 +819,17 @@ const Sessions: React.FC = () => {
                 />
                 {errors.after_session_feedback && <p className="mt-1 text-sm text-red-600">{errors.after_session_feedback.message}</p>}
               </div>
-              <div className="flex items-center mt-2">
-                  <input id="is_done" type="checkbox" {...register('is_done')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
-                  <label htmlFor="is_done" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Mark as Done</label>
+                <div className="flex items-center mt-2">
+                  <input 
+                    id="is_done" 
+                    type="checkbox" 
+                    {...register('is_done')} 
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 disabled:opacity-50" 
+                    disabled={editingSession?.status === 'Cancelled'}
+                  />
+                  <label htmlFor="is_done" className={clsx("ml-2 block text-sm", editingSession?.status === 'Cancelled' ? "text-gray-400" : "text-gray-900 dark:text-gray-300")}>
+                    Mark as Done {editingSession?.status === 'Cancelled' && "(Cannot mark cancelled session as done)"}
+                  </label>
                 </div>
                 {editingSession && (
                   <div className="flex items-center mt-2">
@@ -889,6 +979,52 @@ const Sessions: React.FC = () => {
               Fill Attendance
             </button>
             <button type="button" onClick={() => { setAutoFillAttendanceDialogOpen(false); resetAutoFill(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Mark Cancelled Modal */}
+      <Modal
+        open={markCancelledDialogOpen}
+        onClose={() => {
+          setMarkCancelledDialogOpen(false)
+          resetMarkCancelled()
+        }}
+        title="Mark Sessions as Cancelled"
+        maxWidth="sm"
+      >
+        <form onSubmit={handleSubmitMarkCancelled(onMarkCancelledSubmit)}>
+          <div className="px-6 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="min-w-0">
+                <SearchableSelect
+                  name="group_id"
+                  control={controlMarkCancelled}
+                  label="Group"
+                  placeholder="Search for a group..."
+                  options={groups.map(g => ({ value: g.id, label: g.name }))}
+                  error={errorsMarkCancelled.group_id?.message}
+                />
+              </div>
+              <div className="min-w-0">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">From Date</label>
+                <input type="date" {...registerMarkCancelled('from_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkCancelled.from_date ? "border-red-300" : "border-gray-300")} />
+                {errorsMarkCancelled.from_date && <p className="mt-1 text-sm text-red-600">{errorsMarkCancelled.from_date.message}</p>}
+              </div>
+              <div className="min-w-0">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Before Date</label>
+                <input type="date" {...registerMarkCancelled('before_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkCancelled.before_date ? "border-red-300" : "border-gray-300")} />
+                {errorsMarkCancelled.before_date && <p className="mt-1 text-sm text-red-600">{errorsMarkCancelled.before_date.message}</p>}
+              </div>
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
+            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
+              Mark Cancelled
+            </button>
+            <button type="button" onClick={() => { setMarkCancelledDialogOpen(false); resetMarkCancelled(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
               Cancel
             </button>
           </div>
