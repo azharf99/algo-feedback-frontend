@@ -81,8 +81,8 @@ const Dashboard: React.FC = () => {
     .filter(lesson => {
       const search = debouncedLessonsSearch.toLowerCase()
       return lesson.title.toLowerCase().includes(search) ||
-             lesson.module.toLowerCase().includes(search) ||
-             lesson.level.toLowerCase().includes(search)
+        lesson.module.toLowerCase().includes(search) ||
+        lesson.level.toLowerCase().includes(search)
     })
     .sort((a, b) => {
       let comparison = 0
@@ -104,7 +104,7 @@ const Dashboard: React.FC = () => {
     .filter(feedback => {
       const search = debouncedFeedbacksSearch.toLowerCase()
       return feedback.course.toLowerCase().includes(search) ||
-             feedback.number.toString().includes(search)
+        feedback.number.toString().includes(search)
     })
     .sort((a, b) => {
       let comparison = 0
@@ -319,10 +319,13 @@ const Dashboard: React.FC = () => {
               filteredAndSortedFeedbacks.map((feedback) => (
                 <li key={feedback.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                   <p className="text-sm font-medium text-gray-900 dark:text-white">
+                    {feedback.group_name || "No Group Name"}
+                  </p>
+                  <p className="text-sm font-medium text-gray-900 dark:text-white">
                     {feedback.course} - Feedback #{feedback.number}
                   </p>
                   <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                    Student ID: {feedback.student_id} - {new Date(feedback.created_at).toLocaleDateString()}
+                    Student Name: {feedback.student?.fullname} - {new Date(feedback.created_at).toLocaleDateString()}
                   </p>
                 </li>
               ))

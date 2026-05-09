@@ -69,6 +69,7 @@ export interface Feedback {
   student_id: number
   course: string
   number: number
+  group_name?: string
   attendance_score: string
   activity_score: string
   task_score: string
