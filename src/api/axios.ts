@@ -3,13 +3,6 @@ import toast from 'react-hot-toast'
 
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
-// Extend Axios request config to include custom options
-declare module 'axios' {
-  export interface AxiosRequestConfig {
-    skipToast?: boolean
-  }
-}
-
 export const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -38,13 +31,30 @@ api.interceptors.response.use(
   (response) => {
     // Show success message if the response contains one
     const successMsg = response.data?.message || response.data?.data?.message
-    if (successMsg && response.config.method !== 'get' && !response.config.skipToast) {
+    const method = response.config.method?.toLowerCase()
+    const isGetRequest = method === 'get'
+    
+    // Check for skip toast header (case-insensitive)
+    const headers = response.config.headers
+    const skipToast = headers && (
+      (typeof headers.get === 'function' && headers.get('X-Skip-Toast') === 'true') ||
+      headers['X-Skip-Toast'] === 'true' || 
+      headers['x-skip-toast'] === 'true'
+    )
+    
+    if (successMsg && !isGetRequest && !skipToast) {
       toast.success(successMsg)
     }
     return response
   },
   async (error) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean; _retryCount?: number; skipToast?: boolean }
+    const originalRequest = error.config
+    const headers = originalRequest?.headers
+    const skipToast = headers && (
+      (typeof headers.get === 'function' && headers.get('X-Skip-Toast') === 'true') ||
+      headers['X-Skip-Toast'] === 'true' || 
+      headers['x-skip-toast'] === 'true'
+    )
 
     // Handle Rate Limiting (429 Too Many Requests)
     if (error.response?.status === 429 && (!originalRequest._retryCount || originalRequest._retryCount < 3)) {
@@ -90,7 +100,7 @@ api.interceptors.response.use(
     }
 
     // Global Error Handling
-    if (!originalRequest?.skipToast) {
+    if (!skipToast) {
       if (!error.response) {
         toast.error('Network error. Please check your connection.')
       } else {
