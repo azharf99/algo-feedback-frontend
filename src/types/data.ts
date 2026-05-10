@@ -30,6 +30,7 @@ export interface Group {
   first_lesson_date: string
   first_lesson_time: string
   is_active: boolean
+  language: string
   students?: Student[]
   student_ids?: number[]
   course?: Course

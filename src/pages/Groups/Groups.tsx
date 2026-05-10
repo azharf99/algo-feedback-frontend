@@ -36,6 +36,7 @@ const groupSchema = z.object({
   first_lesson_date: z.string().min(1, 'First lesson date is required'),
   first_lesson_time: z.string().min(1, 'First lesson time is required'),
   is_active: z.boolean().default(true),
+  language: z.enum(['Indonesia', 'English']).default('Indonesia'),
   student_ids: z.array(z.number()).optional(),
 })
 
@@ -69,7 +70,7 @@ const Groups: React.FC = () => {
     control,
   } = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
-    defaultValues: { is_active: true }
+    defaultValues: { is_active: true, language: 'Indonesia' }
   })
 
 
@@ -387,7 +388,10 @@ const Groups: React.FC = () => {
                       {(groupPagination.page - 1) * groupPagination.limit + index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{group.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{group.course?.title || `Course ${group.course_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">{group.course?.title || `Course ${group.course_id}`}</div>
+                      <div className="text-sm text-gray-500 dark:text-gray-400">{group.language}</div>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{group.name}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title={group.description}>{group.description}</div>
@@ -526,6 +530,17 @@ const Groups: React.FC = () => {
                 {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Language</label>
+                <select
+                  {...register('language')}
+                  className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.language ? "border-red-300" : "border-gray-300")}
+                >
+                  <option value="Indonesia">Indonesia</option>
+                  <option value="English">English</option>
+                </select>
+                {errors.language && <p className="mt-1 text-sm text-red-600">{errors.language.message}</p>}
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Phone</label>
                 <input type="text" {...register('group_phone')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.group_phone ? "border-red-300" : "border-gray-300")} />
                 {errors.group_phone && <p className="mt-1 text-sm text-red-600">{errors.group_phone.message}</p>}
@@ -606,7 +621,7 @@ const Groups: React.FC = () => {
               {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              CSV headers: id, course_id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active
+              CSV headers: id, course_id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active, language
             </p>
           </div>
         </div>
