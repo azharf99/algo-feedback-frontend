@@ -11,22 +11,25 @@ import {
   X,
   Sun,
   Moon,
+  Globe,
   User as UserIcon
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
+import { useLanguage } from '../../contexts/LanguageContext'
+import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
 const menuItems = [
-  { text: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/dashboard' },
-  { text: 'Students', icon: <Users className="w-5 h-5" />, path: '/students' },
-  { text: 'Groups', icon: <UsersRound className="w-5 h-5" />, path: '/groups' },
-  { text: 'Courses', icon: <GraduationCap className="w-5 h-5" />, path: '/courses' },
-  { text: 'Lessons', icon: <CalendarDays className="w-5 h-5" />, path: '/lessons' },
-  { text: 'Sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
-  { text: 'Feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
-  { text: 'Users', icon: <UserIcon className="w-5 h-5" />, path: '/users', adminOnly: true },
+  { text: 'nav_dashboard', icon: <LayoutDashboard className="w-5 h-5" />, path: '/dashboard' },
+  { text: 'nav_students', icon: <Users className="w-5 h-5" />, path: '/students' },
+  { text: 'nav_groups', icon: <UsersRound className="w-5 h-5" />, path: '/groups' },
+  { text: 'nav_courses', icon: <GraduationCap className="w-5 h-5" />, path: '/courses' },
+  { text: 'nav_lessons', icon: <CalendarDays className="w-5 h-5" />, path: '/lessons' },
+  { text: 'nav_sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
+  { text: 'nav_feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
+  { text: 'nav_users', icon: <UserIcon className="w-5 h-5" />, path: '/users', adminOnly: true },
 ]
 
 interface LayoutProps {
@@ -36,11 +39,15 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
+  const [langOpen, setLangOpen] = useState(false)
   const profileRef = useRef<HTMLDivElement>(null)
+  const langRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
   const location = useLocation()
   const { state: authState, logout } = useAuth()
   const { theme, toggleTheme } = useTheme()
+  const { language, setLanguage } = useLanguage()
+  const { t } = useTranslation()
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
@@ -56,12 +63,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false)
       }
+      if (langRef.current && !langRef.current.contains(event.target as Node)) {
+        setLangOpen(false)
+      }
     }
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const currentTitle = menuItems.find(item => item.path === location.pathname)?.text || 'Algo Feedback System'
+  const currentItem = menuItems.find(item => item.path === location.pathname)
+  const currentTitle = currentItem ? t(currentItem.text) : t('system_title')
   const userInitial = authState.user?.name?.charAt(0)?.toUpperCase() || 'U'
 
   return (
@@ -105,7 +116,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className={clsx("mr-3 transition-colors", isActive ? "text-white" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300")}>
                   {item.icon}
                 </span>
-                <span className="font-medium">{item.text}</span>
+                <span className="font-medium">{t(item.text)}</span>
               </button>
             )
           })}
@@ -129,11 +140,55 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </div>
 
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Language Selector */}
+            <div className="relative" ref={langRef}>
+              <button
+                onClick={() => setLangOpen(!langOpen)}
+                className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-1.5"
+                title="Change Language"
+              >
+                <Globe className="w-5 h-5" />
+                <span className="text-xs font-bold hidden sm:inline">{language === 'Indonesia' ? 'ID' : language === 'English' ? 'EN' : 'RU'}</span>
+              </button>
+
+              {langOpen && (
+                <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 border border-gray-100 dark:border-gray-700 z-50 transform origin-top-right animate-in fade-in zoom-in duration-100">
+                  <button
+                    onClick={() => { setLanguage('Indonesia'); setLangOpen(false); }}
+                    className={clsx(
+                      "w-full text-left px-4 py-2 text-sm transition-colors",
+                      language === 'Indonesia' ? "text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    Indonesia (ID)
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('English'); setLangOpen(false); }}
+                    className={clsx(
+                      "w-full text-left px-4 py-2 text-sm transition-colors",
+                      language === 'English' ? "text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    English (EN)
+                  </button>
+                  <button
+                    onClick={() => { setLanguage('Russian'); setLangOpen(false); }}
+                    className={clsx(
+                      "w-full text-left px-4 py-2 text-sm transition-colors",
+                      language === 'Russian' ? "text-blue-600 font-bold bg-blue-50 dark:bg-blue-900/20" : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
+                    )}
+                  >
+                    Russian (RU)
+                  </button>
+                </div>
+              )}
+            </div>
+
             {/* Theme Toggle */}
             <button
               onClick={toggleTheme}
               className="p-2 text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-              title={theme === 'light' ? 'Switch to Dark Mode' : 'Switch to Light Mode'}
+              title={theme === 'light' ? t('switch_dark') : t('switch_light')}
             >
               {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
             </button>
@@ -150,7 +205,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 border border-gray-100 dark:border-gray-700 z-50 transform origin-top-right">
+                <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-xl py-2 border border-gray-100 dark:border-gray-700 z-50 transform origin-top-right animate-in fade-in zoom-in duration-100">
                   <div className="px-4 py-3 border-b border-gray-100 dark:border-gray-700">
                     <p className="text-sm font-bold text-gray-900 dark:text-white truncate">
                       {authState.user?.name}
@@ -167,14 +222,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     className="w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 flex items-center transition-colors"
                   >
                     <UserIcon className="w-4 h-4 mr-2.5" />
-                    My Profile
+                    {t('my_profile')}
                   </button>
                   <button
                     onClick={handleLogout}
                     className="w-full text-left px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center transition-colors mt-1"
                   >
                     <LogOut className="w-4 h-4 mr-2.5" />
-                    Logout
+                    {t('logout')}
                   </button>
                 </div>
               )}

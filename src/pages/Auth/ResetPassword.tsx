@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Link as RouterLink, useSearchParams, useNavigate } from 'react-router-dom'
 import { authApi } from '../../api/services'
 import clsx from 'clsx'
@@ -18,6 +19,7 @@ const resetPasswordSchema = z.object({
 type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>
 
 const ResetPassword: React.FC = () => {
+  const { t } = useTranslation()
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
@@ -25,10 +27,10 @@ const ResetPassword: React.FC = () => {
 
   useEffect(() => {
     if (!token) {
-      toast.error('Invalid or missing reset token')
+      toast.error(t('invalid_token'))
       navigate('/login')
     }
-  }, [token, navigate])
+  }, [token, navigate, t])
 
   const {
     register,
@@ -42,13 +44,13 @@ const ResetPassword: React.FC = () => {
     if (!token) return
 
     setLoading(true)
-    const loadingToast = toast.loading('Resetting password...')
+    const loadingToast = toast.loading(t('resetting_password'))
     try {
       await authApi.resetPassword({
         token,
         new_password: data.new_password,
       }, true)
-      toast.success('Password successfully reset!', { id: loadingToast })
+      toast.success(t('reset_password_success'), { id: loadingToast })
       setTimeout(() => navigate('/login'), 2000)
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to reset password'
@@ -62,10 +64,10 @@ const ResetPassword: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Algo Feedback System
+          {t('system_title')}
         </h1>
         <h2 className="mt-2 text-center text-lg text-gray-600 dark:text-gray-400">
-          Set New Password
+          {t('set_new_password')}
         </h2>
       </div>
 
@@ -74,7 +76,7 @@ const ResetPassword: React.FC = () => {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="new_password" disable-grammarly="true" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                New Password
+                {t('new_password')}
               </label>
               <div className="mt-1">
                 <input
@@ -98,7 +100,7 @@ const ResetPassword: React.FC = () => {
 
             <div>
               <label htmlFor="confirm_password" disable-grammarly="true" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Confirm New Password
+                {t('confirm_new_password')}
               </label>
               <div className="mt-1">
                 <input
@@ -131,16 +133,17 @@ const ResetPassword: React.FC = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                ) : 'Reset Password'}
+                ) : t('reset_password_btn')}
               </button>
-            </div>
-          </form>
+              </div>
+              </form>
 
-          <div className="mt-6 text-center">
-            <RouterLink to="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm transition-colors">
-              Back to Sign In
-            </RouterLink>
-          </div>
+              <div className="mt-6 text-center">
+              <RouterLink to="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm transition-colors">
+              {t('back_to_signin')}
+              </RouterLink>
+              </div>
+
         </div>
       </div>
     </div>

@@ -75,6 +75,7 @@ export interface Feedback {
   activity_score: string
   task_score: string
   tutor_feedback: string
+  language: string
   lesson_date?: string
   lesson_time?: string
   project_link?: string

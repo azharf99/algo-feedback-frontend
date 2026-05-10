@@ -15,6 +15,7 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { courseApi } from '../../api/services'
 import { Course } from '../../types/data'
@@ -33,6 +34,7 @@ const courseSchema = z.object({
 type CourseFormData = z.infer<typeof courseSchema>
 
 const Courses: React.FC = () => {
+  const { t } = useTranslation()
   const [courses, setCourses] = useState<Course[]>([])
   const [coursePagination, setCoursePagination] = useState({
     page: 1,
@@ -202,7 +204,7 @@ const Courses: React.FC = () => {
   return (
     <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Courses</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_courses')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -210,7 +212,7 @@ const Courses: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search courses..."
+              placeholder={t('search_courses_placeholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -230,7 +232,7 @@ const Courses: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -238,14 +240,14 @@ const Courses: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
-            Import CSV
+            {t('import_csv')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Add Course
+            {t('add_course')}
           </button>
         </div>
       </div>
@@ -283,23 +285,23 @@ const Courses: React.FC = () => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('title')}
                 >
-                  <div className="flex items-center gap-1">Title {renderSortIcon('title')}</div>
+                  <div className="flex items-center gap-1">{t('title')} {renderSortIcon('title')}</div>
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('module')}
                 >
-                  <div className="flex items-center gap-1">Module {renderSortIcon('module')}</div>
+                  <div className="flex items-center gap-1">{t('module')} {renderSortIcon('module')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Description
+                  {t('description')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -316,7 +318,7 @@ const Courses: React.FC = () => {
               ) : courses.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                    No courses found.
+                    {t('no_courses_found')}
                   </td>
                 </tr>
               ) : (
@@ -352,7 +354,7 @@ const Courses: React.FC = () => {
                           ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
                           : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                       )}>
-                        {course.is_active ? 'Active' : 'Inactive'}
+                        {course.is_active ? t('active') : t('inactive')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -386,30 +388,30 @@ const Courses: React.FC = () => {
               disabled={coursePagination.page === 1}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               onClick={() => setCoursePagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
               disabled={coursePagination.page >= coursePagination.total_pages}
               className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
-              Next
+              {t('next')}
             </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                Showing <span className="font-medium">{(coursePagination.page - 1) * coursePagination.limit + (courses.length > 0 ? 1 : 0)}</span> to <span className="font-medium">{(coursePagination.page - 1) * coursePagination.limit + courses.length}</span> of <span className="font-medium">{coursePagination.total}</span> results
+                {t('showing')} <span className="font-medium">{(coursePagination.page - 1) * coursePagination.limit + (courses.length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium">{(coursePagination.page - 1) * coursePagination.limit + courses.length}</span> {t('of')} <span className="font-medium">{coursePagination.total}</span> {t('results')}
               </p>
               <select
                 value={coursePagination.limit}
                 onChange={(e) => setCoursePagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
                 className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md transition-colors"
               >
-                <option value={10}>10 / page</option>
-                <option value={25}>25 / page</option>
-                <option value={50}>50 / page</option>
-                <option value={100}>100 / page</option>
+                <option value={10}>10 / {t('per_page')}</option>
+                <option value={25}>25 / {t('per_page')}</option>
+                <option value={50}>50 / {t('per_page')}</option>
+                <option value={100}>100 / {t('per_page')}</option>
               </select>
             </div>
             <div>
@@ -423,7 +425,7 @@ const Courses: React.FC = () => {
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
                 <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Page {coursePagination.page} of {Math.max(1, coursePagination.total_pages)}
+                  {t('page_x_of_y', { current: coursePagination.page, total: Math.max(1, coursePagination.total_pages) })}
                 </span>
                 <button
                   onClick={() => setCoursePagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
@@ -443,34 +445,34 @@ const Courses: React.FC = () => {
       <Modal
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={editingCourse ? 'Edit Course' : 'Add Course'}
+        title={editingCourse ? t('edit_course') : t('add_course')}
         maxWidth="md"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-6 py-4 bg-white dark:bg-gray-800 grid grid-cols-1 gap-4 transition-colors duration-200">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Title</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('title')}</label>
               <input type="text" {...register('title')} placeholder="e.g. Logic Programming" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
               {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Module</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('module')}</label>
               <input type="text" {...register('module')} placeholder="e.g. Module 1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.module ? "border-red-300" : "border-gray-300")} />
               {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('description')}</label>
               <textarea {...register('description')} rows={3} placeholder="Course details..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
               {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
             </div>
             <div className="flex items-center">
               <input id="c_is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded" />
-              <label htmlFor="c_is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Active Course</label>
+              <label htmlFor="c_is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_course')}</label>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">{editingCourse ? 'Update' : 'Create'}</button>
+            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">{editingCourse ? t('update') : t('create')}</button>
           </div>
         </form>
       </Modal>
@@ -479,7 +481,7 @@ const Courses: React.FC = () => {
       <Modal
         open={importDialogOpen}
         onClose={() => setImportDialogOpen(false)}
-        title="Import Courses from CSV"
+        title={t('import_csv')}
         maxWidth="sm"
       >
         <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
@@ -495,15 +497,15 @@ const Courses: React.FC = () => {
             <input {...getInputProps()} />
             <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
             <p className="text-gray-600 dark:text-gray-300 mb-2">
-              {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
+              {isDragActive ? t('drop_csv') : t('drag_drop_csv')}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              CSV headers: id, title, module, description, is_active
+              {t('csv_headers')}: id, title, module, description, is_active
             </p>
           </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-          <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Cancel</button>
+          <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
         </div>
       </Modal>
     </div>

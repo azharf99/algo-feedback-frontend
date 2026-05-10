@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Link as RouterLink } from 'react-router-dom'
 import { authApi } from '../../api/services'
 import clsx from 'clsx'
@@ -14,6 +15,7 @@ const forgotPasswordSchema = z.object({
 type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>
 
 const ForgotPassword: React.FC = () => {
+  const { t } = useTranslation()
   const [isSubmitted, setIsSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
 
@@ -27,10 +29,10 @@ const ForgotPassword: React.FC = () => {
 
   const onSubmit: SubmitHandler<ForgotPasswordFormData> = async (data) => {
     setLoading(true)
-    const loadingToast = toast.loading('Sending reset link...')
+    const loadingToast = toast.loading(t('sending_reset_link'))
     try {
       await authApi.forgotPassword(data, true)
-      toast.success('Reset link sent to your email!', { id: loadingToast })
+      toast.success(t('reset_link_sent'), { id: loadingToast })
       setIsSubmitted(true)
     } catch (error: any) {
       const errorMessage = error.response?.data?.error || error.response?.data?.message || 'Failed to send reset link'
@@ -44,10 +46,10 @@ const ForgotPassword: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Algo Feedback System
+          {t('system_title')}
         </h1>
         <h2 className="mt-2 text-center text-lg text-gray-600 dark:text-gray-400">
-          Reset Password
+          {t('reset_password')}
         </h2>
       </div>
 
@@ -56,11 +58,11 @@ const ForgotPassword: React.FC = () => {
           {!isSubmitted ? (
             <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Enter your email address and we'll send you a link to reset your password.
+                {t('forgot_password_desc')}
               </p>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Email Address
+                  {t('email_address')}
                 </label>
                 <div className="mt-1">
                   <input
@@ -93,7 +95,7 @@ const ForgotPassword: React.FC = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                  ) : 'Send Reset Link'}
+                  ) : t('send_reset_link')}
                 </button>
               </div>
             </form>
@@ -104,16 +106,16 @@ const ForgotPassword: React.FC = () => {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
-              <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">Email Sent</h3>
+              <h3 className="mt-4 text-lg font-medium text-gray-900 dark:text-white">{t('email_sent_title')}</h3>
               <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-                Please check your email for a link to reset your password.
+                {t('email_sent_desc')}
               </p>
             </div>
           )}
 
           <div className="mt-6 text-center">
             <RouterLink to="/login" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm transition-colors">
-              Back to Sign In
+              {t('back_to_signin')}
             </RouterLink>
           </div>
         </div>

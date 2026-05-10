@@ -15,6 +15,7 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { studentApi } from '../../api/services'
 import { Student } from '../../types/data'
@@ -38,6 +39,7 @@ const studentSchema = z.object({
 type StudentFormData = z.infer<typeof studentSchema>
 
 const Students: React.FC = () => {
+  const { t } = useTranslation()
   const [students, setStudents] = useState<Student[]>([])
   const [pagination, setPagination] = useState({
     page: 1,
@@ -220,7 +222,7 @@ const Students: React.FC = () => {
   return (
     <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Students</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_students')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -228,7 +230,7 @@ const Students: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder={t('search_students')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -248,7 +250,7 @@ const Students: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -256,14 +258,14 @@ const Students: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
-            Import CSV
+            {t('import_csv')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Add Student
+            {t('add_student')}
           </button>
         </div>
       </div>
@@ -301,26 +303,26 @@ const Students: React.FC = () => {
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('fullname')}
                 >
-                  <div className="flex items-center gap-1">Full Name {renderSortIcon('fullname')}</div>
+                  <div className="flex items-center gap-1">{t('full_name')} {renderSortIcon('fullname')}</div>
                 </th>
                 <th 
                   scope="col" 
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('username')}
                 >
-                  <div className="flex items-center gap-1">Username {renderSortIcon('username')}</div>
+                  <div className="flex items-center gap-1">{t('username')} {renderSortIcon('username')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Phone
+                  {t('phone')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Parent Info
+                  {t('parent_info')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -469,60 +471,60 @@ const Students: React.FC = () => {
       <Modal
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={editingStudent ? 'Edit Student' : 'Add Student'}
+        title={editingStudent ? t('edit_student') : t('add_student')}
         maxWidth="md"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('full_name')}</label>
                 <input type="text" {...register('fullname')} placeholder="e.g. John Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.fullname ? "border-red-300" : "border-gray-300")} />
                 {errors.fullname && <p className="mt-1 text-sm text-red-600">{errors.fullname.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Surname</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('surname')}</label>
                 <input type="text" {...register('surname')} placeholder="e.g. Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.surname ? "border-red-300" : "border-gray-300")} />
                 {errors.surname && <p className="mt-1 text-sm text-red-600">{errors.surname.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Username</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('username')}</label>
                 <input type="text" {...register('username')} placeholder="johndoe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.username ? "border-red-300" : "border-gray-300")} />
                 {errors.username && <p className="mt-1 text-sm text-red-600">{errors.username.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Phone Number</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('phone')}</label>
                 <input type="text" {...register('phone_number')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.phone_number ? "border-red-300" : "border-gray-300")} />
                 {errors.phone_number && <p className="mt-1 text-sm text-red-600">{errors.phone_number.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('parent_name_label')}</label>
                 <input type="text" {...register('parent_name')} placeholder="e.g. Jane Doe" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.parent_name ? "border-red-300" : "border-gray-300")} />
                 {errors.parent_name && <p className="mt-1 text-sm text-red-600">{errors.parent_name.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Parent Contact</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('parent_contact_label')}</label>
                 <input type="text" {...register('parent_contact')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.parent_contact ? "border-red-300" : "border-gray-300")} />
                 {errors.parent_contact && <p className="mt-1 text-sm text-red-600">{errors.parent_contact.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('password')}</label>
                 <input type="password" {...register('password')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.password ? "border-red-300" : "border-gray-300")} />
-                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingStudent ? 'Leave empty to keep current password' : 'Required for new students'}</p>
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingStudent ? t('leave_empty_password') : t('password_required_new')}</p>
                 {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
               </div>
               <div className="flex items-center mt-6">
                 <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded" />
-                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Active Student</label>
+                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_student')}</label>
               </div>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
             <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-              Cancel
+              {t('cancel')}
             </button>
             <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
-              {editingStudent ? 'Update' : 'Create'}
+              {editingStudent ? t('update') : t('create')}
             </button>
           </div>
         </form>
@@ -532,7 +534,7 @@ const Students: React.FC = () => {
       <Modal
         open={importDialogOpen}
         onClose={() => setImportDialogOpen(false)}
-        title="Import Students from CSV"
+        title={t('import_csv')}
         maxWidth="sm"
       >
         <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
@@ -548,16 +550,16 @@ const Students: React.FC = () => {
             <input {...getInputProps()} />
             <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
             <p className="text-gray-600 dark:text-gray-300 mb-2">
-              {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
+              {isDragActive ? t('drop_csv') : t('drag_drop_csv')}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              CSV headers: id, fullname, surname, username, password, phone_number, parent_name, parent_contact, is_active
+              {t('csv_headers')}: id, fullname, surname, username, password, phone_number, parent_name, parent_contact, is_active
             </p>
           </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
           <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-            Cancel
+            {t('cancel')}
           </button>
         </div>
       </Modal>

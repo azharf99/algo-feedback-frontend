@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Edit2,
@@ -36,13 +37,14 @@ const groupSchema = z.object({
   first_lesson_date: z.string().min(1, 'First lesson date is required'),
   first_lesson_time: z.string().min(1, 'First lesson time is required'),
   is_active: z.boolean().default(true),
-  language: z.enum(['Indonesia', 'English']).default('Indonesia'),
+  language: z.enum(['Indonesia', 'English', 'Russian']).default('Indonesia'),
   student_ids: z.array(z.number()).optional(),
 })
 
 type GroupFormData = z.infer<typeof groupSchema>
 
 const Groups: React.FC = () => {
+  const { t } = useTranslation()
   const [groups, setGroups] = useState<Group[]>([])
   const [studentsList, setStudentsList] = useState<Student[]>([])
   const [courses, setCourses] = useState<Course[]>([])
@@ -127,14 +129,14 @@ const Groups: React.FC = () => {
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
         } as Partial<Group>, true)
-        toast.success('Group updated successfully')
+        toast.success(t('group_updated_success'))
       } else {
         await groupApi.createGroup({
           ...sanitizedData,
           meeting_link: sanitizedData.meeting_link || '',
           recordings_link: sanitizedData.recordings_link || '',
         } as Omit<Group, 'id'>, true)
-        toast.success('Group created successfully')
+        toast.success(t('group_created_success'))
       }
       fetchData(groupPagination.page)
       handleCloseDialog()
@@ -144,10 +146,10 @@ const Groups: React.FC = () => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this group?')) {
+    if (window.confirm(t('delete_group_confirm'))) {
       try {
         await groupApi.deleteGroup(id, true)
-        toast.success('Group deleted successfully')
+        toast.success(t('group_deleted_success'))
         fetchData(groupPagination.page)
       } catch (error: any) {
         // Global interceptor handles this
@@ -156,10 +158,10 @@ const Groups: React.FC = () => {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} groups?`)) {
+    if (window.confirm(t('delete_groups_bulk_confirm', { count: selectedIds.length }))) {
       try {
         await groupApi.deleteGroupsBulk(selectedIds, true)
-        toast.success('Groups deleted successfully')
+        toast.success(t('groups_deleted_success'))
         setSelectedIds([])
         fetchData(groupPagination.page)
       } catch (error: any) {
@@ -179,6 +181,7 @@ const Groups: React.FC = () => {
 
     reset({
       ...group,
+      language: group.language as 'Indonesia' | 'English' | 'Russian',
       first_lesson_date: formattedDate,
       first_lesson_time: formattedTime,
       student_ids: group.students?.map(s => s.id) || group.student_ids || [],
@@ -244,7 +247,7 @@ const Groups: React.FC = () => {
   return (
     <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Groups</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_groups')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -252,7 +255,7 @@ const Groups: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search groups..."
+              placeholder={t('search_groups')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -272,7 +275,7 @@ const Groups: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -280,14 +283,14 @@ const Groups: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
-            Import CSV
+            {t('import_csv')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Add Group
+            {t('add_group')}
           </button>
         </div>
       </div>
@@ -321,33 +324,33 @@ const Groups: React.FC = () => {
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Course
+                  {t('course')}
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('name')}
                 >
-                  <div className="flex items-center gap-1">Name {renderSortIcon('name')}</div>
+                  <div className="flex items-center gap-1">{t('group_name')} {renderSortIcon('name')}</div>
                 </th>
                 <th
                   scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
                   onClick={() => toggleSort('type')}
                 >
-                  <div className="flex items-center gap-1">Type {renderSortIcon('type')}</div>
+                  <div className="flex items-center gap-1">{t('type')} {renderSortIcon('type')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Group Phone
+                  {t('group_phone')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Students
+                  {t('students')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -364,7 +367,7 @@ const Groups: React.FC = () => {
               ) : groups.length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
-                    No groups found.
+                    {t('no_groups_found')}
                   </td>
                 </tr>
               ) : (
@@ -396,7 +399,9 @@ const Groups: React.FC = () => {
                       <div className="text-sm font-medium text-gray-900 dark:text-white">{group.name}</div>
                       <div className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title={group.description}>{group.description}</div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{group.type}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {group.type === 'Group' ? t('group_type') : t('private_type')}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{group.group_phone}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{group.students?.length || 0}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -497,7 +502,7 @@ const Groups: React.FC = () => {
       <Modal
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={editingGroup ? 'Edit Group' : 'Add Group'}
+        title={editingGroup ? t('edit_group') : t('add_group')}
         maxWidth="md"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -514,59 +519,60 @@ const Groups: React.FC = () => {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('group_name')}</label>
                 <input type="text" {...register('name')} placeholder="e.g. Group A" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.name ? "border-red-300" : "border-gray-300")} />
                 {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Type</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('type')}</label>
                 <select
                   {...register('type')}
                   className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.type ? "border-red-300" : "border-gray-300")}
                 >
-                  <option value="Group">Group</option>
-                  <option value="Private">Private</option>
+                  <option value="Group">{t('group_type')}</option>
+                  <option value="Private">{t('private_type')}</option>
                 </select>
                 {errors.type && <p className="mt-1 text-sm text-red-600">{errors.type.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Language</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('language')}</label>
                 <select
                   {...register('language')}
                   className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.language ? "border-red-300" : "border-gray-300")}
                 >
                   <option value="Indonesia">Indonesia</option>
                   <option value="English">English</option>
+                  <option value="Russian">Russian</option>
                 </select>
                 {errors.language && <p className="mt-1 text-sm text-red-600">{errors.language.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Group Phone</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('group_phone')}</label>
                 <input type="text" {...register('group_phone')} placeholder="+62..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.group_phone ? "border-red-300" : "border-gray-300")} />
                 {errors.group_phone && <p className="mt-1 text-sm text-red-600">{errors.group_phone.message}</p>}
               </div>
               <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('description')}</label>
                 <textarea {...register('description')} rows={2} placeholder="Brief description of the group" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
                 {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Meeting Link</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('meeting_link')}</label>
                 <input type="text" {...register('meeting_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.meeting_link ? "border-red-300" : "border-gray-300")} />
                 {errors.meeting_link && <p className="mt-1 text-sm text-red-600">{errors.meeting_link.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Recordings Link</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('recordings_link')}</label>
                 <input type="text" {...register('recordings_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.recordings_link ? "border-red-300" : "border-gray-300")} />
                 {errors.recordings_link && <p className="mt-1 text-sm text-red-600">{errors.recordings_link.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Lesson Date</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('first_lesson_date')}</label>
                 <input type="date" {...register('first_lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.first_lesson_date ? "border-red-300" : "border-gray-300")} />
                 {errors.first_lesson_date && <p className="mt-1 text-sm text-red-600">{errors.first_lesson_date.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">First Lesson Time</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('first_lesson_time')}</label>
                 <input type="time" {...register('first_lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.first_lesson_time ? "border-red-300" : "border-gray-300")} />
                 {errors.first_lesson_time && <p className="mt-1 text-sm text-red-600">{errors.first_lesson_time.message}</p>}
               </div>
@@ -574,25 +580,25 @@ const Groups: React.FC = () => {
                 <SearchableSelect
                   name="student_ids"
                   control={control}
-                  label="Students"
+                  label={t('students')}
                   isMulti
-                  placeholder="Search for students..."
+                  placeholder={t('search_students_placeholder')}
                   options={studentsList.map(s => ({ value: s.id, label: `${s.fullname} ${s.surname}` }))}
                   error={errors.student_ids?.message}
                 />
               </div>
               <div className="flex items-center mt-2">
                 <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded" />
-                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Active Group</label>
+                <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_group')}</label>
               </div>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
             <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-              Cancel
+              {t('cancel')}
             </button>
             <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
-              {editingGroup ? 'Update' : 'Create'}
+              {editingGroup ? t('update') : t('create')}
             </button>
           </div>
         </form>
@@ -602,7 +608,7 @@ const Groups: React.FC = () => {
       <Modal
         open={importDialogOpen}
         onClose={() => setImportDialogOpen(false)}
-        title={'Import Groups from CSV'}
+        title={t('import_csv')}
         maxWidth="sm"
       >
         <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
@@ -618,16 +624,16 @@ const Groups: React.FC = () => {
             <input {...getInputProps()} />
             <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
             <p className="text-gray-600 dark:text-gray-300 mb-2">
-              {isDragActive ? 'Drop the CSV file here' : 'Drag & drop a CSV file here, or click to select'}
+              {isDragActive ? t('drop_csv') : t('drag_drop_csv')}
             </p>
             <p className="text-xs text-gray-500 dark:text-gray-400">
-              CSV headers: id, course_id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active, language
+              {t('csv_headers')}: id, course_id, name, type, description, group_phone, meeting_link, recordings_link, first_lesson_date, first_lesson_time, is_active, language
             </p>
           </div>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
           <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-            Cancel
+            {t('cancel')}
           </button>
         </div>
       </Modal>

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Edit2,
@@ -34,6 +35,7 @@ const userSchema = z.object({
 type UserFormData = z.infer<typeof userSchema>
 
 const Users: React.FC = () => {
+  const { t } = useTranslation()
   const [users, setUsers] = useState<User[]>([])
   const [pagination, setPagination] = useState({
     page: 1,
@@ -102,14 +104,14 @@ const Users: React.FC = () => {
           delete updateData.password
         }
         await userApi.updateUser(editingUser.id, updateData, true)
-        toast.success('User updated successfully')
+        toast.success(t('user_updated_success'))
       } else {
         if (!data.password) {
-          toast.error('Password is required for new users')
+          toast.error(t('password_required_new'))
           return
         }
         await userApi.createUser(data as any, true)
-        toast.success('User created successfully')
+        toast.success(t('user_created_success'))
       }
       fetchUsers(pagination.page)
       handleCloseDialog()
@@ -119,10 +121,10 @@ const Users: React.FC = () => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
+    if (window.confirm(t('delete_user_confirm'))) {
       try {
         await userApi.deleteUser(id, true)
-        toast.success('User deleted successfully')
+        toast.success(t('user_deleted_success'))
         fetchUsers(pagination.page)
       } catch (error: any) {
         // Global interceptor handles this
@@ -131,10 +133,10 @@ const Users: React.FC = () => {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} users?`)) {
+    if (window.confirm(t('delete_users_bulk_confirm', { count: selectedIds.length }))) {
       try {
         await userApi.deleteUsersBulk(selectedIds, true)
-        toast.success('Users deleted successfully')
+        toast.success(t('users_deleted_success'))
         setSelectedIds([])
         fetchUsers(pagination.page)
       } catch (error: any) {
@@ -179,7 +181,7 @@ const Users: React.FC = () => {
   return (
     <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Users</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_users')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -187,7 +189,7 @@ const Users: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Search users..."
+              placeholder={t('search_users')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -207,7 +209,7 @@ const Users: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -215,7 +217,7 @@ const Users: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Add User
+            {t('add_user')}
           </button>
         </div>
       </div>
@@ -244,13 +246,13 @@ const Users: React.FC = () => {
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => toggleSort('name')}>
-                  <div className="flex items-center gap-1">Name {renderSortIcon('name')}</div>
+                  <div className="flex items-center gap-1">{t('name')} {renderSortIcon('name')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors" onClick={() => toggleSort('email')}>
-                  <div className="flex items-center gap-1">Email {renderSortIcon('email')}</div>
+                  <div className="flex items-center gap-1">{t('email_address')} {renderSortIcon('email')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Role</th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('role')}</th>
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">{t('actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700 transition-colors duration-200">
@@ -262,7 +264,7 @@ const Users: React.FC = () => {
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">No users found.</td>
+                  <td colSpan={7} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">{t('no_users_found')}</td>
                 </tr>
               ) : (
                 users.map((user, index) => (
@@ -316,16 +318,16 @@ const Users: React.FC = () => {
 
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6 transition-colors duration-200">
           <div className="flex-1 flex justify-between sm:hidden">
-            <button onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))} disabled={pagination.page === 1} className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">Previous</button>
-            <button onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))} disabled={pagination.page >= pagination.total_pages} className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">Next</button>
+            <button onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))} disabled={pagination.page === 1} className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">{t('previous')}</button>
+            <button onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))} disabled={pagination.page >= pagination.total_pages} className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">{t('next')}</button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <p className="text-sm text-gray-700 dark:text-gray-300">Showing <span className="font-medium">{(pagination.page - 1) * pagination.limit + (users.length > 0 ? 1 : 0)}</span> to <span className="font-medium">{(pagination.page - 1) * pagination.limit + users.length}</span> of <span className="font-medium">{pagination.total}</span> results</p>
+            <p className="text-sm text-gray-700 dark:text-gray-300">{t('showing')} <span className="font-medium">{(pagination.page - 1) * pagination.limit + (users.length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium">{(pagination.page - 1) * pagination.limit + users.length}</span> {t('of')} <span className="font-medium">{pagination.total}</span> {t('results')}</p>
             <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))} disabled={pagination.page === 1} className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">
                 <ChevronLeft className="h-5 w-5" />
               </button>
-              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">Page {pagination.page} of {Math.max(1, pagination.total_pages)}</span>
+              <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">{t('page_x_of_y', { current: pagination.page, total: Math.max(1, pagination.total_pages) })}</span>
               <button onClick={() => setPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))} disabled={pagination.page >= pagination.total_pages} className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors">
                 <ChevronRight className="h-5 w-5" />
               </button>
@@ -334,16 +336,16 @@ const Users: React.FC = () => {
         </div>
       </div>
 
-      <Modal open={dialogOpen} onClose={handleCloseDialog} title={editingUser ? 'Edit User' : 'Add User'} maxWidth="sm">
+      <Modal open={dialogOpen} onClose={handleCloseDialog} title={editingUser ? t('edit_user') : t('add_user')} maxWidth="sm">
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-6 py-4 bg-white dark:bg-gray-800 space-y-4 transition-colors duration-200">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Full Name</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('full_name')}</label>
               <input type="text" {...register('name')} placeholder="e.g. Admin User" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.name ? "border-red-300" : "border-gray-300")} />
               {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Email Address</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('email_address')}</label>
               <input type="email" {...register('email')} placeholder="admin@example.com" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.email ? "border-red-300" : "border-gray-300")} />
               {errors.email && <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>}
             </div>
@@ -351,7 +353,7 @@ const Users: React.FC = () => {
               <SearchableSelect
                 name="role"
                 control={control}
-                label="Role"
+                label={t('role')}
                 options={[
                   { value: 'Admin', label: 'Admin' },
                   { value: 'Tutor', label: 'Tutor' },
@@ -361,25 +363,25 @@ const Users: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('password')}</label>
               <input type="password" {...register('password')} placeholder="••••••••" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.password ? "border-red-300" : "border-gray-300")} />
-              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingUser ? 'Leave empty to keep current password' : 'Required for new users'}</p>
+              <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingUser ? t('leave_empty_password') : t('password_required_new')}</p>
               {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp API Key</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('whatsapp_api_key')}</label>
                 <input type="text" {...register('whatsapp_api_key')} placeholder="API Key" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">WhatsApp Device ID</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('whatsapp_device_id')}</label>
                 <input type="text" {...register('whatsapp_device_id')} placeholder="Device ID" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white" />
               </div>
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">Cancel</button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">{editingUser ? 'Update' : 'Create'}</button>
+            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">{editingUser ? t('update') : t('create')}</button>
           </div>
         </form>
       </Modal>

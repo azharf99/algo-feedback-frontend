@@ -18,6 +18,7 @@ import {
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { feedbackApi, groupApi } from '../../api/services'
 import { Feedback, Group } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -46,6 +47,7 @@ const generateFeedbackSchema = z.object({
 type GenerateFeedbackFormData = z.infer<typeof generateFeedbackSchema>
 
 const Feedbacks: React.FC = () => {
+  const { t } = useTranslation()
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [feedbackPagination, setFeedbackPagination] = useState({
@@ -168,7 +170,7 @@ const Feedbacks: React.FC = () => {
 
     try {
       await feedbackApi.updateFeedback(editingFeedback.id, data, true)
-      toast.success('Feedback updated successfully')
+      toast.success(t('feedback_updated_success'))
       fetchData(feedbackPagination.page)
       handleCloseDialog()
     } catch (error: any) {
@@ -177,10 +179,10 @@ const Feedbacks: React.FC = () => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this feedback?')) {
+    if (window.confirm(t('delete_feedback_confirm'))) {
       try {
         await feedbackApi.deleteFeedback(id, true)
-        toast.success('Feedback deleted successfully')
+        toast.success(t('feedback_deleted_success'))
         fetchData(feedbackPagination.page)
       } catch (error: any) {
         // Global interceptor handles this
@@ -189,10 +191,10 @@ const Feedbacks: React.FC = () => {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} feedbacks?`)) {
+    if (window.confirm(t('delete_feedbacks_bulk_confirm', { count: selectedIds.length }))) {
       try {
         await feedbackApi.deleteFeedbacksBulk(selectedIds, true)
-        toast.success('Feedbacks deleted successfully')
+        toast.success(t('feedbacks_deleted_success'))
         setSelectedIds([])
         fetchData(feedbackPagination.page)
       } catch (error: any) {
@@ -202,13 +204,13 @@ const Feedbacks: React.FC = () => {
   }
 
   const onGenerateSubmit: SubmitHandler<GenerateFeedbackFormData> = async (data) => {
-    const loadingToast = toast.loading('Starting feedback generation...')
+    const loadingToast = toast.loading(t('feedback_gen_started'))
     try {
       await feedbackApi.generateFeedbacks({
         all: data.all,
         group_id: data.group_id
       }, true)
-      toast.success('Feedback generation started', { id: loadingToast })
+      toast.success(t('feedback_gen_started'), { id: loadingToast })
       fetchData(1)
       handleCloseGenerateDialog()
     } catch (error: any) {
@@ -230,7 +232,7 @@ const Feedbacks: React.FC = () => {
         all: false,
       }, true)
 
-      toast.success('PDF generation started (background process)')
+      toast.success(t('pdf_gen_started'))
       fetchData(feedbackPagination.page)
     } catch (error: any) {
       // Global interceptor handles this
@@ -243,7 +245,7 @@ const Feedbacks: React.FC = () => {
     try {
       setIsGeneratingAllPdf(true)
       const response = await feedbackApi.generateAllPdf(true)
-      toast.success(response.message || 'Mass PDF generation started in background')
+      toast.success(response.message || t('mass_pdf_gen_started'))
       fetchData(feedbackPagination.page)
     } catch (error: any) {
       // Global interceptor handles this
@@ -256,7 +258,7 @@ const Feedbacks: React.FC = () => {
     try {
       setWaScheduling(feedback?.id || 0)
       await feedbackApi.sendWhatsApp({ student_id: feedback?.student_id }, true)
-      toast.success(feedback ? 'WhatsApp updated for student' : 'WhatsApp scheduling started for all')
+      toast.success(feedback ? t('wa_updated_student') : t('wa_scheduling_started'))
       fetchData(feedbackPagination.page)
     } catch (error: any) {
       // Global interceptor handles this
@@ -266,12 +268,12 @@ const Feedbacks: React.FC = () => {
   }
 
   const handleSeedFeedbacks = async () => {
-    if (!window.confirm('This will seed initial feedback scores (all 3) for existing sessions. Continue?')) return
+    if (!window.confirm(t('seed_feedbacks_confirm'))) return
 
-    const loadingToast = toast.loading('Seeding feedbacks...')
+    const loadingToast = toast.loading(t('seed_feedbacks'))
     try {
       await feedbackApi.generateFeedbacks({ all: true }, true)
-      toast.success('Feedbacks seeded successfully', { id: loadingToast })
+      toast.success(t('feedbacks_seeded_success'), { id: loadingToast })
       fetchData(1)
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Seeding failed'
@@ -281,7 +283,7 @@ const Feedbacks: React.FC = () => {
 
   const handleExportPdf = async (feedback: Feedback) => {
     if (feedback.url_pdf) {
-      const loadingToast = toast.loading('Downloading PDF...')
+      const loadingToast = toast.loading(t('download_pdf'))
       try {
         const blob = await feedbackApi.downloadPdf(feedback.id, true)
         const url = window.URL.createObjectURL(blob)
@@ -294,13 +296,13 @@ const Feedbacks: React.FC = () => {
         a.click()
         window.URL.revokeObjectURL(url)
         document.body.removeChild(a)
-        toast.success('Download started', { id: loadingToast })
+        toast.success(t('download_started'), { id: loadingToast })
       } catch (error: any) {
         const errorMsg = error.response?.data?.error || 'Failed to download PDF'
         toast.error(errorMsg, { id: loadingToast })
       }
     } else {
-      toast.error('PDF not yet generated')
+      toast.error(t('pdf_not_generated'))
     }
   }
 
@@ -331,9 +333,9 @@ const Feedbacks: React.FC = () => {
 
   const getScoreLabel = (score: string, type: 'attendance' | 'activity' | 'task') => {
     const labels = {
-      attendance: ['None', 'Rarely', 'Sometimes', 'Often', 'Always'],
-      activity: ['Inactive', 'Slightly Active', 'Active', 'Very Active'],
-      task: ['None', 'Some', 'All'],
+      attendance: [t('score_none'), t('score_rarely'), t('score_sometimes'), t('score_often'), t('score_always')],
+      activity: [t('score_inactive'), t('score_slightly_active'), t('score_active'), t('score_super_active')],
+      task: [t('score_none'), t('score_some'), t('score_all')],
     }
     const parsed = parseInt(score)
     if (isNaN(parsed)) return score
@@ -356,17 +358,17 @@ const Feedbacks: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Feedbacks</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_feedbacks')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
-              placeholder="Search feedbacks..."
+              placeholder={t('search_feedbacks')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -386,7 +388,7 @@ const Feedbacks: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -395,7 +397,7 @@ const Feedbacks: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-all"
           >
             <FileText className={clsx("-ml-1 mr-2 h-4 w-4", isGeneratingAllPdf && "animate-pulse")} />
-            Generate All PDF
+            {t('generate_all_pdf')}
           </button>
           <button
             onClick={() => handleSendWhatsApp()}
@@ -403,21 +405,21 @@ const Feedbacks: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 transition-colors"
           >
             <RefreshCw className={clsx("-ml-1 mr-2 h-4 w-4", waScheduling === 0 && "animate-spin")} />
-            Schedule All WhatsApp
+            {t('schedule_all_whatsapp')}
           </button>
           <button
             onClick={handleSeedFeedbacks}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Seed Feedbacks
+            {t('seed_feedbacks')}
           </button>
           <button
             onClick={() => setGenerateDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-lg text-sm font-medium rounded-md text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-xl active:scale-95"
           >
             <BarChart2 className="-ml-1 mr-2 h-4 w-4" />
-            Generate Feedbacks
+            {t('generate_feedbacks')}
           </button>
           <button
             onClick={() => fetchData(feedbackPagination.page)}
@@ -438,7 +440,7 @@ const Feedbacks: React.FC = () => {
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700 dark:text-yellow-300">
-                You have <span className="font-bold">{feedbackStats.pdf_pending}</span> PDFs left to generate.
+                {t('pdf_pending_alert', { count: feedbackStats.pdf_pending })}
               </p>
             </div>
           </div>
@@ -449,13 +451,13 @@ const Feedbacks: React.FC = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Total Feedbacks</dt>
+            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('total_feedbacks')}</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackPagination.total}</dd>
           </div>
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">PDFs Generated</dt>
+            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('pdfs_generated')}</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.pdf_generated}</dd>
             <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
               <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.pdf_generated / feedbackStats.total * 100) : 0}%` }}></div>
@@ -464,7 +466,7 @@ const Feedbacks: React.FC = () => {
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">WhatsApp Scheduled</dt>
+            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('whatsapp_scheduled')}</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.is_sent}</dd>
             <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
               <div className="bg-green-600 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.is_sent / feedbackStats.total * 100) : 0}%` }}></div>
@@ -473,7 +475,7 @@ const Feedbacks: React.FC = () => {
         </div>
         <div className="bg-white dark:bg-gray-800 overflow-hidden shadow rounded-lg border border-gray-200 dark:border-gray-700">
           <div className="px-4 py-5 sm:p-6">
-            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">Pending PDFs</dt>
+            <dt className="text-sm font-medium text-gray-500 dark:text-gray-400 truncate">{t('pending_pdfs')}</dt>
             <dd className="mt-1 text-3xl font-semibold text-gray-900 dark:text-white">{feedbackStats.pdf_pending}</dd>
             <div className="mt-2 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1.5">
               <div className="bg-yellow-500 h-1.5 rounded-full" style={{ width: `${feedbackStats.total > 0 ? (feedbackStats.pdf_pending / feedbackStats.total * 100) : 0}%` }}></div>
@@ -510,39 +512,39 @@ const Feedbacks: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('id')}
                 >
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Student
+                  {t('student')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Course
+                  {t('course')}
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('number')}
                 >
-                  <div className="flex items-center gap-1">Feedback # {renderSortIcon('number')}</div>
+                  <div className="flex items-center gap-1">{t('feedback_number_col')} {renderSortIcon('number')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Scores
+                  {t('scores')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   PDF
                 </th>
                 <th
                   scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('is_sent')}
                 >
-                  <div className="flex items-center gap-1">WhatsApp {renderSortIcon('is_sent')}</div>
+                  <div className="flex items-center gap-1">{t('whatsapp_col')} {renderSortIcon('is_sent')}</div>
                 </th>
-                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -558,8 +560,8 @@ const Feedbacks: React.FC = () => {
                 </tr>
               ) : feedbacks.length === 0 ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-10 text-center text-gray-500">
-                    No feedbacks found.
+                  <td colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                    {t('no_feedbacks_found')}
                   </td>
                 </tr>
               ) : (
@@ -583,7 +585,7 @@ const Feedbacks: React.FC = () => {
                       {(feedbackPagination.page - 1) * feedbackPagination.limit + index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{feedback.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{feedback.student?.fullname || `Student ${feedback.student_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{feedback.student?.fullname || `${t('student')} ${feedback.student_id}`}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{feedback.course}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{feedback.number}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -598,16 +600,16 @@ const Feedbacks: React.FC = () => {
                         <button
                           onClick={() => handleExportPdf(feedback)}
                           className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
-                          title="View PDF"
+                          title={t('view_pdf')}
                         >
                           <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-1 rounded inline-flex" title="PDF Generated">
-                            <FileText className="w-5 h-5" /> View PDF
+                            <FileText className="w-5 h-5" /> {t('view_pdf')}
                           </span>
                         </button>
                       ) : (
                         <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 italic text-xs">
                           <RefreshCw className="w-3 h-3 animate-spin" />
-                          Pending...
+                          {t('pending')}...
                         </div>
                       )}
                     </td>
@@ -616,14 +618,14 @@ const Feedbacks: React.FC = () => {
                         "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
                         feedback.is_sent ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300" : "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300"
                       )}>
-                        {feedback.is_sent ? 'Scheduled' : 'Not Scheduled'}
+                        {feedback.is_sent ? t('scheduled') : t('not_scheduled')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <button
                         onClick={() => handleEdit(feedback)}
                         className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mx-1 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
-                        title="Edit"
+                        title={t('edit_feedback')}
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
@@ -631,7 +633,7 @@ const Feedbacks: React.FC = () => {
                         onClick={() => handleGeneratePdf(feedback.id)}
                         disabled={pdfGenerating === feedback.id}
                         className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300 mx-1 p-1 rounded-md hover:bg-indigo-50 dark:hover:bg-indigo-900/20 disabled:opacity-50 transition-colors"
-                        title="Generate PDF"
+                        title={t('generate_pdf')}
                       >
                         <FileText className="w-4 h-4" />
                       </button>
@@ -639,14 +641,14 @@ const Feedbacks: React.FC = () => {
                         onClick={() => handleSendWhatsApp(feedback)}
                         disabled={waScheduling === feedback.id || !feedback.url_pdf}
                         className="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 mx-1 p-1 rounded-md hover:bg-green-50 dark:hover:bg-green-900/20 disabled:opacity-50 transition-all duration-200 hover:scale-110"
-                        title="Send WhatsApp"
+                        title={t('send_whatsapp')}
                       >
                         <MessageCircle className={clsx("w-4 h-4", waScheduling === feedback.id && "animate-bounce")} />
                       </button>
                       <button
                         onClick={() => handleExportPdf(feedback)}
                         className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 mx-1 p-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 hover:scale-110"
-                        title="Download PDF"
+                        title={t('download_pdf')}
                       >
                         <FileText className="w-4 h-4" />
                       </button>
@@ -673,30 +675,30 @@ const Feedbacks: React.FC = () => {
               disabled={feedbackPagination.page === 1}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
-              Previous
+              {t('previous')}
             </button>
             <button
               onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
               disabled={feedbackPagination.page >= feedbackPagination.total_pages}
               className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
-              Next
+              {t('next')}
             </button>
           </div>
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
-              <p className="text-sm text-gray-700 dark:text-gray-400">
-                Showing <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (feedbacks.length > 0 ? 1 : 0)}</span> to <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + feedbacks.length}</span> of <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> results
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (feedbacks.length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + feedbacks.length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> {t('results')}
               </p>
               <select
                 value={feedbackPagination.limit}
                 onChange={(e) => setFeedbackPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
-                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md"
+                className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md transition-colors"
               >
-                <option value={10}>10 / page</option>
-                <option value={25}>25 / page</option>
-                <option value={50}>50 / page</option>
-                <option value={100}>100 / page</option>
+                <option value={10}>10 / {t('per_page')}</option>
+                <option value={25}>25 / {t('per_page')}</option>
+                <option value={50}>50 / {t('per_page')}</option>
+                <option value={100}>100 / {t('per_page')}</option>
               </select>
             </div>
             <div>
@@ -706,11 +708,11 @@ const Feedbacks: React.FC = () => {
                   disabled={feedbackPagination.page === 1}
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
-                  <span className="sr-only">Previous</span>
+                  <span className="sr-only">{t('previous')}</span>
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
                 <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Page {feedbackPagination.page} of {Math.max(1, feedbackPagination.total_pages)}
+                  {t('page_x_of_y', { current: feedbackPagination.page, total: Math.max(1, feedbackPagination.total_pages) })}
                 </span>
                 <button
                   onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
@@ -730,64 +732,64 @@ const Feedbacks: React.FC = () => {
       <Modal
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title="Edit Feedback"
+        title={t('edit_feedback')}
         maxWidth="md"
       >
         <form onSubmit={handleSubmit(onSubmit)}>
-          <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Attendance Score</label>
-              <select {...register('attendance_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.attendance_score ? "border-red-300" : "border-gray-300")}>
-                <option value="0">None (0)</option>
-                <option value="1">Rarely (1)</option>
-                <option value="2">Sometimes (2)</option>
-                <option value="3">Often (3)</option>
-                <option value="4">Always (4)</option>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('attendance_score')}</label>
+              <select {...register('attendance_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.attendance_score ? "border-red-300" : "border-gray-300")}>
+                <option value="0">{t('score_none')} (0)</option>
+                <option value="1">{t('score_rarely')} (1)</option>
+                <option value="2">{t('score_sometimes')} (2)</option>
+                <option value="3">{t('score_often')} (3)</option>
+                <option value="4">{t('score_always')} (4)</option>
               </select>
               {errors.attendance_score && <p className="mt-1 text-sm text-red-600">{errors.attendance_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Activity Score</label>
-              <select {...register('activity_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.activity_score ? "border-red-300" : "border-gray-300")}>
-                <option value="0">Inactive (0)</option>
-                <option value="1">Slightly Active (1)</option>
-                <option value="2">Active (2)</option>
-                <option value="3">Super Active (3)</option>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('activity_score')}</label>
+              <select {...register('activity_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.activity_score ? "border-red-300" : "border-gray-300")}>
+                <option value="0">{t('score_inactive')} (0)</option>
+                <option value="1">{t('score_slightly_active')} (1)</option>
+                <option value="2">{t('score_active')} (2)</option>
+                <option value="3">{t('score_super_active')} (3)</option>
               </select>
               {errors.activity_score && <p className="mt-1 text-sm text-red-600">{errors.activity_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Task Score</label>
-              <select {...register('task_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.task_score ? "border-red-300" : "border-gray-300")}>
-                <option value="0">None (0)</option>
-                <option value="1">Some (1)</option>
-                <option value="2">All (2)</option>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('task_score')}</label>
+              <select {...register('task_score')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.task_score ? "border-red-300" : "border-gray-300")}>
+                <option value="0">{t('score_none')} (0)</option>
+                <option value="1">{t('score_some')} (1)</option>
+                <option value="2">{t('score_all')} (2)</option>
               </select>
               {errors.task_score && <p className="mt-1 text-sm text-red-600">{errors.task_score.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Date</label>
-              <input type="date" {...register('lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_date ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('lesson_date')}</label>
+              <input type="date" {...register('lesson_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.lesson_date ? "border-red-300" : "border-gray-300")} />
               {errors.lesson_date && <p className="mt-1 text-sm text-red-600">{errors.lesson_date.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Lesson Time</label>
-              <input type="time" {...register('lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.lesson_time ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('lesson_time')}</label>
+              <input type="time" {...register('lesson_time')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.lesson_time ? "border-red-300" : "border-gray-300")} />
               {errors.lesson_time && <p className="mt-1 text-sm text-red-600">{errors.lesson_time.message}</p>}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Project Link</label>
-              <input type="url" {...register('project_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.project_link ? "border-red-300" : "border-gray-300")} />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('project_link')}</label>
+              <input type="url" {...register('project_link')} placeholder="https://..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.project_link ? "border-red-300" : "border-gray-300")} />
               {errors.project_link && <p className="mt-1 text-sm text-red-600">{errors.project_link.message}</p>}
             </div>
             <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Tutor Comments</label>
-              <textarea {...register('tutor_feedback')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.tutor_feedback ? "border-red-300" : "border-gray-300")}></textarea>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('tutor_comments')}</label>
+              <textarea {...register('tutor_feedback')} rows={4} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.tutor_feedback ? "border-red-300" : "border-gray-300")}></textarea>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">Update</button>
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">{t('update')}</button>
           </div>
         </form>
       </Modal>
@@ -805,13 +807,13 @@ const Feedbacks: React.FC = () => {
               This will generate feedback records for every 4 lessons completed by students.
             </p>
             <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Generate For</label>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('generate_for')}</label>
               <select
                 {...registerGenerate('all', { setValueAs: v => v === 'true' || v === true })}
-                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", generateErrors.all ? "border-red-300" : "border-gray-300")}
+                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", generateErrors.all ? "border-red-300" : "border-gray-300")}
               >
-                <option value="false">Specific Group</option>
-                <option value="true">All Students</option>
+                <option value="false">{t('specific_group')}</option>
+                <option value="true">{t('all_students')}</option>
               </select>
             </div>
             {!isAllStudents && (
@@ -825,9 +827,9 @@ const Feedbacks: React.FC = () => {
                 />
             )}
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="button" onClick={handleCloseGenerateDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Cancel</button>
-            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">Generate</button>
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="button" onClick={handleCloseGenerateDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">{t('generate')}</button>
           </div>
         </form>
       </Modal>

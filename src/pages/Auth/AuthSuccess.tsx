@@ -1,8 +1,10 @@
 import React, { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useNavigate, useLocation } from 'react-router-dom'
 import toast from 'react-hot-toast'
 
 const AuthSuccess: React.FC = () => {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -28,20 +30,20 @@ const AuthSuccess: React.FC = () => {
         window.location.href = '/dashboard'
       } catch (error) {
         console.error('Error parsing user data:', error)
-        toast.error('Failed to process login data')
+        toast.error(t('login_process_failed'))
         navigate('/login')
       }
     } else {
-      toast.error('Missing authentication tokens')
+      toast.error(t('missing_tokens'))
       navigate('/login')
     }
-  }, [location, navigate])
+  }, [location, navigate, t])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 transition-colors duration-200">
       <div className="flex flex-col items-center">
         <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p className="text-gray-600 font-medium">Completing sign-in...</p>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">{t('completing_signin')}</p>
       </div>
     </div>
   )

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Plus,
   Edit2,
@@ -51,6 +52,7 @@ const markCancelledSchema = z.object({
 type MarkCancelledFormData = z.infer<typeof markCancelledSchema>
 
 const Sessions: React.FC = () => {
+  const { t } = useTranslation()
   const [sessions, setSessions] = useState<Session[]>([])
   const [groups, setGroups] = useState<Group[]>([])
   const [filteredLessons, setFilteredLessons] = useState<Lesson[]>([])
@@ -212,10 +214,10 @@ const Sessions: React.FC = () => {
     try {
       if (editingSession) {
         await sessionApi.updateSession(editingSession.id, data, true)
-        toast.success('Session updated successfully')
+        toast.success(t('session_updated_success'))
       } else {
         await sessionApi.createSession(data, true)
-        toast.success('Session created successfully')
+        toast.success(t('session_created_success'))
       }
       fetchData(sessionPagination.page)
       fetchSummary()
@@ -226,10 +228,10 @@ const Sessions: React.FC = () => {
   }
 
   const handleDelete = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this session?')) {
+    if (window.confirm(t('delete_session_confirm'))) {
       try {
         await sessionApi.deleteSession(id, true)
-        toast.success('Session deleted successfully')
+        toast.success(t('session_deleted_success'))
         fetchData(sessionPagination.page)
         fetchSummary()
       } catch (error: any) {
@@ -239,10 +241,10 @@ const Sessions: React.FC = () => {
   }
 
   const handleCancelSession = async (session: Session) => {
-    if (window.confirm('Are you sure you want to cancel this session?')) {
+    if (window.confirm(t('cancel_session_confirm'))) {
       try {
         await sessionApi.updateSession(session.id, { status: 'Cancelled' }, true)
-        toast.success('Session cancelled successfully')
+        toast.success(t('session_cancelled_success'))
         fetchData(sessionPagination.page)
         fetchSummary()
       } catch (error: any) {
@@ -252,10 +254,10 @@ const Sessions: React.FC = () => {
   }
 
   const handleBulkDelete = async () => {
-    if (window.confirm(`Are you sure you want to delete ${selectedIds.length} sessions?`)) {
+    if (window.confirm(t('delete_sessions_bulk_confirm', { count: selectedIds.length }))) {
       try {
         await sessionApi.deleteSessionsBulk(selectedIds, true)
-        toast.success('Sessions deleted successfully')
+        toast.success(t('sessions_deleted_success'))
         setSelectedIds([])
         fetchData(sessionPagination.page)
         fetchSummary()
@@ -318,7 +320,7 @@ const Sessions: React.FC = () => {
 
     try {
       await sessionApi.updateAttendance(attendanceSession.id, selectedStudents, true)
-      toast.success('Attendance updated successfully')
+      toast.success(t('attendance_updated_success'))
       fetchData(sessionPagination.page)
       fetchSummary()
       handleCloseAttendanceDialog()
@@ -330,7 +332,7 @@ const Sessions: React.FC = () => {
   const onMarkDoneSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
     try {
       await sessionApi.markDone(data, true)
-      toast.success('Sessions marked as done successfully')
+      toast.success(t('sessions_marked_done_success'))
       fetchData(sessionPagination.page)
       fetchSummary()
       setMarkDoneDialogOpen(false)
@@ -343,7 +345,7 @@ const Sessions: React.FC = () => {
   const onAutoFillAttendanceSubmit: SubmitHandler<MarkDoneFormData> = async (data) => {
     try {
       await sessionApi.autoFillAttendance(data, true)
-      toast.success('Attendance filled successfully')
+      toast.success(t('attendance_filled_success'))
       fetchData(sessionPagination.page)
       fetchSummary()
       setAutoFillAttendanceDialogOpen(false)
@@ -356,7 +358,7 @@ const Sessions: React.FC = () => {
   const onMarkCancelledSubmit: SubmitHandler<MarkCancelledFormData> = async (data) => {
     try {
       await sessionApi.markCancelled(data, true)
-      toast.success('Sessions marked as cancelled successfully')
+      toast.success(t('sessions_marked_cancelled_success'))
       fetchData(sessionPagination.page)
       fetchSummary()
       setMarkCancelledDialogOpen(false)
@@ -433,17 +435,17 @@ const Sessions: React.FC = () => {
   }
 
   return (
-    <div>
+    <div className="transition-colors duration-200">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Sessions</h1>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_sessions')}</h1>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
           <div className="relative flex-1 sm:flex-none sm:min-w-[250px]">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-4 w-4 text-gray-400" />
+              <Search className="h-4 w-4 text-gray-400 dark:text-gray-500" />
             </div>
             <input
               type="text"
-              placeholder="Search sessions..."
+              placeholder={t('search_sessions')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-700 rounded-md leading-5 bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -463,7 +465,7 @@ const Sessions: React.FC = () => {
               className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all"
             >
               <Trash2 className="-ml-1 mr-2 h-4 w-4" />
-              Delete ({selectedIds.length})
+              {t('delete_selected')} ({selectedIds.length})
             </button>
           )}
           <button
@@ -471,28 +473,28 @@ const Sessions: React.FC = () => {
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <CheckCircle className="-ml-1 mr-2 h-4 w-4 text-green-500" />
-            Auto Mark Done
+            {t('auto_mark_done')}
           </button>
           <button
             onClick={() => setAutoFillAttendanceDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <CheckCircle className="-ml-1 mr-2 h-4 w-4 text-blue-500" />
-            Auto Fill Attendance
+            {t('auto_fill_attendance')}
           </button>
           <button
             onClick={() => setMarkCancelledDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <X className="-ml-1 mr-2 h-4 w-4 text-red-500" />
-            Mark Cancelled
+            {t('mark_cancelled')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}
             className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
           >
             <Plus className="-ml-1 mr-2 h-4 w-4" />
-            Add Session
+            {t('add_session')}
           </button>
         </div>
       </div>
@@ -511,10 +513,10 @@ const Sessions: React.FC = () => {
                 'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
               )}
             >
-              {tab === 'ALL' ? 'ALL' :
-               tab === 'LAST_WEEK' ? 'Session Last Week' :
-               tab === 'THIS_WEEK' ? 'Session This Week' :
-               'Session Next Week'}
+              {tab === 'ALL' ? t('all') :
+               tab === 'LAST_WEEK' ? t('session_last_week') :
+               tab === 'THIS_WEEK' ? t('session_this_week') :
+               t('session_next_week')}
             </button>
           ))}
         </nav>
@@ -543,42 +545,42 @@ const Sessions: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('id')}
                 >
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Group
+                  {t('group')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Lesson
+                  {t('lesson')}
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('date_start')}
                 >
-                  <div className="flex items-center gap-1">Date {renderSortIcon('date_start')}</div>
+                  <div className="flex items-center gap-1">{t('date')} {renderSortIcon('date_start')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Time
+                  {t('time')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
+                  {t('status')}
                 </th>
                 <th 
                   scope="col" 
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
+                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
                   onClick={() => toggleSort('is_done')}
                 >
-                  <div className="flex items-center gap-1">Done {renderSortIcon('is_done')}</div>
+                  <div className="flex items-center gap-1">{t('done')} {renderSortIcon('is_done')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Attendees
+                  {t('attendees')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
+                  {t('actions')}
                 </th>
               </tr>
             </thead>
@@ -619,8 +621,8 @@ const Sessions: React.FC = () => {
                       {(sessionPagination.page - 1) * sessionPagination.limit + index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.id}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{session.group?.name || `Group ${session.group_id}`}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title={session.lesson?.title}>{session.lesson?.title || `Lesson ${session.lesson_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{session.group?.name || `${t('group')} ${session.group_id}`}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400 truncate max-w-[200px]" title={session.lesson?.title}>{session.lesson?.title || `${t('lesson')} ${session.lesson_id}`}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{new Date(session.date_start).toLocaleDateString()}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{session.time_start.substring(0, 5)}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
@@ -628,14 +630,14 @@ const Sessions: React.FC = () => {
                         "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
                         session.status === 'Cancelled' ? "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300" : "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300"
                       )}>
-                        {session.status || 'Active'}
+                        {session.status === 'Cancelled' ? t('cancelled') : t('active')}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center gap-1">
                         {session.is_done && <CheckCircle className="w-4 h-4 text-green-500" />}
                         <span className={clsx("text-sm", session.is_done ? "text-green-600 font-medium" : "text-gray-500")}>
-                          {session.is_done ? 'Done' : 'Pending'}
+                          {session.is_done ? t('done') : t('pending')}
                         </span>
                       </div>
                     </td>
@@ -653,7 +655,7 @@ const Sessions: React.FC = () => {
                             ? "text-gray-400 cursor-not-allowed" 
                             : "text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 hover:bg-green-50 dark:hover:bg-green-900/20"
                         )}
-                        title={session.status === 'Cancelled' ? "Cannot update attendance for cancelled session" : "Attendance"}
+                        title={session.status === 'Cancelled' ? t('cannot_mark_cancelled_done') : t('attendees')}
                         disabled={session.status === 'Cancelled'}
                       >
                         <CheckCircle className="w-4 h-4" />
@@ -666,7 +668,7 @@ const Sessions: React.FC = () => {
                             ? "text-gray-400 cursor-not-allowed" 
                             : "text-yellow-600 hover:text-yellow-900 dark:text-yellow-400 dark:hover:text-yellow-300 hover:bg-yellow-50 dark:hover:bg-yellow-900/20"
                         )}
-                        title={session.status === 'Cancelled' ? "Session is cancelled" : "Cancel Session"}
+                        title={session.status === 'Cancelled' ? t('cancelled') : t('mark_cancelled')}
                         disabled={session.status === 'Cancelled'}
                       >
                         <X className="w-4 h-4" />
@@ -764,23 +766,22 @@ const Sessions: React.FC = () => {
         </div>
       </div>
 
-      {/* Add/Edit Modal */}
       <Modal
         open={dialogOpen}
         onClose={handleCloseDialog}
-        title={editingSession ? 'Edit Session' : 'Add Session'}
+        title={editingSession ? t('edit_session') : t('add_session')}
         maxWidth="sm"
       >
 
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="px-6 py-4">
+            <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="min-w-0">
                   <SearchableSelect
                     name="group_id"
                     control={control}
-                    label="Group"
-                    placeholder="Search for a group..."
+                    label={t('group')}
+                    placeholder={t('search_groups_placeholder')}
                     options={groups.map(g => ({ value: g.id, label: g.name }))}
                     error={errors.group_id?.message}
                   />
@@ -789,25 +790,25 @@ const Sessions: React.FC = () => {
                   <SearchableSelect
                     name="lesson_id"
                     control={control}
-                    label="Lesson"
-                    placeholder={loadingLessons ? "Loading lessons..." : selectedGroupId ? "Search for a lesson..." : "Select a group first"}
+                    label={t('lesson')}
+                    placeholder={loadingLessons ? "Loading lessons..." : selectedGroupId ? t('search_lessons_placeholder') : "Select a group first"}
                     options={filteredLessons.map(l => ({ value: l.id, label: l.title }))}
                     error={errors.lesson_id?.message}
                     isDisabled={!selectedGroupId || loadingLessons}
                   />
                 </div>
                 <div className="min-w-0">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Date</label>
-                  <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.date_start ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('date')}</label>
+                  <input type="date" {...register('date_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.date_start ? "border-red-300" : "border-gray-300")} />
                   {errors.date_start && <p className="mt-1 text-sm text-red-600">{errors.date_start.message}</p>}
                 </div>
                 <div className="min-w-0">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Time</label>
-                  <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errors.time_start ? "border-red-300" : "border-gray-300")} />
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('time')}</label>
+                  <input type="time" {...register('time_start')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.time_start ? "border-red-300" : "border-gray-300")} />
                   {errors.time_start && <p className="mt-1 text-sm text-red-600">{errors.time_start.message}</p>}
                 </div>
                 <div className="sm:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">After Session Feedback</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('after_session_feedback')}</label>
                 <textarea 
                   {...register('after_session_feedback')} 
                   rows={3} 
@@ -824,27 +825,27 @@ const Sessions: React.FC = () => {
                     id="is_done" 
                     type="checkbox" 
                     {...register('is_done')} 
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800 disabled:opacity-50" 
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded bg-white dark:bg-gray-800 disabled:opacity-50" 
                     disabled={editingSession?.status === 'Cancelled'}
                   />
                   <label htmlFor="is_done" className={clsx("ml-2 block text-sm", editingSession?.status === 'Cancelled' ? "text-gray-400" : "text-gray-900 dark:text-gray-300")}>
-                    Mark as Done {editingSession?.status === 'Cancelled' && "(Cannot mark cancelled session as done)"}
+                    {t('mark_as_done')} {editingSession?.status === 'Cancelled' && t('cannot_mark_cancelled_done')}
                   </label>
                 </div>
                 {editingSession && (
                   <div className="flex items-center mt-2">
                     <input id="shift_subsequent" type="checkbox" {...register('shift_subsequent')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-700 rounded bg-white dark:bg-gray-800" />
-                    <label htmlFor="shift_subsequent" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">Geser sesi berikutnya</label>
+                    <label htmlFor="shift_subsequent" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('shift_subsequent_label')}</label>
                   </div>
                 )}
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-              <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                {editingSession ? 'Update' : 'Create'}
+            <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
+                {editingSession ? t('update') : t('create')}
               </button>
-              <button type="button" onClick={handleCloseDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-                Cancel
+              <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+                {t('cancel')}
               </button>
             </div>
           </form>
@@ -854,13 +855,13 @@ const Sessions: React.FC = () => {
       <Modal
         open={attendanceDialogOpen}
         onClose={handleCloseAttendanceDialog}
-        title={'Update Attendance'}
+        title={t('update_attendance')}
         maxWidth="sm"
       >
 
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-              Select students who attended this session.
+              {t('select_attended_students')}
             </p>
             <div className="max-h-60 overflow-y-auto border border-gray-300 dark:border-gray-700 rounded-md p-2 bg-white dark:bg-gray-800">
               {getAvailableStudents().map(student => (
@@ -878,7 +879,7 @@ const Sessions: React.FC = () => {
                 </div>
               ))}
               {getAvailableStudents().length === 0 && (
-                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">No students available in this group.</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-2">{t('no_students_in_group')}</p>
               )}
             </div>
             <div className="mt-3 flex flex-wrap gap-1">
@@ -893,12 +894,12 @@ const Sessions: React.FC = () => {
               })}
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="button" onClick={onSubmitAttendance} className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Save Attendance
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="button" onClick={onSubmitAttendance} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
+              {t('save_attendance')}
             </button>
-            <button type="button" onClick={handleCloseAttendanceDialog} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Cancel
+            <button type="button" onClick={handleCloseAttendanceDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+              {t('cancel')}
             </button>
           </div>
       </Modal>
@@ -910,35 +911,35 @@ const Sessions: React.FC = () => {
           setMarkDoneDialogOpen(false)
           resetMarkDone()
         }}
-        title="Auto Mark Done Sessions"
+        title={t('auto_mark_done')}
         maxWidth="sm"
       >
         <form onSubmit={handleSubmitMarkDone(onMarkDoneSubmit)}>
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div className="grid grid-cols-1 gap-4">
               <div className="min-w-0">
                 <SearchableSelect
                   name="group_id"
                   control={controlMarkDone}
-                  label="Group"
-                  placeholder="Search for a group..."
+                  label={t('group')}
+                  placeholder={t('search_groups_placeholder')}
                   options={groups.map(g => ({ value: g.id, label: g.name }))}
                   error={errorsMarkDone.group_id?.message}
                 />
               </div>
               <div className="min-w-0">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Until Date</label>
-                <input type="date" {...registerMarkDone('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkDone.until_date ? "border-red-300" : "border-gray-300")} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('until_date')}</label>
+                <input type="date" {...registerMarkDone('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errorsMarkDone.until_date ? "border-red-300" : "border-gray-300")} />
                 {errorsMarkDone.until_date && <p className="mt-1 text-sm text-red-600">{errorsMarkDone.until_date.message}</p>}
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Mark Done
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
+              {t('done')}
             </button>
-            <button type="button" onClick={() => { setMarkDoneDialogOpen(false); resetMarkDone(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Cancel
+            <button type="button" onClick={() => { setMarkDoneDialogOpen(false); resetMarkDone(); }} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+              {t('cancel')}
             </button>
           </div>
         </form>
@@ -951,35 +952,35 @@ const Sessions: React.FC = () => {
           setAutoFillAttendanceDialogOpen(false)
           resetAutoFill()
         }}
-        title="Auto Fill Attendance Student"
+        title={t('auto_fill_attendance')}
         maxWidth="sm"
       >
         <form onSubmit={handleSubmitAutoFill(onAutoFillAttendanceSubmit)}>
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div className="grid grid-cols-1 gap-4">
               <div className="min-w-0">
                 <SearchableSelect
                   name="group_id"
                   control={controlAutoFill}
-                  label="Group"
-                  placeholder="Search for a group..."
+                  label={t('group')}
+                  placeholder={t('search_groups_placeholder')}
                   options={groups.map(g => ({ value: g.id, label: g.name }))}
                   error={errorsAutoFill.group_id?.message}
                 />
               </div>
               <div className="min-w-0">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Until Date</label>
-                <input type="date" {...registerAutoFill('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsAutoFill.until_date ? "border-red-300" : "border-gray-300")} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('until_date')}</label>
+                <input type="date" {...registerAutoFill('until_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errorsAutoFill.until_date ? "border-red-300" : "border-gray-300")} />
                 {errorsAutoFill.until_date && <p className="mt-1 text-sm text-red-600">{errorsAutoFill.until_date.message}</p>}
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-blue-600 text-base font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Fill Attendance
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
+              {t('fill_attendance_btn')}
             </button>
-            <button type="button" onClick={() => { setAutoFillAttendanceDialogOpen(false); resetAutoFill(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Cancel
+            <button type="button" onClick={() => { setAutoFillAttendanceDialogOpen(false); resetAutoFill(); }} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+              {t('cancel')}
             </button>
           </div>
         </form>
@@ -992,40 +993,40 @@ const Sessions: React.FC = () => {
           setMarkCancelledDialogOpen(false)
           resetMarkCancelled()
         }}
-        title="Mark Sessions as Cancelled"
+        title={t('mark_cancelled')}
         maxWidth="sm"
       >
         <form onSubmit={handleSubmitMarkCancelled(onMarkCancelledSubmit)}>
-          <div className="px-6 py-4">
+          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
             <div className="grid grid-cols-1 gap-4">
               <div className="min-w-0">
                 <SearchableSelect
                   name="group_id"
                   control={controlMarkCancelled}
-                  label="Group"
-                  placeholder="Search for a group..."
+                  label={t('group')}
+                  placeholder={t('search_groups_placeholder')}
                   options={groups.map(g => ({ value: g.id, label: g.name }))}
                   error={errorsMarkCancelled.group_id?.message}
                 />
               </div>
               <div className="min-w-0">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">From Date</label>
-                <input type="date" {...registerMarkCancelled('from_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkCancelled.from_date ? "border-red-300" : "border-gray-300")} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('from_date')}</label>
+                <input type="date" {...registerMarkCancelled('from_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errorsMarkCancelled.from_date ? "border-red-300" : "border-gray-300")} />
                 {errorsMarkCancelled.from_date && <p className="mt-1 text-sm text-red-600">{errorsMarkCancelled.from_date.message}</p>}
               </div>
               <div className="min-w-0">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Before Date</label>
-                <input type="date" {...registerMarkCancelled('before_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-800 dark:text-white dark:border-gray-700 dark:placeholder-gray-400", errorsMarkCancelled.before_date ? "border-red-300" : "border-gray-300")} />
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('before_date')}</label>
+                <input type="date" {...registerMarkCancelled('before_date')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errorsMarkCancelled.before_date ? "border-red-300" : "border-gray-300")} />
                 {errorsMarkCancelled.before_date && <p className="mt-1 text-sm text-red-600">{errorsMarkCancelled.before_date.message}</p>}
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-900/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700">
-            <button type="submit" className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Mark Cancelled
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 transition-all">
+              {t('mark_cancelled')}
             </button>
-            <button type="button" onClick={() => { setMarkCancelledDialogOpen(false); resetMarkCancelled(); }} className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-700 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm transition-colors">
-              Cancel
+            <button type="button" onClick={() => { setMarkCancelledDialogOpen(false); resetMarkCancelled(); }} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+              {t('cancel')}
             </button>
           </div>
         </form>

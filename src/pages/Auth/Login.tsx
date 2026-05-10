@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { Link as RouterLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { LoginCredentials } from '../../types/auth'
@@ -41,6 +42,7 @@ const GoogleIcon = () => (
 
 const Login: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const { state: authState, login, clearError } = useAuth()
   const recaptchaRef = useRef<ReCAPTCHA>(null)
 
@@ -79,10 +81,10 @@ const Login: React.FC = () => {
   }
 
   const onSubmit: SubmitHandler<LoginFormData> = async (data) => {
-    const loadingToast = toast.loading('Signing in...')
+    const loadingToast = toast.loading(t('signing_in'))
     try {
       await login(data as LoginCredentials, true)
-      toast.success('Successfully logged in!', { id: loadingToast })
+      toast.success(t('login_success'), { id: loadingToast })
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || error.response?.data?.message || 'Login failed'
       toast.error(errorMsg, { id: loadingToast })
@@ -95,10 +97,10 @@ const Login: React.FC = () => {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors duration-200">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-          Algo Feedback System
+          {t('system_title')}
         </h1>
         <h2 className="mt-2 text-center text-lg text-gray-600 dark:text-gray-400">
-          Sign In
+          {t('sign_in')}
         </h2>
       </div>
 
@@ -128,7 +130,7 @@ const Login: React.FC = () => {
           <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email Address
+                {t('email_address')}
               </label>
               <div className="mt-1">
                 <input
@@ -152,7 +154,7 @@ const Login: React.FC = () => {
 
             <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Password
+                {t('password')}
               </label>
               <div className="mt-1">
                 <input
@@ -177,7 +179,7 @@ const Login: React.FC = () => {
                   to="/forgot-password"
                   className="text-xs font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 transition-colors"
                 >
-                  Forgot your password?
+                  {t('forgot_password')}
                 </RouterLink>
               </div>
             </div>
@@ -206,7 +208,7 @@ const Login: React.FC = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                ) : 'Sign In'}
+                ) : t('sign_in')}
               </button>
             </div>
           </form>
@@ -217,7 +219,7 @@ const Login: React.FC = () => {
                 <div className="w-full border-t border-gray-300 dark:border-gray-600" />
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
+                <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">{t('or_continue_with')}</span>
               </div>
             </div>
 
@@ -227,14 +229,14 @@ const Login: React.FC = () => {
                 className="w-full flex justify-center items-center py-2 px-4 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
               >
                 <GoogleIcon />
-                Sign in with Google
+                {t('sign_in_google')}
               </button>
             </div>
           </div>
 
           <div className="mt-6 text-center">
             <RouterLink to="/register" className="font-medium text-blue-600 dark:text-blue-400 hover:text-blue-500 dark:hover:text-blue-300 text-sm transition-colors">
-              Don't have an account? Sign Up
+              {t('dont_have_account')}
             </RouterLink>
           </div>
         </div>

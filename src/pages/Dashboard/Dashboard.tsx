@@ -10,6 +10,7 @@ import {
   X
 } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import api from '../../api/axios'
 import { Student, Group, Lesson, Feedback } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
@@ -24,6 +25,7 @@ interface DashboardStats {
 
 const Dashboard: React.FC = () => {
   const navigate = useNavigate()
+  const { t } = useTranslation()
   const [stats, setStats] = useState<DashboardStats>({
     totalStudents: 0,
     totalGroups: 0,
@@ -121,7 +123,7 @@ const Dashboard: React.FC = () => {
 
   const statCards = [
     {
-      title: 'Total Students',
+      title: t('total_students'),
       value: stats.totalStudents,
       icon: <Users className="w-8 h-8" />,
       color: 'text-blue-600 dark:text-blue-400',
@@ -129,7 +131,7 @@ const Dashboard: React.FC = () => {
       action: () => navigate('/students'),
     },
     {
-      title: 'Total Groups',
+      title: t('total_groups'),
       value: stats.totalGroups,
       icon: <UsersRound className="w-8 h-8" />,
       color: 'text-green-600 dark:text-green-400',
@@ -137,7 +139,7 @@ const Dashboard: React.FC = () => {
       action: () => navigate('/groups'),
     },
     {
-      title: 'Total Lessons',
+      title: t('total_lessons'),
       value: stats.totalLessons,
       icon: <GraduationCap className="w-8 h-8" />,
       color: 'text-orange-600 dark:text-orange-400',
@@ -145,7 +147,7 @@ const Dashboard: React.FC = () => {
       action: () => navigate('/lessons'),
     },
     {
-      title: 'Total Feedbacks',
+      title: t('total_feedbacks'),
       value: stats.totalFeedbacks,
       icon: <LineChart className="w-8 h-8" />,
       color: 'text-purple-600 dark:text-purple-400',
@@ -168,8 +170,8 @@ const Dashboard: React.FC = () => {
   return (
     <div className="transition-colors duration-200">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Welcome to Algo Feedback System</p>
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{t('nav_dashboard')}</h1>
+        <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{t('welcome_msg')}</p>
       </div>
 
       {/* Statistics Cards */}
@@ -198,13 +200,13 @@ const Dashboard: React.FC = () => {
         {/* Recent Lessons */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
           <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Lessons</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('recent_lessons')}</h2>
             <button
               onClick={() => navigate('/lessons')}
               className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <Plus className="-ml-1 mr-2 h-4 w-4" />
-              Add Lesson
+              {t('add_lesson')}
             </button>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3 transition-colors duration-200">
@@ -214,7 +216,7 @@ const Dashboard: React.FC = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search lessons..."
+                placeholder={t('search_lessons')}
                 value={lessonsSearch}
                 onChange={(e) => setLessonsSearch(e.target.value)}
                 className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -243,13 +245,13 @@ const Dashboard: React.FC = () => {
               onChange={(e) => setLessonsSortDir(e.target.value as 'asc' | 'desc')}
               className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
+              <option value="asc">{t('ascending')}</option>
+              <option value="desc">{t('descending')}</option>
             </select>
           </div>
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAndSortedLessons.length === 0 ? (
-              <li className="p-6 text-center text-gray-500 dark:text-gray-400">No lessons found</li>
+              <li className="p-6 text-center text-gray-500 dark:text-gray-400">{t('no_lessons_found')}</li>
             ) : (
               filteredAndSortedLessons.map((lesson) => (
                 <li key={lesson.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
@@ -264,13 +266,13 @@ const Dashboard: React.FC = () => {
         {/* Recent Feedbacks */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden transition-colors duration-200">
           <div className="p-6 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Recent Feedbacks</h2>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">{t('recent_feedbacks')}</h2>
             <button
               onClick={() => navigate('/feedbacks')}
               className="inline-flex items-center px-3 py-1.5 border border-gray-300 dark:border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-200 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               <Upload className="-ml-1 mr-2 h-4 w-4" />
-              Generate
+              {t('generate')}
             </button>
           </div>
           <div className="p-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-100 dark:border-gray-700 flex flex-col sm:flex-row gap-3 transition-colors duration-200">
@@ -280,7 +282,7 @@ const Dashboard: React.FC = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search feedbacks..."
+                placeholder={t('search_feedbacks')}
                 value={feedbacksSearch}
                 onChange={(e) => setFeedbacksSearch(e.target.value)}
                 className="block w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
@@ -308,13 +310,13 @@ const Dashboard: React.FC = () => {
               onChange={(e) => setFeedbacksSortDir(e.target.value as 'asc' | 'desc')}
               className="block w-full sm:w-36 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md transition-colors"
             >
-              <option value="asc">Ascending</option>
-              <option value="desc">Descending</option>
+              <option value="asc">{t('ascending')}</option>
+              <option value="desc">{t('descending')}</option>
             </select>
           </div>
           <ul className="divide-y divide-gray-200 dark:divide-gray-700">
             {filteredAndSortedFeedbacks.length === 0 ? (
-              <li className="p-6 text-center text-gray-500 dark:text-gray-400">No feedbacks found</li>
+              <li className="p-6 text-center text-gray-500 dark:text-gray-400">{t('no_feedbacks_found')}</li>
             ) : (
               filteredAndSortedFeedbacks.map((feedback) => (
                 <li key={feedback.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">

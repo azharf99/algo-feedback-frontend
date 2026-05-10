@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
+import { useTranslation } from 'react-i18next'
 import { User as UserIcon, Lock, Key, Smartphone, Save, ShieldCheck } from 'lucide-react'
 import { profileApi } from '../../api/services'
 import { useAuth } from '../../contexts/AuthContext'
@@ -18,6 +19,7 @@ const profileSchema = z.object({
 type ProfileFormData = z.infer<typeof profileSchema>
 
 const Profile: React.FC = () => {
+  const { t } = useTranslation()
   const { state: authState, updateUser } = useAuth()
   const [loading, setLoading] = useState(false)
 
@@ -44,7 +46,7 @@ const Profile: React.FC = () => {
       
       const updatedUser = await profileApi.updateProfile(filteredData, true)
       updateUser(updatedUser)
-      toast.success('Profile updated successfully')
+      toast.success(t('profile_updated_success'))
     } catch (error: any) {
       // Global interceptor handles this
     } finally {
@@ -57,10 +59,10 @@ const Profile: React.FC = () => {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900 dark:text-white flex items-center gap-3">
           <UserIcon className="w-8 h-8 text-blue-600" />
-          My Profile
+          {t('nav_profile')}
         </h1>
         <p className="mt-2 text-gray-600 dark:text-gray-400">
-          Manage your account settings and WhatsApp API configuration.
+          {t('profile_desc')}
         </p>
       </div>
 
@@ -71,13 +73,13 @@ const Profile: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-6 text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
                 <ShieldCheck className="w-5 h-5 text-blue-500" />
-                <h2 className="text-xl font-semibold">Account Information</h2>
+                <h2 className="text-xl font-semibold">{t('account_info')}</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Full Name
+                    {t('full_name')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -90,7 +92,7 @@ const Profile: React.FC = () => {
                         "block w-full pl-10 pr-3 py-2 border rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm dark:bg-gray-700 dark:text-white transition-all",
                         errors.name ? "border-red-300 ring-red-100 ring-2" : "border-gray-300 dark:border-gray-600"
                       )}
-                      placeholder="Your full name"
+                      placeholder={t('full_name_placeholder')}
                     />
                   </div>
                   {errors.name && <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>}
@@ -98,7 +100,7 @@ const Profile: React.FC = () => {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Email Address
+                    {t('email_address')}
                   </label>
                   <input
                     type="email"
@@ -106,12 +108,12 @@ const Profile: React.FC = () => {
                     disabled
                     className="block w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl shadow-sm bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 cursor-not-allowed sm:text-sm"
                   />
-                  <p className="mt-1 text-xs text-gray-400 italic">Email cannot be changed.</p>
+                  <p className="mt-1 text-xs text-gray-400 italic">{t('email_no_change')}</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    New Password
+                    {t('new_password')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -124,12 +126,12 @@ const Profile: React.FC = () => {
                       placeholder="••••••••"
                     />
                   </div>
-                  <p className="mt-1 text-xs text-gray-400">Leave empty to keep current password.</p>
+                  <p className="mt-1 text-xs text-gray-400">{t('leave_empty_password')}.</p>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    Role
+                    {t('role')}
                   </label>
                   <div className="px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-xl bg-gray-50 dark:bg-gray-900 text-gray-500 dark:text-gray-400 sm:text-sm capitalize">
                     {authState.user?.role}
@@ -142,13 +144,13 @@ const Profile: React.FC = () => {
             <div>
               <div className="flex items-center gap-2 mb-6 text-gray-900 dark:text-white border-b border-gray-100 dark:border-gray-700 pb-2">
                 <Smartphone className="w-5 h-5 text-green-500" />
-                <h2 className="text-xl font-semibold">WhatsApp Integration</h2>
+                <h2 className="text-xl font-semibold">{t('wa_integration')}</h2>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    WhatsApp API Key
+                    {t('whatsapp_api_key')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -158,14 +160,14 @@ const Profile: React.FC = () => {
                       type="text"
                       {...register('whatsapp_api_key')}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm dark:bg-gray-700 dark:text-white transition-all"
-                      placeholder="e.g. your-api-key"
+                      placeholder={t('api_key_placeholder')}
                     />
                   </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                    WhatsApp Device ID
+                    {t('whatsapp_device_id')}
                   </label>
                   <div className="relative">
                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -175,13 +177,13 @@ const Profile: React.FC = () => {
                       type="text"
                       {...register('whatsapp_device_id')}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm dark:bg-gray-700 dark:text-white transition-all"
-                      placeholder="e.g. 1"
+                      placeholder={t('device_id_placeholder')}
                     />
                   </div>
                 </div>
               </div>
               <p className="mt-4 text-sm text-gray-500 dark:text-gray-400 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800">
-                <strong>Tip:</strong> These credentials are required to send automated feedback messages via WhatsApp. You can find them in your WA Gateway dashboard.
+                <strong>Tip:</strong> {t('wa_tip')}
               </p>
             </div>
 
@@ -200,7 +202,7 @@ const Profile: React.FC = () => {
                 ) : (
                   <Save className="-ml-1 mr-2 h-5 w-5" />
                 )}
-                Save Changes
+                {loading ? t('saving') : t('save_changes')}
               </button>
             </div>
           </form>
