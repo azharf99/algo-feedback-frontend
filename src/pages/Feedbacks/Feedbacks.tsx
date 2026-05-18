@@ -339,7 +339,6 @@ const Feedbacks: React.FC = () => {
     }
     const parsed = parseInt(score)
     if (isNaN(parsed)) return score
-    // @ts-expect-error - Expected due to missing type definition
     return labels[type][parsed] || score
   }
 
