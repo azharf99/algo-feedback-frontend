@@ -20,7 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { feedbackApi, groupApi, studentApi, courseApi } from '../../api/services'
-import { Feedback, Group, Student, Course } from '../../types/data'
+import { Feedback, Group, Student, Course, GraduationFeedback } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -52,6 +52,13 @@ const graduationSchema = z.object({
 })
 
 type GraduationFormData = z.infer<typeof graduationSchema>
+
+const editGraduationSchema = z.object({
+  grade: z.string().min(1, 'Grade is required'),
+  tutor_feedback: z.string().min(1, 'Tutor feedback is required'),
+})
+
+type EditGraduationFormData = z.infer<typeof editGraduationSchema>
 
 const Feedbacks: React.FC = () => {
   const { t } = useTranslation()
@@ -86,8 +93,17 @@ const Feedbacks: React.FC = () => {
     pdf_pending: 0,
     is_sent: 0
   })
-  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('THIS_WEEK')
+  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK' | 'GRADUATION'>('THIS_WEEK')
   const [summaryData, setSummaryData] = useState<{ last_week: Feedback[]; this_week: Feedback[]; next_week: Feedback[] } | null>(null)
+  const [graduationFeedbacks, setGraduationFeedbacks] = useState<GraduationFeedback[]>([])
+  const [graduationPagination, setGraduationPagination] = useState({
+    page: 1,
+    limit: 10,
+    total: 0,
+    total_pages: 0
+  })
+  const [editingGraduation, setEditingGraduation] = useState<GraduationFeedback | null>(null)
+  const [graduationEditOpen, setGraduationEditOpen] = useState(false)
 
   const fetchSummary = async () => {
     try {
@@ -102,7 +118,7 @@ const Feedbacks: React.FC = () => {
     let source: Feedback[] = []
     if (currentTab === 'ALL') {
       source = feedbacks
-    } else if (summaryData) {
+    } else if (summaryData && currentTab !== 'GRADUATION') {
       source = currentTab === 'LAST_WEEK' ? summaryData.last_week :
                currentTab === 'THIS_WEEK' ? summaryData.this_week :
                summaryData.next_week
@@ -118,7 +134,7 @@ const Feedbacks: React.FC = () => {
       )
     }
     
-    if (currentTab !== 'ALL') {
+    if (currentTab !== 'ALL' && currentTab !== 'GRADUATION') {
       filtered = [...filtered].sort((a, b) => {
         const valA = a[sortField as keyof Feedback]
         const valB = b[sortField as keyof Feedback]
@@ -132,6 +148,19 @@ const Feedbacks: React.FC = () => {
       })
     }
     
+    return filtered
+  }
+
+  const getDisplayGraduationFeedbacks = () => {
+    let filtered = graduationFeedbacks
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase()
+      filtered = graduationFeedbacks.filter(f => 
+        f.student?.fullname?.toLowerCase().includes(searchLower) ||
+        f.course?.toLowerCase().includes(searchLower) ||
+        f.id.toString().includes(searchLower)
+      )
+    }
     return filtered
   }
 
@@ -167,16 +196,29 @@ const Feedbacks: React.FC = () => {
     resolver: zodResolver(graduationSchema),
   })
 
+  const {
+    register: registerEditGraduation,
+    handleSubmit: handleEditGraduationSubmit,
+    reset: resetEditGraduation,
+    formState: { errors: editGraduationErrors },
+  } = useForm<EditGraduationFormData>({
+    resolver: zodResolver(editGraduationSchema),
+  })
+
   useEffect(() => {
     fetchData(1)
   }, [debouncedSearch, sortField, sortDir])
 
   useEffect(() => {
-    fetchData(feedbackPagination.page, feedbackPagination.limit)
-  }, [feedbackPagination.page, feedbackPagination.limit])
+    if (currentTab === 'GRADUATION') {
+      fetchData(graduationPagination.page, graduationPagination.limit)
+    } else {
+      fetchData(feedbackPagination.page, feedbackPagination.limit)
+    }
+  }, [feedbackPagination.page, feedbackPagination.limit, graduationPagination.page, graduationPagination.limit, currentTab])
 
   useEffect(() => {
-    if (currentTab !== 'ALL') {
+    if (currentTab !== 'ALL' && currentTab !== 'GRADUATION') {
       if (!summaryData) {
         fetchSummary()
       }
@@ -205,55 +247,84 @@ const Feedbacks: React.FC = () => {
 
   // Auto-polling if there are pending PDFs
   useEffect(() => {
-    const hasPendingPdf = getDisplayFeedbacks().some(f => !f.url_pdf)
+    const hasPendingPdf = currentTab === 'GRADUATION' 
+      ? getDisplayGraduationFeedbacks().some(f => !f.url_pdf)
+      : getDisplayFeedbacks().some(f => !f.url_pdf)
     if (!hasPendingPdf) return
 
     const interval = setInterval(() => {
-      fetchData(feedbackPagination.page, feedbackPagination.limit, true)
-      if (currentTab !== 'ALL') fetchSummary()
+      if (currentTab === 'GRADUATION') {
+        fetchData(graduationPagination.page, graduationPagination.limit, true)
+      } else {
+        fetchData(feedbackPagination.page, feedbackPagination.limit, true)
+        if (currentTab !== 'ALL') fetchSummary()
+      }
     }, 10000) // Poll every 10 seconds
 
     return () => clearInterval(interval)
-  }, [feedbacks, summaryData, feedbackPagination.page, feedbackPagination.limit, currentTab])
+  }, [feedbacks, summaryData, graduationFeedbacks, feedbackPagination.page, feedbackPagination.limit, graduationPagination.page, graduationPagination.limit, currentTab])
 
-  const fetchData = async (page: number, limit: number = feedbackPagination.limit, silent: boolean = false) => {
+  const fetchData = async (page: number, limit: number = (currentTab === 'GRADUATION' ? graduationPagination.limit : feedbackPagination.limit), silent: boolean = false) => {
     if (!silent) setLoading(true)
     setIsRefreshing(true)
     if (!silent) setSelectedIds([])
     try {
-      const [feedbacksRes, groupsRes] = await Promise.all([
-        feedbackApi.getFeedbacks({
-          page,
-          limit,
-          search: debouncedSearch,
-          sort_by: sortField,
-          sort_dir: sortDir
-        }) as unknown as Promise<{
-          data: Feedback[];
-          meta?: { total: number; page: number; limit: number; total_pages: number };
-          stats?: { total: number; pdf_generated: number; pdf_pending: number; is_sent: number };
-          page?: number; limit?: number; total?: number; total_pages?: number; // fallback
-        }>,
-        groupApi.getGroups()
-      ])
-      
-      setFeedbacks(feedbacksRes.data)
-      setGroups(groupsRes.data)
-      
-      const stats = feedbacksRes.stats || {
-        total: feedbacksRes.meta?.total || feedbacksRes.total || 0,
-        pdf_generated: 0,
-        pdf_pending: 0,
-        is_sent: 0
+      if (currentTab === 'GRADUATION') {
+        const [graduationRes, groupsRes] = await Promise.all([
+          feedbackApi.getGraduationFeedbacks({
+            page,
+            limit,
+            search: debouncedSearch,
+            sort_by: sortField,
+            sort_dir: sortDir
+          }),
+          groupApi.getGroups()
+        ])
+        
+        setGraduationFeedbacks(graduationRes.data)
+        setGroups(groupsRes.data)
+        
+        setGraduationPagination({
+          page: graduationRes.page ?? 1,
+          limit: graduationRes.limit ?? 10,
+          total: graduationRes.total ?? 0,
+          total_pages: graduationRes.total_pages ?? 1
+        })
+      } else {
+        const [feedbacksRes, groupsRes] = await Promise.all([
+          feedbackApi.getFeedbacks({
+            page,
+            limit,
+            search: debouncedSearch,
+            sort_by: sortField,
+            sort_dir: sortDir
+          }) as unknown as Promise<{
+            data: Feedback[];
+            meta?: { total: number; page: number; limit: number; total_pages: number };
+            stats?: { total: number; pdf_generated: number; pdf_pending: number; is_sent: number };
+            page?: number; limit?: number; total?: number; total_pages?: number; // fallback
+          }>,
+          groupApi.getGroups()
+        ])
+        
+        setFeedbacks(feedbacksRes.data)
+        setGroups(groupsRes.data)
+        
+        const stats = feedbacksRes.stats || {
+          total: feedbacksRes.meta?.total || feedbacksRes.total || 0,
+          pdf_generated: 0,
+          pdf_pending: 0,
+          is_sent: 0
+        }
+        setFeedbackStats(stats)
+        
+        setFeedbackPagination({
+          page: feedbacksRes.meta?.page ?? feedbacksRes.page ?? 1,
+          limit: feedbacksRes.meta?.limit ?? feedbacksRes.limit ?? 10,
+          total: feedbacksRes.meta?.total ?? feedbacksRes.total ?? 0,
+          total_pages: feedbacksRes.meta?.total_pages ?? feedbacksRes.total_pages ?? 1
+        })
       }
-      setFeedbackStats(stats)
-      
-      setFeedbackPagination({
-        page: feedbacksRes.meta?.page ?? feedbacksRes.page ?? 1,
-        limit: feedbacksRes.meta?.limit ?? feedbacksRes.limit ?? 10,
-        total: feedbacksRes.meta?.total ?? feedbacksRes.total ?? 0,
-        total_pages: feedbacksRes.meta?.total_pages ?? feedbacksRes.total_pages ?? 1
-      })
     } catch (error) {
       // Global interceptor handles this
     } finally {
@@ -461,6 +532,61 @@ const Feedbacks: React.FC = () => {
     resetGraduation()
   }
 
+  const handleEditGraduation = (gf: GraduationFeedback) => {
+    setEditingGraduation(gf)
+    resetEditGraduation({
+      grade: gf.grade,
+      tutor_feedback: gf.tutor_feedback
+    })
+    setGraduationEditOpen(true)
+  }
+
+  const onEditGraduationSubmit: SubmitHandler<EditGraduationFormData> = async (data) => {
+    if (!editingGraduation) return
+    try {
+      await feedbackApi.updateGraduationFeedback(editingGraduation.id, data, true)
+      toast.success(t('feedback_updated_success'))
+      fetchData(graduationPagination.page)
+      setGraduationEditOpen(false)
+      setEditingGraduation(null)
+      resetEditGraduation()
+    } catch (error: any) {
+      // Global interceptor handles this
+    }
+  }
+
+  const handleDeleteGraduation = async (id: number) => {
+    if (window.confirm(t('delete_feedback_confirm'))) {
+      try {
+        await feedbackApi.deleteGraduationFeedback(id, true)
+        toast.success(t('feedback_deleted_success'))
+        fetchData(graduationPagination.page)
+      } catch (error: any) {
+        // Global interceptor handles this
+      }
+    }
+  }
+
+  const handleDownloadGraduationPdf = async (gf: GraduationFeedback) => {
+    const loadingToast = toast.loading(t('download_pdf'))
+    try {
+      const blob = await feedbackApi.downloadGraduationPdf(gf.id, true)
+      const url = window.URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      const filename = `Graduation_${gf.student?.fullname || gf.student_id}_${gf.course}.pdf`.replace(/\s+/g, '_')
+      a.download = filename
+      document.body.appendChild(a)
+      a.click()
+      window.URL.revokeObjectURL(url)
+      document.body.removeChild(a)
+      toast.success(t('download_started'), { id: loadingToast })
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || 'Failed to download PDF'
+      toast.error(errorMsg, { id: loadingToast })
+    }
+  }
+
   const getScoreLabel = (score: string, type: 'attendance' | 'activity' | 'task') => {
     const labels = {
       attendance: [t('score_none'), t('score_rarely'), t('score_sometimes'), t('score_often'), t('score_always')],
@@ -571,7 +697,7 @@ const Feedbacks: React.FC = () => {
       {/* Tabs */}
       <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
         <nav className="-mb-px flex space-x-8" aria-label="Tabs">
-          {['ALL', 'LAST_WEEK', 'THIS_WEEK', 'NEXT_WEEK'].map((tab) => (
+          {['ALL', 'LAST_WEEK', 'THIS_WEEK', 'NEXT_WEEK', 'GRADUATION'].map((tab) => (
             <button
               key={tab}
               onClick={() => setCurrentTab(tab as any)}
@@ -585,7 +711,8 @@ const Feedbacks: React.FC = () => {
               {tab === 'ALL' ? t('all') :
                tab === 'LAST_WEEK' ? t('feedback_last_week') :
                tab === 'THIS_WEEK' ? t('feedback_this_week') :
-               t('feedback_next_week')}
+               tab === 'NEXT_WEEK' ? t('feedback_next_week') :
+               t('nav_graduation_feedback')}
             </button>
           ))}
         </nav>
@@ -654,20 +781,22 @@ const Feedbacks: React.FC = () => {
           <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
             <thead className="bg-gray-50 dark:bg-gray-900/50">
               <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-                    checked={selectedIds.length === getDisplayFeedbacks().length && getDisplayFeedbacks().length > 0}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedIds(getDisplayFeedbacks().map(f => f.id))
-                      } else {
-                        setSelectedIds([])
-                      }
-                    }}
-                  />
-                </th>
+                {currentTab !== 'GRADUATION' && (
+                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    <input
+                      type="checkbox"
+                      className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
+                      checked={selectedIds.length === getDisplayFeedbacks().length && getDisplayFeedbacks().length > 0}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedIds(getDisplayFeedbacks().map(f => f.id))
+                        } else {
+                          setSelectedIds([])
+                        }
+                      }}
+                    />
+                  </th>
+                )}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
                 <th
                   scope="col"
@@ -682,26 +811,41 @@ const Feedbacks: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('course')}
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => toggleSort('number')}
-                >
-                  <div className="flex items-center gap-1">{t('feedback_number_col')} {renderSortIcon('number')}</div>
-                </th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  {t('scores')}
-                </th>
+                {currentTab === 'GRADUATION' ? (
+                  <>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('grade')}
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('tutor_comments')}
+                    </th>
+                  </>
+                ) : (
+                  <>
+                    <th
+                      scope="col"
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                      onClick={() => toggleSort('number')}
+                    >
+                      <div className="flex items-center gap-1">{t('feedback_number_col')} {renderSortIcon('number')}</div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                      {t('scores')}
+                    </th>
+                  </>
+                )}
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   PDF
                 </th>
-                <th
-                  scope="col"
-                  className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  onClick={() => toggleSort('is_sent')}
-                >
-                  <div className="flex items-center gap-1">{t('whatsapp_col')} {renderSortIcon('is_sent')}</div>
-                </th>
+                {currentTab !== 'GRADUATION' && (
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                    onClick={() => toggleSort('is_sent')}
+                  >
+                    <div className="flex items-center gap-1">{t('whatsapp_col')} {renderSortIcon('is_sent')}</div>
+                  </th>
+                )}
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('actions')}
                 </th>
@@ -710,13 +854,77 @@ const Feedbacks: React.FC = () => {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={10} className="px-6 py-10 text-center">
+                  <td colSpan={currentTab === 'GRADUATION' ? 8 : 10} className="px-6 py-10 text-center">
                     <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
                   </td>
                 </tr>
+              ) : currentTab === 'GRADUATION' ? (
+                getDisplayGraduationFeedbacks().length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                      {t('no_feedbacks_found')}
+                    </td>
+                  </tr>
+                ) : (
+                  getDisplayGraduationFeedbacks().map((gf, index) => (
+                    <tr key={gf.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                        {(graduationPagination.page - 1) * graduationPagination.limit + index + 1}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{gf.id}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{gf.student?.fullname || `${t('student')} ${gf.student_id}`}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{gf.course}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white font-semibold">{gf.grade}</td>
+                      <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-xs truncate" title={gf.tutor_feedback}>
+                        {gf.tutor_feedback}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {gf.url_pdf ? (
+                          <button
+                            onClick={() => handleDownloadGraduationPdf(gf)}
+                            className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300"
+                            title={t('view_pdf')}
+                          >
+                            <span className="text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 p-1 rounded inline-flex items-center gap-1" title="PDF Generated">
+                              <FileText className="w-5 h-5" /> {t('view_pdf')}
+                            </span>
+                          </button>
+                        ) : (
+                          <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400 italic text-xs">
+                            <RefreshCw className="w-3 h-3 animate-spin" />
+                            {t('pending')}...
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button
+                          onClick={() => handleEditGraduation(gf)}
+                          className="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300 mx-1 p-1 rounded-md hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors hover:scale-110"
+                          title={t('edit_feedback')}
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDownloadGraduationPdf(gf)}
+                          className="text-orange-600 hover:text-orange-900 dark:text-orange-400 dark:hover:text-orange-300 mx-1 p-1 rounded-md hover:bg-orange-50 dark:hover:bg-orange-900/20 transition-all duration-200 hover:scale-110"
+                          title={t('download_pdf')}
+                        >
+                          <FileText className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGraduation(gf.id)}
+                          className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 mx-1 p-1 rounded-md hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )
               ) : getDisplayFeedbacks().length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
@@ -828,19 +1036,31 @@ const Feedbacks: React.FC = () => {
 
         {/* Pagination */}
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-          {currentTab === 'ALL' ? (
+          {currentTab === 'ALL' || currentTab === 'GRADUATION' ? (
             <>
               <div className="flex-1 flex justify-between sm:hidden">
             <button
-              onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-              disabled={feedbackPagination.page === 1}
+              onClick={() => {
+                if (currentTab === 'GRADUATION') {
+                  setGraduationPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))
+                } else {
+                  setFeedbackPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))
+                }
+              }}
+              disabled={currentTab === 'GRADUATION' ? graduationPagination.page === 1 : feedbackPagination.page === 1}
               className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               {t('previous')}
             </button>
             <button
-              onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
-              disabled={feedbackPagination.page >= feedbackPagination.total_pages}
+              onClick={() => {
+                if (currentTab === 'GRADUATION') {
+                  setGraduationPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))
+                } else {
+                  setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))
+                }
+              }}
+              disabled={currentTab === 'GRADUATION' ? graduationPagination.page >= graduationPagination.total_pages : feedbackPagination.page >= feedbackPagination.total_pages}
               className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
             >
               {t('next')}
@@ -849,11 +1069,26 @@ const Feedbacks: React.FC = () => {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (getDisplayFeedbacks().length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + getDisplayFeedbacks().length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> {t('results')}
+                {currentTab === 'GRADUATION' ? (
+                  <>
+                    {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(graduationPagination.page - 1) * graduationPagination.limit + (getDisplayGraduationFeedbacks().length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(graduationPagination.page - 1) * graduationPagination.limit + getDisplayGraduationFeedbacks().length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{graduationPagination.total}</span> {t('results')}
+                  </>
+                ) : (
+                  <>
+                    {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (getDisplayFeedbacks().length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + getDisplayFeedbacks().length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> {t('results')}
+                  </>
+                )}
               </p>
               <select
-                value={feedbackPagination.limit}
-                onChange={(e) => setFeedbackPagination(prev => ({ ...prev, limit: Number(e.target.value), page: 1 }))}
+                value={currentTab === 'GRADUATION' ? graduationPagination.limit : feedbackPagination.limit}
+                onChange={(e) => {
+                  const limitVal = Number(e.target.value)
+                  if (currentTab === 'GRADUATION') {
+                    setGraduationPagination(prev => ({ ...prev, limit: limitVal, page: 1 }))
+                  } else {
+                    setFeedbackPagination(prev => ({ ...prev, limit: limitVal, page: 1 }))
+                  }
+                }}
                 className="ml-2 block w-full pl-3 pr-10 py-1 text-sm border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md transition-colors"
               >
                 <option value={10}>10 / {t('per_page')}</option>
@@ -865,19 +1100,35 @@ const Feedbacks: React.FC = () => {
             <div>
               <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
                 <button
-                  onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-                  disabled={feedbackPagination.page === 1}
+                  onClick={() => {
+                    if (currentTab === 'GRADUATION') {
+                      setGraduationPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))
+                    } else {
+                      setFeedbackPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))
+                    }
+                  }}
+                  disabled={currentTab === 'GRADUATION' ? graduationPagination.page === 1 : feedbackPagination.page === 1}
                   className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">{t('previous')}</span>
                   <ChevronLeft className="h-5 w-5" aria-hidden="true" />
                 </button>
                 <span className="relative inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300">
-                  {t('page_x_of_y', { current: feedbackPagination.page, total: Math.max(1, feedbackPagination.total_pages) })}
+                  {currentTab === 'GRADUATION' ? (
+                    t('page_x_of_y', { current: graduationPagination.page, total: Math.max(1, graduationPagination.total_pages) })
+                  ) : (
+                    t('page_x_of_y', { current: feedbackPagination.page, total: Math.max(1, feedbackPagination.total_pages) })
+                  )}
                 </span>
                 <button
-                  onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))}
-                  disabled={feedbackPagination.page >= feedbackPagination.total_pages}
+                  onClick={() => {
+                    if (currentTab === 'GRADUATION') {
+                      setGraduationPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))
+                    } else {
+                      setFeedbackPagination(prev => ({ ...prev, page: Math.min(prev.total_pages, prev.page + 1) }))
+                    }
+                  }}
+                  disabled={currentTab === 'GRADUATION' ? graduationPagination.page >= graduationPagination.total_pages : feedbackPagination.page >= feedbackPagination.total_pages}
                   className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm font-medium text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 transition-colors"
                 >
                   <span className="sr-only">Next</span>
@@ -1036,6 +1287,59 @@ const Feedbacks: React.FC = () => {
             <button type="button" onClick={handleCloseGraduationDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
             <button type="submit" disabled={isGeneratingGraduationPdf} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors">
               {isGeneratingGraduationPdf ? 'Generating...' : t('generate')}
+            </button>
+          </div>
+        </form>
+      </Modal>
+      {/* Edit Graduation Feedback Modal */}
+      <Modal
+        open={graduationEditOpen}
+        onClose={() => {
+          setGraduationEditOpen(false)
+          setEditingGraduation(null)
+          resetEditGraduation()
+        }}
+        title={t('edit_feedback')}
+        maxWidth="sm"
+      >
+        <form onSubmit={handleEditGraduationSubmit(onEditGraduationSubmit)}>
+          <div className="px-6 py-4 space-y-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('grade')}</label>
+              <input 
+                type="text" 
+                {...registerEditGraduation('grade')} 
+                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", editGraduationErrors.grade ? "border-red-300" : "border-gray-300")} 
+              />
+              {editGraduationErrors.grade && <p className="mt-1 text-sm text-red-600">{editGraduationErrors.grade.message}</p>}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('tutor_comments')}</label>
+              <textarea 
+                {...registerEditGraduation('tutor_feedback')} 
+                rows={4} 
+                className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", editGraduationErrors.tutor_feedback ? "border-red-300" : "border-gray-300")}
+              ></textarea>
+              {editGraduationErrors.tutor_feedback && <p className="mt-1 text-sm text-red-600">{editGraduationErrors.tutor_feedback.message}</p>}
+            </div>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button 
+              type="button" 
+              onClick={() => {
+                setGraduationEditOpen(false)
+                setEditingGraduation(null)
+                resetEditGraduation()
+              }} 
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors"
+            >
+              {t('cancel')}
+            </button>
+            <button 
+              type="submit" 
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors"
+            >
+              {t('update')}
             </button>
           </div>
         </form>

@@ -130,3 +130,20 @@ export interface PaginationParams {
   sort_by?: string
   sort_dir?: string
 }
+
+export interface GraduationFeedback {
+  id: number
+  user_id: number
+  student_id: number
+  course: string
+  grade: string
+  tutor_feedback: string
+  url_pdf: string
+  created_at: string
+  updated_at: string
+  student?: {
+    id: number
+    fullname: string
+  }
+}
+

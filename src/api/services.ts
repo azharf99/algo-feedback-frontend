@@ -1,5 +1,5 @@
 import api from './axios'
-import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams } from '../types/data'
+import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams, GraduationFeedback } from '../types/data'
 import { ForgotPasswordData, ResetPasswordData } from '../types/auth'
 
 // Build query string from pagination parameters
@@ -450,5 +450,32 @@ export const feedbackApi = {
       headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
     })
     return response.data
+  },
+
+  getGraduationFeedbacks: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<GraduationFeedback>> => {
+    const response = await api.get(`/feedbacks/graduation${buildQueryParams(params)}`, { 
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    })
+    return response.data
+  },
+
+  downloadGraduationPdf: async (id: number, skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get(`/feedbacks/graduation/${id}/download`, {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    })
+    return response.data
+  },
+
+  updateGraduationFeedback: async (id: number, data: { grade?: string; tutor_feedback?: string }, skipToast?: boolean): Promise<void> => {
+    await api.put(`/feedbacks/graduation/${id}`, data, { 
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    })
+  },
+
+  deleteGraduationFeedback: async (id: number, skipToast?: boolean): Promise<void> => {
+    await api.delete(`/feedbacks/graduation/${id}`, { 
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    })
   }
 }
