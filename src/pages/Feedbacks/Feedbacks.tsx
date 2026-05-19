@@ -75,6 +75,54 @@ const Feedbacks: React.FC = () => {
     pdf_pending: 0,
     is_sent: 0
   })
+  const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('THIS_WEEK')
+  const [summaryData, setSummaryData] = useState<{ last_week: Feedback[]; this_week: Feedback[]; next_week: Feedback[] } | null>(null)
+
+  const fetchSummary = async () => {
+    try {
+      const res = await feedbackApi.getSummary()
+      setSummaryData(res.data)
+    } catch (error) {
+      // Global interceptor handles this
+    }
+  }
+
+  const getDisplayFeedbacks = () => {
+    let source: Feedback[] = []
+    if (currentTab === 'ALL') {
+      source = feedbacks
+    } else if (summaryData) {
+      source = currentTab === 'LAST_WEEK' ? summaryData.last_week :
+               currentTab === 'THIS_WEEK' ? summaryData.this_week :
+               summaryData.next_week
+    }
+    
+    let filtered = source
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase()
+      filtered = source.filter(f => 
+        f.student?.fullname?.toLowerCase().includes(searchLower) ||
+        f.course?.toLowerCase().includes(searchLower) ||
+        f.id.toString().includes(searchLower)
+      )
+    }
+    
+    if (currentTab !== 'ALL') {
+      filtered = [...filtered].sort((a, b) => {
+        const valA = a[sortField as keyof Feedback]
+        const valB = b[sortField as keyof Feedback]
+        
+        if (valA === valB) return 0
+        if (valA === null || valA === undefined) return 1
+        if (valB === null || valB === undefined) return -1
+        
+        const compare = valA < valB ? -1 : 1
+        return sortDir === 'asc' ? compare : -compare
+      })
+    }
+    
+    return filtered
+  }
 
   const {
     register,
@@ -107,22 +155,33 @@ const Feedbacks: React.FC = () => {
     fetchData(feedbackPagination.page, feedbackPagination.limit)
   }, [feedbackPagination.page, feedbackPagination.limit])
 
+  useEffect(() => {
+    if (currentTab !== 'ALL') {
+      if (!summaryData) {
+        fetchSummary()
+      }
+    } else {
+      fetchData(1)
+    }
+  }, [currentTab])
+
   // Auto-polling if there are pending PDFs
   useEffect(() => {
-    const hasPendingPdf = feedbacks.some(f => !f.url_pdf)
+    const hasPendingPdf = getDisplayFeedbacks().some(f => !f.url_pdf)
     if (!hasPendingPdf) return
 
     const interval = setInterval(() => {
       fetchData(feedbackPagination.page, feedbackPagination.limit, true)
+      if (currentTab !== 'ALL') fetchSummary()
     }, 10000) // Poll every 10 seconds
 
     return () => clearInterval(interval)
-  }, [feedbacks, feedbackPagination.page, feedbackPagination.limit])
+  }, [feedbacks, summaryData, feedbackPagination.page, feedbackPagination.limit, currentTab])
 
   const fetchData = async (page: number, limit: number = feedbackPagination.limit, silent: boolean = false) => {
     if (!silent) setLoading(true)
     setIsRefreshing(true)
-    setSelectedIds([])
+    if (!silent) setSelectedIds([])
     try {
       const [feedbacksRes, groupsRes] = await Promise.all([
         feedbackApi.getFeedbacks({
@@ -172,6 +231,7 @@ const Feedbacks: React.FC = () => {
       await feedbackApi.updateFeedback(editingFeedback.id, data, true)
       toast.success(t('feedback_updated_success'))
       fetchData(feedbackPagination.page)
+      fetchSummary()
       handleCloseDialog()
     } catch (error: any) {
       // Global interceptor handles this
@@ -184,6 +244,7 @@ const Feedbacks: React.FC = () => {
         await feedbackApi.deleteFeedback(id, true)
         toast.success(t('feedback_deleted_success'))
         fetchData(feedbackPagination.page)
+        fetchSummary()
       } catch (error: any) {
         // Global interceptor handles this
       }
@@ -197,6 +258,7 @@ const Feedbacks: React.FC = () => {
         toast.success(t('feedbacks_deleted_success'))
         setSelectedIds([])
         fetchData(feedbackPagination.page)
+        fetchSummary()
       } catch (error: any) {
         // Global interceptor handles this
       }
@@ -212,6 +274,7 @@ const Feedbacks: React.FC = () => {
       }, true)
       toast.success(t('feedback_gen_started'), { id: loadingToast })
       fetchData(1)
+      fetchSummary()
       handleCloseGenerateDialog()
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Generation failed'
@@ -234,6 +297,7 @@ const Feedbacks: React.FC = () => {
 
       toast.success(t('pdf_gen_started'))
       fetchData(feedbackPagination.page)
+      fetchSummary()
     } catch (error: any) {
       // Global interceptor handles this
     } finally {
@@ -247,6 +311,7 @@ const Feedbacks: React.FC = () => {
       const response = await feedbackApi.generateAllPdf(true)
       toast.success(response.message || t('mass_pdf_gen_started'))
       fetchData(feedbackPagination.page)
+      fetchSummary()
     } catch (error: any) {
       // Global interceptor handles this
     } finally {
@@ -260,6 +325,7 @@ const Feedbacks: React.FC = () => {
       await feedbackApi.sendWhatsApp({ student_id: feedback?.student_id }, true)
       toast.success(feedback ? t('wa_updated_student') : t('wa_scheduling_started'))
       fetchData(feedbackPagination.page)
+      fetchSummary()
     } catch (error: any) {
       // Global interceptor handles this
     } finally {
@@ -275,6 +341,7 @@ const Feedbacks: React.FC = () => {
       await feedbackApi.generateFeedbacks({ all: true }, true)
       toast.success(t('feedbacks_seeded_success'), { id: loadingToast })
       fetchData(1)
+      fetchSummary()
     } catch (error: any) {
       const errorMsg = error.response?.data?.error || 'Seeding failed'
       toast.error(errorMsg, { id: loadingToast })
@@ -431,6 +498,29 @@ const Feedbacks: React.FC = () => {
         </div>
       </div>
 
+      {/* Tabs */}
+      <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
+        <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+          {['ALL', 'LAST_WEEK', 'THIS_WEEK', 'NEXT_WEEK'].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setCurrentTab(tab as any)}
+              className={clsx(
+                currentTab === tab
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+                'whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors'
+              )}
+            >
+              {tab === 'ALL' ? t('all') :
+               tab === 'LAST_WEEK' ? t('feedback_last_week') :
+               tab === 'THIS_WEEK' ? t('feedback_this_week') :
+               t('feedback_next_week')}
+            </button>
+          ))}
+        </nav>
+      </div>
+
       {feedbackStats.pdf_pending > 0 && (
         <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/30 border-l-4 border-yellow-400 p-4 rounded-r-md">
           <div className="flex">
@@ -498,10 +588,10 @@ const Feedbacks: React.FC = () => {
                   <input
                     type="checkbox"
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 rounded"
-                    checked={selectedIds.length === feedbacks.length && feedbacks.length > 0}
+                    checked={selectedIds.length === getDisplayFeedbacks().length && getDisplayFeedbacks().length > 0}
                     onChange={(e) => {
                       if (e.target.checked) {
-                        setSelectedIds(feedbacks.map(f => f.id))
+                        setSelectedIds(getDisplayFeedbacks().map(f => f.id))
                       } else {
                         setSelectedIds([])
                       }
@@ -557,14 +647,14 @@ const Feedbacks: React.FC = () => {
                     </svg>
                   </td>
                 </tr>
-              ) : feedbacks.length === 0 ? (
+              ) : getDisplayFeedbacks().length === 0 ? (
                 <tr>
                   <td colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                     {t('no_feedbacks_found')}
                   </td>
                 </tr>
               ) : (
-                feedbacks.map((feedback, index) => (
+                getDisplayFeedbacks().map((feedback, index) => (
                   <tr key={feedback.id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <input
@@ -668,7 +758,9 @@ const Feedbacks: React.FC = () => {
 
         {/* Pagination */}
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
-          <div className="flex-1 flex justify-between sm:hidden">
+          {currentTab === 'ALL' ? (
+            <>
+              <div className="flex-1 flex justify-between sm:hidden">
             <button
               onClick={() => setFeedbackPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
               disabled={feedbackPagination.page === 1}
@@ -687,7 +779,7 @@ const Feedbacks: React.FC = () => {
           <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
             <div className="flex items-center gap-4">
               <p className="text-sm text-gray-700 dark:text-gray-300">
-                {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (feedbacks.length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + feedbacks.length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> {t('results')}
+                {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + (getDisplayFeedbacks().length > 0 ? 1 : 0)}</span> {t('to')} <span className="font-medium text-gray-900 dark:text-white">{(feedbackPagination.page - 1) * feedbackPagination.limit + getDisplayFeedbacks().length}</span> {t('of')} <span className="font-medium text-gray-900 dark:text-white">{feedbackPagination.total}</span> {t('results')}
               </p>
               <select
                 value={feedbackPagination.limit}
@@ -724,6 +816,14 @@ const Feedbacks: React.FC = () => {
               </nav>
             </div>
           </div>
+            </>
+          ) : (
+            <div className="flex-1 flex justify-between items-center">
+              <p className="text-sm text-gray-700 dark:text-gray-400">
+                {t('showing')} <span className="font-medium text-gray-900 dark:text-white">{getDisplayFeedbacks().length}</span> {t('results')}
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
