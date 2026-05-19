@@ -19,8 +19,8 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
-import { feedbackApi, groupApi } from '../../api/services'
-import { Feedback, Group } from '../../types/data'
+import { feedbackApi, groupApi, studentApi, courseApi } from '../../api/services'
+import { Feedback, Group, Student, Course } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
@@ -46,10 +46,19 @@ const generateFeedbackSchema = z.object({
 
 type GenerateFeedbackFormData = z.infer<typeof generateFeedbackSchema>
 
+const graduationSchema = z.object({
+  student_id: z.number().min(1, 'Student is required'),
+  course: z.string().min(1, 'Course is required'),
+})
+
+type GraduationFormData = z.infer<typeof graduationSchema>
+
 const Feedbacks: React.FC = () => {
   const { t } = useTranslation()
   const [feedbacks, setFeedbacks] = useState<Feedback[]>([])
   const [groups, setGroups] = useState<Group[]>([])
+  const [students, setStudents] = useState<Student[]>([])
+  const [courses, setCourses] = useState<Course[]>([])
   const [feedbackPagination, setFeedbackPagination] = useState({
     page: 1,
     limit: 10,
@@ -59,9 +68,11 @@ const Feedbacks: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [dialogOpen, setDialogOpen] = useState(false)
   const [generateDialogOpen, setGenerateDialogOpen] = useState(false)
+  const [graduationDialogOpen, setGraduationDialogOpen] = useState(false)
   const [editingFeedback, setEditingFeedback] = useState<Feedback | null>(null)
   const [pdfGenerating, setPdfGenerating] = useState<number | null>(null)
   const [isGeneratingAllPdf, setIsGeneratingAllPdf] = useState(false)
+  const [isGeneratingGraduationPdf, setIsGeneratingGraduationPdf] = useState(false)
   const [waScheduling, setWaScheduling] = useState<number | null>(null)
   const [isRefreshing, setIsRefreshing] = useState(false)
   const [search, setSearch] = useState('')
@@ -147,6 +158,15 @@ const Feedbacks: React.FC = () => {
 
   const isAllStudents = watchGenerate('all')
 
+  const {
+    handleSubmit: handleGraduationSubmit,
+    reset: resetGraduation,
+    formState: { errors: graduationErrors },
+    control: graduationControl,
+  } = useForm<GraduationFormData>({
+    resolver: zodResolver(graduationSchema),
+  })
+
   useEffect(() => {
     fetchData(1)
   }, [debouncedSearch, sortField, sortDir])
@@ -164,6 +184,24 @@ const Feedbacks: React.FC = () => {
       fetchData(1)
     }
   }, [currentTab])
+
+  useEffect(() => {
+    if (graduationDialogOpen) {
+      const fetchStudentsAndCourses = async () => {
+        try {
+          const [studentsRes, coursesRes] = await Promise.all([
+            studentApi.getStudents({ limit: 1000 }),
+            courseApi.getCourses({ limit: 1000 })
+          ])
+          setStudents(studentsRes.data)
+          setCourses(coursesRes.data)
+        } catch (error) {
+          // Errors handled by interceptors
+        }
+      }
+      fetchStudentsAndCourses()
+    }
+  }, [graduationDialogOpen])
 
   // Auto-polling if there are pending PDFs
   useEffect(() => {
@@ -398,6 +436,31 @@ const Feedbacks: React.FC = () => {
     resetGenerate({ all: false })
   }
 
+  const onGraduationSubmit: SubmitHandler<GraduationFormData> = async (data) => {
+    setIsGeneratingGraduationPdf(true)
+    const loadingToast = toast.loading(t('graduation_pdf_gen_started') || 'Generating Graduation PDF...')
+    try {
+      const response = await feedbackApi.generateGraduationPdf({
+        student_id: data.student_id,
+        course: data.course
+      }, true)
+      toast.success(response.message || 'Graduation PDF task started in background', { id: loadingToast })
+      handleCloseGraduationDialog()
+      fetchData(feedbackPagination.page)
+      fetchSummary()
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || 'Failed to generate Graduation PDF'
+      toast.error(errorMsg, { id: loadingToast })
+    } finally {
+      setIsGeneratingGraduationPdf(false)
+    }
+  }
+
+  const handleCloseGraduationDialog = () => {
+    setGraduationDialogOpen(false)
+    resetGraduation()
+  }
+
   const getScoreLabel = (score: string, type: 'attendance' | 'activity' | 'task') => {
     const labels = {
       attendance: [t('score_none'), t('score_rarely'), t('score_sometimes'), t('score_often'), t('score_always')],
@@ -464,6 +527,13 @@ const Feedbacks: React.FC = () => {
           >
             <FileText className={clsx("-ml-1 mr-2 h-4 w-4", isGeneratingAllPdf && "animate-pulse")} />
             {t('generate_all_pdf')}
+          </button>
+          <button
+            onClick={() => setGraduationDialogOpen(true)}
+            className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+          >
+            <FileText className="-ml-1 mr-2 h-4 w-4" />
+            {t('generate_graduation_pdf')}
           </button>
           <button
             onClick={() => handleSendWhatsApp()}
@@ -929,6 +999,44 @@ const Feedbacks: React.FC = () => {
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
             <button type="button" onClick={handleCloseGenerateDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
             <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-colors">{t('generate')}</button>
+          </div>
+        </form>
+      </Modal>
+
+      {/* Generate Graduation PDF Modal */}
+      <Modal
+        open={graduationDialogOpen}
+        onClose={handleCloseGraduationDialog}
+        title={t('generate_graduation_pdf')}
+        maxWidth="sm"
+      >
+        <form onSubmit={handleGraduationSubmit(onGraduationSubmit)}>
+          <div className="px-6 py-4 space-y-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              {t('generate_graduation_pdf_desc')}
+            </p>
+            <SearchableSelect
+              name="student_id"
+              control={graduationControl}
+              label={t('select_student')}
+              placeholder={t('search_students_placeholder')}
+              options={students.map(s => ({ value: s.id, label: s.fullname }))}
+              error={graduationErrors.student_id?.message}
+            />
+            <SearchableSelect
+              name="course"
+              control={graduationControl}
+              label={t('select_course')}
+              placeholder={t('search_courses_placeholder')}
+              options={courses.map(c => ({ value: c.title, label: c.title }))}
+              error={graduationErrors.course?.message}
+            />
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="button" onClick={handleCloseGraduationDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">{t('cancel')}</button>
+            <button type="submit" disabled={isGeneratingGraduationPdf} className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 disabled:opacity-50 transition-colors">
+              {isGeneratingGraduationPdf ? 'Generating...' : t('generate')}
+            </button>
           </div>
         </form>
       </Modal>

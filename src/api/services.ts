@@ -438,6 +438,13 @@ export const feedbackApi = {
     })
   },
   
+  generateGraduationPdf: async (params: { student_id: number; course: string }, skipToast?: boolean): Promise<{ message: string; tasks: any[] }> => {
+    const response = await api.post('/feedbacks/generate-graduation-pdf', params, { 
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    })
+    return response.data
+  },
+  
   getSummary: async (skipToast?: boolean): Promise<{ data: { last_week: Feedback[]; this_week: Feedback[]; next_week: Feedback[] } }> => {
     const response = await api.get('/feedbacks/summary', { 
       headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
