@@ -424,7 +424,7 @@ export const feedbackApi = {
   },
 
   downloadPdf: async (id: number, skipToast?: boolean): Promise<Blob> => {
-    const response = await api.get(`/feedbacks/${id}/download`, {
+    const response = await api.get(`/feedbacks/${id}/download?t=${Date.now()}`, {
       responseType: 'blob',
       headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
     })
@@ -460,7 +460,7 @@ export const feedbackApi = {
   },
 
   downloadGraduationPdf: async (id: number, skipToast?: boolean): Promise<Blob> => {
-    const response = await api.get(`/feedbacks/graduation/${id}/download`, {
+    const response = await api.get(`/feedbacks/graduation/${id}/download?t=${Date.now()}`, {
       responseType: 'blob',
       headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
     })
