@@ -509,7 +509,7 @@ const Students: React.FC = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('password')}</label>
-                <input type="password" {...register('password')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.password ? "border-red-300" : "border-gray-300")} />
+                <input type="password" autoComplete="new-password" {...register('password')} className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 transition-colors", errors.password ? "border-red-300" : "border-gray-300")} />
                 <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{editingStudent ? t('leave_empty_password') : t('password_required_new')}</p>
                 {errors.password && <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>}
               </div>

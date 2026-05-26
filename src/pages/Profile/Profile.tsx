@@ -121,6 +121,7 @@ const Profile: React.FC = () => {
                     </div>
                     <input
                       type="password"
+                      autoComplete="new-password"
                       {...register('password')}
                       className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm dark:bg-gray-700 dark:text-white transition-all"
                       placeholder="••••••••"
