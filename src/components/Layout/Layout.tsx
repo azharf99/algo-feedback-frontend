@@ -91,10 +91,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar */}
       <aside className={clsx(
-        "fixed inset-y-0 left-0 bg-white dark:bg-gray-800 w-64 border-r border-gray-200 dark:border-gray-700 z-50 transform transition-transform duration-200 ease-in-out flex flex-col shadow-xl lg:shadow-none",
+        "fixed inset-y-0 left-0 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 z-50 lg:static flex flex-col transform transition-all duration-200 ease-in-out",
         mobileOpen ? "translate-x-0" : "-translate-x-full",
-        !sidebarOpen && "lg:-translate-x-full",
-        !sidebarOpen && "lg:hidden"
+        "lg:translate-x-0",
+        sidebarOpen ? "w-64" : "w-16"
       )}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <span className="text-xl font-bold text-gray-800 dark:text-white">Algo Feedback</span>
@@ -122,7 +122,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <span className={clsx("mr-3 transition-colors", isActive ? "text-white" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300")}>
                   {item.icon}
                 </span>
-                <span className="font-medium">{t(item.text)}</span>
+                {sidebarOpen && (
+                  <span className="font-medium">{t(item.text)}</span>
+                )}
               </button>
             )
           })}
