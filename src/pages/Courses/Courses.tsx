@@ -25,6 +25,10 @@ import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
 
 const courseSchema = z.object({
+  id: z.preprocess((val) => {
+    if (val === '' || val === undefined || val === null) return undefined;
+    return Number(val);
+  }, z.number().min(1, 'ID must be greater than 0').optional()),
   title: z.string().min(1, 'Title is required'),
   module: z.string().min(1, 'Module is required'),
   description: z.string().min(1, 'Description is required'),
@@ -450,6 +454,11 @@ const Courses: React.FC = () => {
       >
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-6 py-4 bg-white dark:bg-gray-800 grid grid-cols-1 gap-4 transition-colors duration-200">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">ID (Optional)</label>
+              <input type="number" {...register('id')} placeholder="Leave blank to auto-generate" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.id ? "border-red-300" : "border-gray-300")} disabled={!!editingCourse} />
+              {errors.id && <p className="mt-1 text-sm text-red-600">{errors.id.message}</p>}
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('title')}</label>
               <input type="text" {...register('title')} placeholder="e.g. Logic Programming" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
