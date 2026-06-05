@@ -40,6 +40,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [mobileOpen, setMobileOpen] = useState(false)
   const [profileOpen, setProfileOpen] = useState(false)
   const [langOpen, setLangOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true) // New state for desktop sidebar visibility
   const profileRef = useRef<HTMLDivElement>(null)
   const langRef = useRef<HTMLDivElement>(null)
   const navigate = useNavigate()
@@ -52,6 +53,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen)
   }
+  const handleSidebarToggle = () => {
+    setSidebarOpen(!sidebarOpen)
+  } // New toggle for desktop sidebar
 
   const handleLogout = () => {
     logout()
@@ -87,8 +91,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Sidebar */}
       <aside className={clsx(
-        "fixed inset-y-0 left-0 bg-white dark:bg-gray-800 w-64 border-r border-gray-200 dark:border-gray-700 z-50 transform transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static flex flex-col shadow-xl lg:shadow-none",
-        mobileOpen ? "translate-x-0" : "-translate-x-full"
+        "fixed inset-y-0 left-0 bg-white dark:bg-gray-800 w-64 border-r border-gray-200 dark:border-gray-700 z-50 transform transition-transform duration-200 ease-in-out flex flex-col shadow-xl lg:shadow-none",
+        mobileOpen ? "translate-x-0" : "-translate-x-full",
+        !sidebarOpen && "lg:-translate-x-full",
+        !sidebarOpen && "lg:hidden"
       )}>
         <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200 dark:border-gray-700 shrink-0">
           <span className="text-xl font-bold text-gray-800 dark:text-white">Algo Feedback</span>
@@ -133,6 +139,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="mr-4 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 lg:hidden"
             >
               <MenuIcon className="w-6 h-6" />
+            </button>
+            {/* Desktop sidebar toggle */}
+            <button
+              onClick={handleSidebarToggle}
+              className="hidden lg:inline-flex text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+            >
+              {sidebarOpen ? <X className="w-6 h-6" /> : <MenuIcon className="w-6 h-6" />}
             </button>
             <h1 className="text-xl font-semibold text-gray-800 dark:text-white truncate max-w-[150px] sm:max-w-none">
               {currentTitle}
