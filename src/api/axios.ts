@@ -109,7 +109,16 @@ api.interceptors.response.use(
         toast.error('Network error. Please check your connection.')
       } else {
         const status = error.response.status
-        const errorMsg = error.response.data?.error || error.response.data?.message || 'Something went wrong'
+        let errorMsg = error.response.data?.error || error.response.data?.message || 'Something went wrong'
+
+        // Security: Prevent leaking stack traces or sensitive database info in toasts
+        if (typeof errorMsg === 'string') {
+          const lowerMsg = errorMsg.toLowerCase()
+          if (lowerMsg.includes('stack') || lowerMsg.includes('sql') || lowerMsg.includes('database') || lowerMsg.includes('prisma')) {
+            console.error('Original error hidden from user:', errorMsg)
+            errorMsg = 'An unexpected error occurred. Please try again later.'
+          }
+        }
         
         // Specifically avoid double toast for 401 as it's handled by refresh logic or redirect
         if (status !== 401) {
