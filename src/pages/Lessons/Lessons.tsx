@@ -85,8 +85,8 @@ const Lessons: React.FC = () => {
     setSelectedIds([])
     try {
       const [lessonsRes, coursesRes] = await Promise.all([
-        lessonApi.getLessons({ 
-          page, 
+        lessonApi.getLessons({
+          page,
           limit,
           search: debouncedSearch,
           sort_by: sortField,
@@ -174,7 +174,7 @@ const Lessons: React.FC = () => {
       const result = await lessonApi.importLessons(formData, true)
       const { created, updated, errors } = result
       let message = `Import success: ${created} created, ${updated} updated`
-      
+
       if (errors && errors.length > 0) {
         message += `. ${errors.length} rows failed.`
         console.error('Import Errors:', errors)
@@ -202,7 +202,7 @@ const Lessons: React.FC = () => {
       const result = await lessonApi.importCompetencies(formData, true)
       const { updated, errors } = result
       let message = `Import success: ${updated} lessons updated`
-      
+
       if (errors && errors.length > 0) {
         message += `. ${errors.length} rows failed.`
         console.error('Import Errors:', errors)
@@ -323,15 +323,15 @@ const Lessons: React.FC = () => {
                   />
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">No.</th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('id')}
                 >
                   <div className="flex items-center gap-1">ID {renderSortIcon('id')}</div>
                 </th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('title')}
                 >
@@ -340,15 +340,15 @@ const Lessons: React.FC = () => {
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('course')}
                 </th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('module')}
                 >
                   <div className="flex items-center gap-1">{t('module')} {renderSortIcon('module')}</div>
                 </th>
-                <th 
-                  scope="col" 
+                <th
+                  scope="col"
                   className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800"
                   onClick={() => toggleSort('level')}
                 >
@@ -412,8 +412,8 @@ const Lessons: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={clsx(
                         "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
-                        lesson.is_project_lesson 
-                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" 
+                        lesson.is_project_lesson
+                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400"
                           : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
                       )}>
                         {lesson.is_project_lesson ? t('yes') : t('no')}
@@ -422,8 +422,8 @@ const Lessons: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={clsx(
                         "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
-                        lesson.is_active 
-                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400" 
+                        lesson.is_active
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400"
                           : "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400"
                       )}>
                         {lesson.is_active ? t('active') : t('inactive')}
@@ -451,7 +451,7 @@ const Lessons: React.FC = () => {
             </tbody>
           </table>
         </div>
-        
+
         {/* Pagination */}
         <div className="bg-white dark:bg-gray-800 px-4 py-3 flex items-center justify-between border-t border-gray-200 dark:border-gray-700 sm:px-6">
           <div className="flex-1 flex justify-between sm:hidden">
@@ -521,73 +521,73 @@ const Lessons: React.FC = () => {
         maxWidth="md"
       >
 
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <SearchableSelect
-                  name="course_id"
-                  control={control}
-                  label={t('course')}
-                  placeholder={t('search_courses_placeholder')}
-                  options={courses.map(c => ({ value: c.id, label: c.title }))}
-                  error={errors.course_id?.message}
-                />
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('title')}</label>
-                  <input type="text" {...register('title')} placeholder="Enter lesson title" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
-                  {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <SearchableSelect
+                name="course_id"
+                control={control}
+                label={t('course')}
+                placeholder={t('search_courses_placeholder')}
+                options={courses.map(c => ({ value: c.id, label: c.title }))}
+                error={errors.course_id?.message}
+              />
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('title')}</label>
+                <input type="text" {...register('title')} placeholder="Enter lesson title" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.title ? "border-red-300" : "border-gray-300")} />
+                {errors.title && <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('module')}</label>
+                <input type="text" {...register('module')} placeholder="e.g. Module 1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.module ? "border-red-300" : "border-gray-300")} />
+                {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('level')}</label>
+                <input type="text" {...register('level')} placeholder="e.g. Beginner" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.level ? "border-red-300" : "border-gray-300")} />
+                {errors.level && <p className="mt-1 text-sm text-red-600">{errors.level.message}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('category')}</label>
+                <input type="text" {...register('category')} placeholder="e.g. Algorithm" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.category ? "border-red-300" : "border-gray-300")} />
+                {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('lesson_number')}</label>
+                <input type="number" {...register('number', { valueAsNumber: true })} placeholder="1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.number ? "border-red-300" : "border-gray-300")} />
+                {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number.message}</p>}
+              </div>
+              <div className="sm:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('competency')}</label>
+                <textarea {...register('competency')} rows={2} placeholder="Key competencies..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.competency ? "border-red-300" : "border-gray-300")}></textarea>
+                {errors.competency && <p className="mt-1 text-sm text-red-600">{errors.competency.message}</p>}
+              </div>
+              <div className={clsx("sm:col-span-2", editingLesson && "hidden")}>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('description')}</label>
+                <textarea {...register('description')} rows={3} placeholder="Lesson description..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
+                {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
+              </div>
+              <div className="sm:col-span-2 flex items-center mt-2 gap-6">
+                <div className="flex items-center">
+                  <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
+                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_lesson')}</label>
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('module')}</label>
-                  <input type="text" {...register('module')} placeholder="e.g. Module 1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.module ? "border-red-300" : "border-gray-300")} />
-                  {errors.module && <p className="mt-1 text-sm text-red-600">{errors.module.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('level')}</label>
-                  <input type="text" {...register('level')} placeholder="e.g. Beginner" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.level ? "border-red-300" : "border-gray-300")} />
-                  {errors.level && <p className="mt-1 text-sm text-red-600">{errors.level.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('category')}</label>
-                  <input type="text" {...register('category')} placeholder="e.g. Algorithm" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.category ? "border-red-300" : "border-gray-300")} />
-                  {errors.category && <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>}
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('lesson_number')}</label>
-                  <input type="number" {...register('number', { valueAsNumber: true })} placeholder="1" className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.number ? "border-red-300" : "border-gray-300")} />
-                  {errors.number && <p className="mt-1 text-sm text-red-600">{errors.number.message}</p>}
-                </div>
-                <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('competency')}</label>
-                  <textarea {...register('competency')} rows={2} placeholder="Key competencies..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.competency ? "border-red-300" : "border-gray-300")}></textarea>
-                  {errors.competency && <p className="mt-1 text-sm text-red-600">{errors.competency.message}</p>}
-                </div>
-                <div className={clsx("sm:col-span-2", editingLesson && "hidden")}>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{t('description')}</label>
-                  <textarea {...register('description')} rows={3} placeholder="Lesson description..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
-                  {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
-                </div>
-                <div className="sm:col-span-2 flex items-center mt-2 gap-6">
-                  <div className="flex items-center">
-                    <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
-                    <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_lesson')}</label>
-                  </div>
-                  <div className="flex items-center">
-                    <input id="is_project_lesson" type="checkbox" {...register('is_project_lesson')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
-                    <label htmlFor="is_project_lesson" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('project_lesson')}</label>
-                  </div>
+                <div className="flex items-center">
+                  <input id="is_project_lesson" type="checkbox" {...register('is_project_lesson')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
+                  <label htmlFor="is_project_lesson" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('project_lesson')}</label>
                 </div>
               </div>
             </div>
-            <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-              <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
-                {editingLesson ? t('update') : t('create')}
-              </button>
-              <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                {t('cancel')}
-              </button>
-            </div>
-          </form>
+          </div>
+          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+            <button type="submit" className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition-all">
+              {editingLesson ? t('update') : t('create')}
+            </button>
+            <button type="button" onClick={handleCloseDialog} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+              {t('cancel')}
+            </button>
+          </div>
+        </form>
       </Modal>
 
       {/* Import Modal */}
@@ -597,31 +597,31 @@ const Lessons: React.FC = () => {
         title={t('import_lessons')}
         maxWidth="sm"
       >
-          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
-            <div
-              {...getImportRootProps()}
-              className={clsx(
-                "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300",
-                isImportDragActive 
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
-                  : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
-              )}
-            >
-              <input {...getImportInputProps()} />
-              <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
-                {isImportDragActive ? t('drop_csv') : t('drag_drop_csv')}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('csv_headers')}: id, title, category, module, level, number, course_id, description, competency, is_active
-              </p>
-            </div>
+        <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+          <div
+            {...getImportRootProps()}
+            className={clsx(
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300",
+              isImportDragActive
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
+            )}
+          >
+            <input {...getImportInputProps()} />
+            <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
+              {isImportDragActive ? t('drop_csv') : t('drag_drop_csv')}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('csv_headers')}: id, title, category, module, level, number, course_id, description, competency, is_active, is_project_lesson
+            </p>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-            <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-              {t('cancel')}
-            </button>
-          </div>
+        </div>
+        <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+          <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            {t('cancel')}
+          </button>
+        </div>
       </Modal>
 
       {/* Import Competencies Modal */}
@@ -631,39 +631,39 @@ const Lessons: React.FC = () => {
         title={t('import_competencies')}
         maxWidth="sm"
       >
-          <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
-            <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-700 dark:text-blue-300">
-              <p className="font-semibold mb-1">{t('csv_format_req')}</p>
-              <ul className="list-disc list-inside space-y-1">
-                <li>Header: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">ID</code>, <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">competencies</code></li>
-                <li>{t('id_is_course_id')}</li>
-                <li>{t('rows_match_lessons')}</li>
-              </ul>
-            </div>
-            <div
-              {...getCompRootProps()}
-              className={clsx(
-                "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300",
-                isCompDragActive 
-                  ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20" 
-                  : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
-              )}
-            >
-              <input {...getCompInputProps()} />
-              <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
-              <p className="text-gray-600 dark:text-gray-300 mb-2">
-                {isCompDragActive ? t('drop_csv') : t('drag_drop_csv')}
-              </p>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                {t('csv_headers')}: ID, competencies
-              </p>
-            </div>
+        <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+          <div className="mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-sm text-blue-700 dark:text-blue-300">
+            <p className="font-semibold mb-1">{t('csv_format_req')}</p>
+            <ul className="list-disc list-inside space-y-1">
+              <li>Header: <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">ID</code>, <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">competencies</code></li>
+              <li>{t('id_is_course_id')}</li>
+              <li>{t('rows_match_lessons')}</li>
+            </ul>
           </div>
-          <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
-            <button type="button" onClick={() => setImportCompDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-              {t('cancel')}
-            </button>
+          <div
+            {...getCompRootProps()}
+            className={clsx(
+              "border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-all duration-300",
+              isCompDragActive
+                ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
+                : "border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
+            )}
+          >
+            <input {...getCompInputProps()} />
+            <UploadCloud className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" />
+            <p className="text-gray-600 dark:text-gray-300 mb-2">
+              {isCompDragActive ? t('drop_csv') : t('drag_drop_csv')}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-400">
+              {t('csv_headers')}: ID, competencies
+            </p>
           </div>
+        </div>
+        <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
+          <button type="button" onClick={() => setImportCompDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
+            {t('cancel')}
+          </button>
+        </div>
       </Modal>
     </div>
   )
