@@ -62,6 +62,7 @@ export interface Lesson {
   description: string
   competency?: string
   is_active: boolean
+  is_project_lesson: boolean
   course?: Course
 }
 
@@ -94,6 +95,7 @@ export interface User {
   role: 'Admin' | 'Tutor' | 'Siswa'
   whatsapp_api_key?: string
   whatsapp_device_id?: string
+  phone_number?: string
 }
 
 export interface ImportResult {

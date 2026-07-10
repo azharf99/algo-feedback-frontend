@@ -3,7 +3,7 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
-import { User as UserIcon, Lock, Key, Smartphone, Save, ShieldCheck } from 'lucide-react'
+import { User as UserIcon, Lock, Key, Smartphone, Save, ShieldCheck, Phone } from 'lucide-react'
 import { profileApi } from '../../api/services'
 import { useAuth } from '../../contexts/AuthContext'
 import toast from 'react-hot-toast'
@@ -12,6 +12,7 @@ import clsx from 'clsx'
 const profileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   password: z.string().optional(),
+  phone_number: z.string().optional(),
   whatsapp_api_key: z.string().optional(),
   whatsapp_device_id: z.string().optional(),
 })
@@ -31,6 +32,7 @@ const Profile: React.FC = () => {
     resolver: zodResolver(profileSchema),
     defaultValues: {
       name: authState.user?.name || '',
+      phone_number: authState.user?.phone_number || '',
       whatsapp_api_key: authState.user?.whatsapp_api_key || '',
       whatsapp_device_id: authState.user?.whatsapp_device_id || '',
     }
@@ -127,6 +129,24 @@ const Profile: React.FC = () => {
                     />
                   </div>
                   <p className="mt-1 text-xs text-gray-400">{t('leave_empty_password')}.</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    {t('phone')}
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <Phone className="h-4 w-4 text-gray-400" />
+                    </div>
+                    <input
+                      type="tel"
+                      {...register('phone_number')}
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent sm:text-sm dark:bg-gray-700 dark:text-white transition-all"
+                      placeholder="08xxxxxxxxxx"
+                    />
+                  </div>
+                  <p className="mt-1 text-xs text-gray-400">{t('phone_number_hint')}</p>
                 </div>
 
                 <div>

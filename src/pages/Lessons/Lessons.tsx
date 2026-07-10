@@ -35,6 +35,7 @@ const lessonSchema = z.object({
   description: z.string().default(''),
   competency: z.string().optional(),
   is_active: z.boolean().default(true),
+  is_project_lesson: z.boolean().default(false),
 })
 
 type LessonFormData = z.infer<typeof lessonSchema>
@@ -158,7 +159,7 @@ const Lessons: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false)
     setEditingLesson(null)
-    reset({ is_active: true })
+    reset({ is_active: true, is_project_lesson: false })
   }
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -354,6 +355,9 @@ const Lessons: React.FC = () => {
                   <div className="flex items-center gap-1">{t('level')} {renderSortIcon('level')}</div>
                 </th>
                 <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                  Project
+                </th>
+                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                   {t('status')}
                 </th>
                 <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -364,7 +368,7 @@ const Lessons: React.FC = () => {
             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
               {loading ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center">
+                  <td colSpan={10} className="px-6 py-10 text-center">
                     <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -373,7 +377,7 @@ const Lessons: React.FC = () => {
                 </tr>
               ) : lessons.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
+                  <td colSpan={10} className="px-6 py-10 text-center text-gray-500 dark:text-gray-400">
                     {t('no_lessons_found')}
                   </td>
                 </tr>
@@ -405,6 +409,16 @@ const Lessons: React.FC = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">{lesson.course?.title || `Course ${lesson.course_id}`}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.module}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{lesson.level}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={clsx(
+                        "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
+                        lesson.is_project_lesson 
+                          ? "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400" 
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-900/30 dark:text-gray-400"
+                      )}>
+                        {lesson.is_project_lesson ? t('yes') : t('no')}
+                      </span>
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={clsx(
                         "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
@@ -553,9 +567,15 @@ const Lessons: React.FC = () => {
                   <textarea {...register('description')} rows={3} placeholder="Lesson description..." className={clsx("mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm dark:bg-gray-700 dark:text-white dark:border-gray-600 dark:placeholder-gray-400 transition-colors", errors.description ? "border-red-300" : "border-gray-300")}></textarea>
                   {errors.description && <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>}
                 </div>
-                <div className="sm:col-span-2 flex items-center mt-2">
-                  <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
-                  <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_lesson')}</label>
+                <div className="sm:col-span-2 flex items-center mt-2 gap-6">
+                  <div className="flex items-center">
+                    <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
+                    <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_lesson')}</label>
+                  </div>
+                  <div className="flex items-center">
+                    <input id="is_project_lesson" type="checkbox" {...register('is_project_lesson')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-700 rounded transition-colors" />
+                    <label htmlFor="is_project_lesson" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('project_lesson')}</label>
+                  </div>
                 </div>
               </div>
             </div>

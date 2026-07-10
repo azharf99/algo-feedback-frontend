@@ -5,6 +5,7 @@ export interface User {
   role: 'Admin' | 'Tutor' | 'Siswa'
   whatsapp_api_key?: string
   whatsapp_device_id?: string
+  phone_number?: string
 }
 
 export interface LoginCredentials {
