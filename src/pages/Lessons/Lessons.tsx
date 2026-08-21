@@ -4,6 +4,7 @@ import {
   Edit2,
   Trash2,
   UploadCloud,
+  Download,
   Search,
   X,
   ChevronLeft,
@@ -20,6 +21,7 @@ import { useDropzone } from 'react-dropzone'
 import { lessonApi, courseApi } from '../../api/services'
 import { Lesson, Course, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
+import { downloadBlob } from '../../utils/downloadFile'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
@@ -233,6 +235,18 @@ const Lessons: React.FC = () => {
     multiple: false,
   })
 
+  const handleExportCSV = async () => {
+    const loadingToast = toast.loading(t('exporting_csv'))
+    try {
+      const blob = await lessonApi.exportLessons(true)
+      downloadBlob(blob, `lessons_${new Date().toISOString().slice(0, 10)}.csv`)
+      toast.success(t('export_csv_success'), { id: loadingToast })
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || t('export_csv_failed')
+      toast.error(errorMsg, { id: loadingToast })
+    }
+  }
+
   const toggleSort = (field: string) => {
     if (sortField === field) {
       setSortDir(sortDir === 'asc' ? 'desc' : 'asc')
@@ -295,6 +309,13 @@ const Lessons: React.FC = () => {
           >
             <UploadCloud className="-ml-1 mr-2 h-4 w-4" />
             {t('import_competencies')}
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <Download className="-ml-1 mr-2 h-4 w-4" />
+            {t('export_csv')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}

@@ -5,6 +5,7 @@ import {
   Edit2,
   Trash2,
   CheckCircle,
+  Download,
   Search,
   X,
   ChevronLeft,
@@ -19,6 +20,7 @@ import { z } from 'zod'
 import { sessionApi, groupApi, lessonApi } from '../../api/services'
 import { Session, Group, Lesson, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
+import { downloadBlob } from '../../utils/downloadFile'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
@@ -270,6 +272,18 @@ const Sessions: React.FC = () => {
     }
   }
 
+  const handleExportCSV = async () => {
+    const loadingToast = toast.loading(t('exporting_csv'))
+    try {
+      const blob = await sessionApi.exportSessions(true)
+      downloadBlob(blob, `sessions_${new Date().toISOString().slice(0, 10)}.csv`)
+      toast.success(t('export_csv_success'), { id: loadingToast })
+    } catch (error: any) {
+      const errorMsg = error.response?.data?.error || t('export_csv_failed')
+      toast.error(errorMsg, { id: loadingToast })
+    }
+  }
+
   const handleEdit = async (session: Session) => {
     setEditingSession(session)
     reset({
@@ -500,6 +514,13 @@ const Sessions: React.FC = () => {
           >
             <X className="-ml-1 mr-2 h-4 w-4 text-red-500" />
             {t('mark_cancelled')}
+          </button>
+          <button
+            onClick={handleExportCSV}
+            className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-700 shadow-sm text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+          >
+            <Download className="-ml-1 mr-2 h-4 w-4" />
+            {t('export_csv')}
           </button>
           <button
             onClick={() => setDialogOpen(true)}

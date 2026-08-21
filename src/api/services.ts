@@ -137,6 +137,14 @@ export const courseApi = {
       }
     })
     return response.data
+  },
+
+  exportCourses: async (skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get('/courses/export', {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data
   }
 }
 
@@ -184,6 +192,14 @@ export const studentApi = {
       }
     })
     return response.data
+  },
+
+  exportStudents: async (skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get('/students/export', {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data
   }
 }
 
@@ -229,6 +245,14 @@ export const groupApi = {
         'Content-Type': 'multipart/form-data',
         ...(skipToast ? { 'X-Skip-Toast': 'true' } : {})
       }
+    })
+    return response.data
+  },
+
+  exportGroups: async (skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get('/groups/export', {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
     })
     return response.data
   }
@@ -293,6 +317,14 @@ export const lessonApi = {
         'Content-Type': 'multipart/form-data',
         ...(skipToast ? { 'X-Skip-Toast': 'true' } : {})
       }
+    })
+    return response.data
+  },
+
+  exportLessons: async (skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get('/lessons/export', {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
     })
     return response.data
   }
@@ -370,8 +402,16 @@ export const sessionApi = {
     })
   },
   getSummary: async (skipToast?: boolean): Promise<{ data: { last_week: Session[]; this_week: Session[]; next_week: Session[] } }> => {
-    const response = await api.get('/sessions/summary', { 
-      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    const response = await api.get('/sessions/summary', {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data
+  },
+
+  exportSessions: async (skipToast?: boolean): Promise<Blob> => {
+    const response = await api.get('/sessions/export', {
+      responseType: 'blob',
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
     })
     return response.data
   }
