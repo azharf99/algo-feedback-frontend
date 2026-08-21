@@ -18,12 +18,13 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { studentApi } from '../../api/services'
-import { Student } from '../../types/data'
+import { Student, StatusFilterValue } from '../../types/data'
 import { sanitizePhoneNumber } from '../../utils/phone'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import StatusFilter from '../../components/ui/StatusFilter'
 
 const studentSchema = z.object({
   fullname: z.string().min(1, 'Full name is required'),
@@ -53,6 +54,7 @@ const Students: React.FC = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('active')
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
@@ -68,8 +70,8 @@ const Students: React.FC = () => {
   })
 
   useEffect(() => {
-    fetchStudents(1) // Reset to page 1 on search or sort change
-  }, [debouncedSearch, sortField, sortDir])
+    fetchStudents(1) // Reset to page 1 on search, sort, or status filter change
+  }, [debouncedSearch, sortField, sortDir, statusFilter])
 
   useEffect(() => {
     fetchStudents(pagination.page, pagination.limit)
@@ -79,12 +81,13 @@ const Students: React.FC = () => {
     setLoading(true)
     setSelectedIds([])
     try {
-      const response = await studentApi.getStudents({ 
-        page, 
+      const response = await studentApi.getStudents({
+        page,
         limit,
         search: debouncedSearch,
         sort_by: sortField,
-        sort_dir: sortDir
+        sort_dir: sortDir,
+        status: statusFilter
       })
       setStudents(response.data)
       setPagination({
@@ -244,6 +247,7 @@ const Students: React.FC = () => {
               </button>
             )}
           </div>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}

@@ -18,13 +18,14 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useDropzone } from 'react-dropzone'
 import { groupApi, studentApi, courseApi } from '../../api/services'
-import { Group, Student, Course } from '../../types/data'
+import { Group, Student, Course, StatusFilterValue } from '../../types/data'
 import { sanitizePhoneNumber } from '../../utils/phone'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
 import SearchableSelect from '../../components/ui/SearchableSelect'
+import StatusFilter from '../../components/ui/StatusFilter'
 
 const groupSchema = z.object({
   course_id: z.number().min(1, 'Course is required'),
@@ -60,6 +61,7 @@ const Groups: React.FC = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('active')
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
@@ -77,8 +79,8 @@ const Groups: React.FC = () => {
 
 
   useEffect(() => {
-    fetchData(1) // Reset to page 1 on search or sort change
-  }, [debouncedSearch, sortField, sortDir])
+    fetchData(1) // Reset to page 1 on search, sort, or status filter change
+  }, [debouncedSearch, sortField, sortDir, statusFilter])
 
   useEffect(() => {
     fetchData(groupPagination.page, groupPagination.limit)
@@ -94,7 +96,8 @@ const Groups: React.FC = () => {
           limit,
           search: debouncedSearch,
           sort_by: sortField,
-          sort_dir: sortDir
+          sort_dir: sortDir,
+          status: statusFilter
         }),
         studentApi.getStudents(),
         courseApi.getCourses(),
@@ -269,6 +272,7 @@ const Groups: React.FC = () => {
               </button>
             )}
           </div>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}

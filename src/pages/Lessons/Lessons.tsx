@@ -18,12 +18,13 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { lessonApi, courseApi } from '../../api/services'
-import { Lesson, Course } from '../../types/data'
+import { Lesson, Course, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
 import SearchableSelect from '../../components/ui/SearchableSelect'
+import StatusFilter from '../../components/ui/StatusFilter'
 
 const lessonSchema = z.object({
   course_id: z.number().min(1, 'Course is required'),
@@ -57,6 +58,7 @@ const Lessons: React.FC = () => {
   const [importCompDialogOpen, setImportCompDialogOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('active')
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
@@ -74,7 +76,7 @@ const Lessons: React.FC = () => {
 
   useEffect(() => {
     fetchData(1)
-  }, [debouncedSearch, sortField, sortDir])
+  }, [debouncedSearch, sortField, sortDir, statusFilter])
 
   useEffect(() => {
     fetchData(lessonPagination.page, lessonPagination.limit)
@@ -90,7 +92,8 @@ const Lessons: React.FC = () => {
           limit,
           search: debouncedSearch,
           sort_by: sortField,
-          sort_dir: sortDir
+          sort_dir: sortDir,
+          status: statusFilter
         }),
         courseApi.getCourses(),
       ])
@@ -269,6 +272,7 @@ const Lessons: React.FC = () => {
               </button>
             )}
           </div>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}

@@ -18,11 +18,12 @@ import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { useDropzone } from 'react-dropzone'
 import { courseApi } from '../../api/services'
-import { Course } from '../../types/data'
+import { Course, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
+import StatusFilter from '../../components/ui/StatusFilter'
 
 const courseSchema = z.object({
   id: z.preprocess((val) => {
@@ -52,6 +53,7 @@ const Courses: React.FC = () => {
   const [importDialogOpen, setImportDialogOpen] = useState(false)
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('active')
   const [sortField, setSortField] = useState('id')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [selectedIds, setSelectedIds] = useState<number[]>([])
@@ -68,7 +70,7 @@ const Courses: React.FC = () => {
 
   useEffect(() => {
     fetchData(1)
-  }, [debouncedSearch, sortField, sortDir])
+  }, [debouncedSearch, sortField, sortDir, statusFilter])
 
   useEffect(() => {
     fetchData(coursePagination.page, coursePagination.limit)
@@ -78,12 +80,13 @@ const Courses: React.FC = () => {
     setLoading(true)
     setSelectedIds([])
     try {
-      const coursesRes = await courseApi.getCourses({ 
-        page, 
+      const coursesRes = await courseApi.getCourses({
+        page,
         limit,
         search: debouncedSearch,
         sort_by: sortField,
-        sort_dir: sortDir
+        sort_dir: sortDir,
+        status: statusFilter
       })
       setCourses(coursesRes.data)
       setCoursePagination({
@@ -230,6 +233,7 @@ const Courses: React.FC = () => {
               </button>
             )}
           </div>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}

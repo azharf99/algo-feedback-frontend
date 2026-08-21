@@ -17,12 +17,13 @@ import { useForm, SubmitHandler } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { sessionApi, groupApi, lessonApi } from '../../api/services'
-import { Session, Group, Lesson } from '../../types/data'
+import { Session, Group, Lesson, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
 import SearchableSelect from '../../components/ui/SearchableSelect'
+import StatusFilter from '../../components/ui/StatusFilter'
 
 const sessionSchema = z.object({
   group_id: z.number().min(1, 'Group is required'),
@@ -74,6 +75,7 @@ const Sessions: React.FC = () => {
   const [selectedStudents, setSelectedStudents] = useState<number[]>([])
   const [search, setSearch] = useState('')
   const debouncedSearch = useDebounce(search, 500)
+  const [statusFilter, setStatusFilter] = useState<StatusFilterValue>('active')
   const [sortField, setSortField] = useState('date_start')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
   const [currentTab, setCurrentTab] = useState<'ALL' | 'LAST_WEEK' | 'THIS_WEEK' | 'NEXT_WEEK'>('THIS_WEEK')
@@ -135,7 +137,7 @@ const Sessions: React.FC = () => {
 
   useEffect(() => {
     fetchData(1)
-  }, [debouncedSearch, sortField, sortDir])
+  }, [debouncedSearch, sortField, sortDir, statusFilter])
 
   useEffect(() => {
     fetchData(sessionPagination.page, sessionPagination.limit)
@@ -184,12 +186,13 @@ const Sessions: React.FC = () => {
     setSelectedIds([])
     try {
       const [sessionsRes, groupsRes, lessonsRes] = await Promise.all([
-        sessionApi.getSessions({ 
-          page, 
+        sessionApi.getSessions({
+          page,
           limit,
           search: debouncedSearch,
           sort_by: sortField,
-          sort_dir: sortDir
+          sort_dir: sortDir,
+          status: statusFilter
         }),
         groupApi.getGroups(),
         lessonApi.getLessons(),
@@ -410,13 +413,21 @@ const Sessions: React.FC = () => {
     let filtered = source
     if (debouncedSearch) {
       const searchLower = debouncedSearch.toLowerCase()
-      filtered = source.filter(s => 
+      filtered = source.filter(s =>
         s.group?.name?.toLowerCase().includes(searchLower) ||
         s.lesson?.title?.toLowerCase().includes(searchLower) ||
         s.id.toString().includes(searchLower)
       )
     }
-    
+
+    // Week tabs (LAST_WEEK/THIS_WEEK/NEXT_WEEK) pull from the unfiltered summary endpoint,
+    // so the status filter is applied client-side here. The ALL tab is already filtered
+    // server-side by getSessions(), so re-applying it is a harmless no-op.
+    if (statusFilter !== 'all') {
+      const wantStatus = statusFilter === 'active' ? 'Active' : 'Cancelled'
+      filtered = filtered.filter(s => (s.status ?? 'Active') === wantStatus)
+    }
+
     if (currentTab !== 'ALL') {
       filtered = [...filtered].sort((a, b) => {
         const valA = a[sortField as keyof Session]
@@ -459,6 +470,7 @@ const Sessions: React.FC = () => {
               </button>
             )}
           </div>
+          <StatusFilter value={statusFilter} onChange={setStatusFilter} />
           {selectedIds.length > 0 && (
             <button
               onClick={handleBulkDelete}

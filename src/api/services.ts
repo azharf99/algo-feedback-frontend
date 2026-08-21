@@ -23,7 +23,10 @@ const buildQueryParams = (params?: PaginationParams): string => {
   if (params.sort_dir !== undefined) {
     queryParams.append('sort_dir', params.sort_dir)
   }
-  
+  if (params.status !== undefined) {
+    queryParams.append('status', params.status)
+  }
+
   const queryString = queryParams.toString()
   return queryString ? `?${queryString}` : ''
 }

@@ -125,12 +125,15 @@ export interface ApiError {
   error: string
 }
 
+export type StatusFilterValue = 'active' | 'inactive' | 'all'
+
 export interface PaginationParams {
   page?: number
   limit?: number
   search?: string
   sort_by?: string
   sort_dir?: string
+  status?: StatusFilterValue
 }
 
 export interface GraduationFeedback {
