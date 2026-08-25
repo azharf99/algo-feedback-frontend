@@ -22,6 +22,9 @@ interface HelpCenterContextType {
   refreshConversations: () => Promise<void>
   selectConversation: (id: number) => Promise<void>
   sendMessage: (body: string) => void
+  // Uploads a file attachment as a new message. Throws on failure (invalid type, too
+  // large, network error) so the caller can show an inline error near the composer.
+  sendAttachment: (file: File, caption?: string) => Promise<void>
   setConversationStatus: (id: number, status: 'open' | 'closed') => Promise<void>
 }
 
@@ -96,7 +99,8 @@ export const HelpCenterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const isViewingThisThread = activeConversationIdRef.current === conversation.id
       if (!isMine && !isViewingThisThread) {
         const from = isAdminRef.current ? (conversation.user?.name || 'User') : 'Algonova Support'
-        toast(`${from}: ${data.body}`, { icon: '💬' })
+        const preview = data.body || (data.attachment_name ? `📎 ${data.attachment_name}` : '')
+        toast(`${from}: ${preview}`, { icon: '💬' })
       }
     } else if (payload.type === 'read') {
       upsertConversation(payload.conversation)
@@ -215,6 +219,20 @@ export const HelpCenterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [isAdmin, appendMessage, upsertConversation])
 
+  const sendAttachment = useCallback(async (file: File, caption?: string) => {
+    const conversationId = isAdmin ? (activeConversationIdRef.current ?? undefined) : undefined
+    if (isAdmin && !conversationId) {
+      throw new Error('Select a conversation first')
+    }
+
+    // Sent over REST only (not the WebSocket text channel) — the server still broadcasts
+    // the resulting message over the socket to every connected participant, so this stays
+    // real-time; appendMessage's id-based dedupe absorbs that echo if it arrives too.
+    const { data, conversation } = await helpCenterApi.sendAttachment(file, caption, conversationId)
+    upsertConversation(conversation)
+    appendMessage(conversation.id, data)
+  }, [isAdmin, appendMessage, upsertConversation])
+
   const setConversationStatus = useCallback(async (id: number, status: 'open' | 'closed') => {
     await helpCenterApi.updateStatus(id, status)
     setConversations(prev => prev.map(c => (c.id === id ? { ...c, status } : c)))
@@ -254,8 +272,9 @@ export const HelpCenterProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     refreshConversations,
     selectConversation,
     sendMessage,
+    sendAttachment,
     setConversationStatus,
-  }), [conversations, activeConversationId, messages, connected, loading, totalUnread, isAdmin, refreshConversations, selectConversation, sendMessage, setConversationStatus])
+  }), [conversations, activeConversationId, messages, connected, loading, totalUnread, isAdmin, refreshConversations, selectConversation, sendMessage, sendAttachment, setConversationStatus])
 
   return <HelpCenterContext.Provider value={value}>{children}</HelpCenterContext.Provider>
 }

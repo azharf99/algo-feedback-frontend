@@ -564,6 +564,32 @@ export const helpCenterApi = {
     return response.data
   },
 
+  // Uploads a file attachment (photo evidence, document, etc.) as a new chat message.
+  // The server re-validates the file's real content (magic bytes) regardless of what
+  // the browser reports as its MIME type — see pkg/attachment.Validate on the backend.
+  sendAttachment: async (file: File, caption?: string, conversationId?: number): Promise<{ data: HelpMessage; conversation: HelpConversation }> => {
+    const form = new FormData()
+    form.append('file', file)
+    if (caption) form.append('body', caption)
+    if (conversationId !== undefined) form.append('conversation_id', String(conversationId))
+
+    const response = await api.post('/help/messages/attachment', form, {
+      headers: { 'X-Skip-Toast': 'true' } // Content-Type multipart boundary is set by the browser
+    })
+    return response.data
+  },
+
+  // Fetches an attachment as a Blob through the authenticated endpoint (never a raw/public
+  // URL), so access control (conversation ownership) is re-checked by the server on every
+  // view — including inline image previews rendered from the resulting object URL.
+  downloadAttachment: async (messageId: number): Promise<Blob> => {
+    const response = await api.get(`/help/messages/${messageId}/attachment`, {
+      responseType: 'blob',
+      headers: { 'X-Skip-Toast': 'true' }
+    })
+    return response.data
+  },
+
   markRead: async (conversationId: number): Promise<void> => {
     await api.patch(`/help/conversations/${conversationId}/read`, {}, {
       headers: { 'X-Skip-Toast': 'true' }

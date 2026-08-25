@@ -1,11 +1,104 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { format, formatDistanceToNow } from 'date-fns'
-import { Send, CheckCheck, Lock, Unlock, Wifi, WifiOff, MessageCircle } from 'lucide-react'
+import toast from 'react-hot-toast'
+import {
+  Send, CheckCheck, Lock, Unlock, Wifi, WifiOff, MessageCircle,
+  Paperclip, FileText, Download, AlertCircle, Loader2
+} from 'lucide-react'
 import clsx from 'clsx'
 import { useAuth } from '../../contexts/AuthContext'
 import { useHelpCenter } from '../../contexts/HelpCenterContext'
-import { HelpConversation } from '../../types/data'
+import { helpCenterApi } from '../../api/services'
+import { HelpConversation, HelpMessage } from '../../types/data'
+import { downloadBlob } from '../../utils/downloadFile'
+import { ACCEPTED_ATTACHMENT_ACCEPT, formatBytes, validateAttachmentClientSide } from '../../utils/attachment'
+
+// Renders one message's attachment. The file is always fetched through the authenticated
+// download endpoint as a Blob (never a public/static URL) so the server re-checks access
+// on every view — including image previews, which are rendered from the resulting
+// object URL rather than pointed straight at the API.
+const AttachmentBubble: React.FC<{ msg: HelpMessage; isMine: boolean }> = ({ msg, isMine }) => {
+  const { t } = useTranslation()
+  const [blob, setBlob] = useState<Blob | null>(null)
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+  const [error, setError] = useState(false)
+  const [loading, setLoading] = useState(true)
+  const [retryToken, setRetryToken] = useState(0)
+  const isImage = msg.attachment_mime_type?.startsWith('image/')
+
+  useEffect(() => {
+    let cancelled = false
+    let objectUrl: string | null = null
+    setLoading(true)
+    setError(false)
+
+    helpCenterApi.downloadAttachment(msg.id)
+      .then((b) => {
+        if (cancelled) return
+        objectUrl = URL.createObjectURL(b)
+        setBlob(b)
+        setBlobUrl(objectUrl)
+      })
+      .catch(() => { if (!cancelled) setError(true) })
+      .finally(() => { if (!cancelled) setLoading(false) })
+
+    return () => {
+      cancelled = true
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    }
+  }, [msg.id, retryToken])
+
+  const handleDownload = () => {
+    if (blob) downloadBlob(blob, msg.attachment_name || 'attachment')
+  }
+
+  if (loading) {
+    return (
+      <div className={clsx('mt-1.5 flex items-center gap-2 text-xs rounded-lg px-3 py-2', isMine ? 'bg-blue-700/40' : 'bg-gray-100 dark:bg-gray-600/40')}>
+        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+        {t('help_attachment_loading')}
+      </div>
+    )
+  }
+
+  if (error || !blobUrl) {
+    return (
+      <button
+        onClick={() => setRetryToken((n) => n + 1)}
+        className={clsx('mt-1.5 flex items-center gap-2 text-xs rounded-lg px-3 py-2 w-full text-left', isMine ? 'bg-blue-700/40 hover:bg-blue-700/60' : 'bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30')}
+      >
+        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+        {t('help_attachment_failed')}
+      </button>
+    )
+  }
+
+  if (isImage) {
+    return (
+      <a href={blobUrl} target="_blank" rel="noopener noreferrer" className="block mt-1.5 max-w-[240px] rounded-lg overflow-hidden border border-black/10 dark:border-white/10">
+        <img src={blobUrl} alt={msg.attachment_name || 'attachment'} className="w-full h-auto max-h-60 object-cover" />
+      </a>
+    )
+  }
+
+  return (
+    <button
+      onClick={handleDownload}
+      className={clsx(
+        'mt-1.5 flex items-center gap-2.5 rounded-lg px-3 py-2 w-full max-w-[240px] transition-colors',
+        isMine ? 'bg-blue-700/40 hover:bg-blue-700/60' : 'bg-gray-100 dark:bg-gray-600/40 hover:bg-gray-200 dark:hover:bg-gray-600/70'
+      )}
+    >
+      <FileText className="w-6 h-6 shrink-0 opacity-80" />
+      <div className="text-left min-w-0 flex-1">
+        <p className="text-xs font-medium truncate">{msg.attachment_name}</p>
+        <p className="text-[10px] opacity-70">{formatBytes(msg.attachment_size || 0)}</p>
+      </div>
+      <Download className="w-4 h-4 shrink-0 opacity-70" />
+    </button>
+  )
+}
 
 const HelpCenter: React.FC = () => {
   const { t } = useTranslation()
@@ -19,11 +112,14 @@ const HelpCenter: React.FC = () => {
     isAdmin,
     selectConversation,
     sendMessage,
+    sendAttachment,
     setConversationStatus,
   } = useHelpCenter()
 
   const [draft, setDraft] = useState('')
+  const [uploading, setUploading] = useState(false)
   const bottomRef = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Non-admin users only ever have one conversation (their own thread with support) —
   // select it automatically as soon as it's loaded.
@@ -48,6 +144,29 @@ const HelpCenter: React.FC = () => {
     if (!draft.trim()) return
     sendMessage(draft)
     setDraft('')
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    e.target.value = '' // allow re-selecting the same file later
+    if (!file) return
+
+    const clientError = validateAttachmentClientSide(file)
+    if (clientError) {
+      toast.error(clientError)
+      return
+    }
+
+    setUploading(true)
+    try {
+      // The current draft doubles as an optional caption sent alongside the file.
+      await sendAttachment(file, draft.trim() || undefined)
+      setDraft('')
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || t('help_attachment_upload_failed'))
+    } finally {
+      setUploading(false)
+    }
   }
 
   const otherPartyName = (conv: HelpConversation | null) => {
@@ -181,7 +300,8 @@ const HelpCenter: React.FC = () => {
                         {!isMine && isAdmin === false && (
                           <p className="text-[10px] font-semibold mb-0.5 opacity-70">{msg.sender_role}</p>
                         )}
-                        <p className="whitespace-pre-wrap break-words">{msg.body}</p>
+                        {msg.body && <p className="whitespace-pre-wrap break-words">{msg.body}</p>}
+                        {msg.attachment_url && <AttachmentBubble msg={msg} isMine={isMine} />}
                         <p className={clsx('text-[10px] mt-1 flex items-center gap-1', isMine ? 'text-blue-100 justify-end' : 'text-gray-400')}>
                           {format(new Date(msg.created_at), 'HH:mm')}
                           {isMine && <CheckCheck className="w-3 h-3" />}
@@ -195,15 +315,32 @@ const HelpCenter: React.FC = () => {
 
               <form onSubmit={handleSend} className="p-3 border-t border-gray-200 dark:border-gray-700 flex items-center gap-2 shrink-0">
                 <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept={ACCEPTED_ATTACHMENT_ACCEPT}
+                  className="hidden"
+                  onChange={handleFileChange}
+                />
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploading}
+                  title={t('help_attach_file')}
+                  className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-40 transition-colors"
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Paperclip className="w-4 h-4" />}
+                </button>
+                <input
                   type="text"
                   value={draft}
                   onChange={(e) => setDraft(e.target.value)}
                   placeholder={t('help_type_message')}
-                  className="flex-1 px-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  disabled={uploading}
+                  className="flex-1 px-4 py-2.5 rounded-full border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-sm text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
                 />
                 <button
                   type="submit"
-                  disabled={!draft.trim()}
+                  disabled={!draft.trim() || uploading}
                   className="w-10 h-10 shrink-0 flex items-center justify-center rounded-full bg-blue-600 text-white disabled:opacity-40 disabled:cursor-not-allowed hover:bg-blue-700 transition-colors"
                 >
                   <Send className="w-4 h-4" />

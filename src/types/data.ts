@@ -156,6 +156,12 @@ export interface HelpMessage {
   sender?: User
   sender_role: 'Admin' | 'Tutor' | 'Siswa'
   body: string
+  attachment_name?: string
+  attachment_mime_type?: string
+  attachment_size?: number
+  // Path relatif ke endpoint download terautentikasi (bukan URL publik) — selalu diakses
+  // lewat axios dengan header Authorization, lalu dirender dari Blob (lihat HelpCenter.tsx).
+  attachment_url?: string
   created_at: string
 }
 

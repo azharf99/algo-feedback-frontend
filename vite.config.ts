@@ -14,6 +14,9 @@ export default defineConfig({
       '/api': {
         target: 'http://localhost:8086',
         changeOrigin: true,
+        // Required for the Help Center WebSocket chat (/api/help/ws) to work through the
+        // Vite dev proxy — without it, upgrade requests aren't forwarded to the backend.
+        ws: true,
       },
     },
   },
