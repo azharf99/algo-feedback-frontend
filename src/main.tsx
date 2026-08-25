@@ -5,6 +5,7 @@ import App from './App.tsx'
 import { AuthProvider } from './contexts/AuthContext.tsx'
 import { ThemeProvider } from './contexts/ThemeContext.tsx'
 import { LanguageProvider } from './contexts/LanguageContext.tsx'
+import { HelpCenterProvider } from './contexts/HelpCenterContext.tsx'
 import './i18n'
 import './index.css'
 
@@ -14,7 +15,9 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
       <LanguageProvider>
         <ThemeProvider>
           <AuthProvider>
-            <App />
+            <HelpCenterProvider>
+              <App />
+            </HelpCenterProvider>
           </AuthProvider>
         </ThemeProvider>
       </LanguageProvider>

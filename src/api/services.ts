@@ -1,5 +1,5 @@
 import api from './axios'
-import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams, GraduationFeedback } from '../types/data'
+import { Student, Group, Lesson, Feedback, Course, Session, User, PaginatedResponse, PaginationParams, GraduationFeedback, HelpConversation, HelpMessage } from '../types/data'
 import { ForgotPasswordData, ResetPasswordData } from '../types/auth'
 
 // Build query string from pagination parameters
@@ -517,8 +517,60 @@ export const feedbackApi = {
   },
 
   deleteGraduationFeedback: async (id: number, skipToast?: boolean): Promise<void> => {
-    await api.delete(`/feedbacks/graduation/${id}`, { 
-      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {} 
+    await api.delete(`/feedbacks/graduation/${id}`, {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
     })
+  }
+}
+
+// Help Center API (chat between Tutor/Siswa and Admin support)
+export const helpCenterApi = {
+  // Admin only: list every conversation, most recently active first.
+  getConversations: async (params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<HelpConversation>> => {
+    const response = await api.get(`/help/conversations${buildQueryParams(params)}`, {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data
+  },
+
+  // Tutor/Siswa: get (or lazily create) their own conversation with support.
+  getMyConversation: async (skipToast?: boolean): Promise<HelpConversation> => {
+    const response = await api.get('/help/conversations/me', {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data.data
+  },
+
+  getConversation: async (id: number, skipToast?: boolean): Promise<HelpConversation> => {
+    const response = await api.get(`/help/conversations/${id}`, {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data.data
+  },
+
+  getMessages: async (conversationId: number, params?: PaginationParams, skipToast?: boolean): Promise<PaginatedResponse<HelpMessage>> => {
+    const response = await api.get(`/help/conversations/${conversationId}/messages${buildQueryParams(params)}`, {
+      headers: skipToast ? { 'X-Skip-Toast': 'true' } : {}
+    })
+    return response.data
+  },
+
+  // conversationId is only required for Admin replying to a specific user; Tutor/Siswa
+  // can omit it and it's routed to their own conversation automatically.
+  sendMessage: async (body: string, conversationId?: number): Promise<{ data: HelpMessage; conversation: HelpConversation }> => {
+    const response = await api.post('/help/messages', { body, conversation_id: conversationId }, {
+      headers: { 'X-Skip-Toast': 'true' }
+    })
+    return response.data
+  },
+
+  markRead: async (conversationId: number): Promise<void> => {
+    await api.patch(`/help/conversations/${conversationId}/read`, {}, {
+      headers: { 'X-Skip-Toast': 'true' }
+    })
+  },
+
+  updateStatus: async (conversationId: number, status: 'open' | 'closed'): Promise<void> => {
+    await api.patch(`/help/conversations/${conversationId}/status`, { status })
   }
 }

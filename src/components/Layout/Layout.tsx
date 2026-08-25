@@ -13,12 +13,14 @@ import {
   Moon,
   Globe,
   User as UserIcon,
-  BookOpen
+  BookOpen,
+  MessageCircle
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { useTheme } from '../../contexts/ThemeContext'
 import { useLanguage } from '../../contexts/LanguageContext'
+import { useHelpCenter } from '../../contexts/HelpCenterContext'
 import { useTranslation } from 'react-i18next'
 import clsx from 'clsx'
 
@@ -31,6 +33,7 @@ const menuItems = [
   { text: 'nav_sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
   { text: 'nav_feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
   { text: 'nav_users', icon: <UserIcon className="w-5 h-5" />, path: '/users', adminOnly: true },
+  { text: 'nav_help_center', icon: <MessageCircle className="w-5 h-5" />, path: '/help' },
   { text: 'nav_guide', icon: <BookOpen className="w-5 h-5" />, path: '/guide' },
 ]
 
@@ -48,6 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate()
   const location = useLocation()
   const { state: authState, logout } = useAuth()
+  const { totalUnread } = useHelpCenter()
   const { theme, toggleTheme } = useTheme()
   const { language, setLanguage } = useLanguage()
   const { t } = useTranslation()
@@ -121,8 +125,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white"
                 )}
               >
-                <span className={clsx("mr-3 transition-colors", isActive ? "text-white" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300")}>
+                <span className={clsx("mr-3 transition-colors relative", isActive ? "text-white" : "text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300")}>
                   {item.icon}
+                  {item.path === '/help' && totalUnread > 0 && (
+                    <span className={clsx(
+                      "absolute -top-1.5 flex items-center justify-center text-white text-[9px] font-bold bg-red-500 rounded-full h-4 min-w-[16px] px-1",
+                      sidebarOpen ? "-right-1.5" : "-right-1"
+                    )}>
+                      {totalUnread > 9 ? '9+' : totalUnread}
+                    </span>
+                  )}
                 </span>
                 {sidebarOpen && (
                   <span className="font-medium">{t(item.text)}</span>

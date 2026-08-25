@@ -136,6 +136,29 @@ export interface PaginationParams {
   status?: StatusFilterValue
 }
 
+export interface HelpConversation {
+  id: number
+  user_id: number
+  user?: User
+  status: 'open' | 'closed'
+  last_message: string
+  last_message_at?: string
+  unread_by_user: number
+  unread_by_admin: number
+  created_at: string
+  updated_at: string
+}
+
+export interface HelpMessage {
+  id: number
+  conversation_id: number
+  sender_id: number
+  sender?: User
+  sender_role: 'Admin' | 'Tutor' | 'Siswa'
+  body: string
+  created_at: string
+}
+
 export interface GraduationFeedback {
   id: number
   user_id: number
