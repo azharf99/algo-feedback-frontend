@@ -12,7 +12,8 @@ import {
   Sun,
   Moon,
   Globe,
-  User as UserIcon
+  User as UserIcon,
+  BookOpen
 } from 'lucide-react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
@@ -30,6 +31,7 @@ const menuItems = [
   { text: 'nav_sessions', icon: <LineChart className="w-5 h-5" />, path: '/sessions' },
   { text: 'nav_feedbacks', icon: <LineChart className="w-5 h-5" />, path: '/feedbacks' },
   { text: 'nav_users', icon: <UserIcon className="w-5 h-5" />, path: '/users', adminOnly: true },
+  { text: 'nav_guide', icon: <BookOpen className="w-5 h-5" />, path: '/guide' },
 ]
 
 interface LayoutProps {

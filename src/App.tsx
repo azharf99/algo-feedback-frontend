@@ -14,6 +14,7 @@ import Users from './pages/Users/Users'
 import AuthSuccess from './pages/Auth/AuthSuccess'
 import Landing from './pages/Landing/Landing'
 import Profile from './pages/Profile/Profile'
+import Guide from './pages/Guide/Guide'
 import ForgotPassword from './pages/Auth/ForgotPassword'
 import ResetPassword from './pages/Auth/ResetPassword'
 import { Toaster } from 'react-hot-toast'
@@ -70,6 +71,7 @@ function App() {
                   <Route path="/feedbacks" element={<Feedbacks />} />
                   <Route path="/users" element={<Users />} />
                   <Route path="/profile" element={<Profile />} />
+                  <Route path="/guide" element={<Guide />} />
                   <Route path="*" element={<Navigate to="/dashboard" replace />} />
                 </Routes>
               </Layout>
