@@ -20,7 +20,18 @@ api.interceptors.request.use(
     
     const lang = localStorage.getItem('language') || 'Indonesia'
     config.headers['Accept-Language'] = lang
-    
+
+    // The instance default Content-Type is 'application/json'. When the body is a
+    // FormData (file uploads), that default must NOT survive: axios v1's transformRequest
+    // sees a JSON Content-Type + FormData data and actually JSON.stringifies the FormData
+    // instead of sending it as multipart (a File has no own enumerable properties, so it
+    // serializes to "{}" — the request silently turns into `{"file":{}}` and the backend
+    // never sees an uploaded file). Deleting it here lets the browser set the correct
+    // `multipart/form-data; boundary=...` header itself.
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type']
+    }
+
     return config
   },
   (error) => {
