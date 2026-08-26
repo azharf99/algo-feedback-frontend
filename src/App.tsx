@@ -20,6 +20,7 @@ import ForgotPassword from './pages/Auth/ForgotPassword'
 import ResetPassword from './pages/Auth/ResetPassword'
 import { Toaster } from 'react-hot-toast'
 
+
 function App() {
   const { state } = useAuth()
   const { isAuthenticated, loading } = state
