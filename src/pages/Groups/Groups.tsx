@@ -43,6 +43,7 @@ const groupSchema = z.object({
   is_active: z.boolean().default(true),
   language: z.enum(['Indonesia', 'English', 'Russian']).default('Indonesia'),
   student_ids: z.array(z.number()).optional(),
+  seed_sessions: z.boolean().default(true),
 })
 
 type GroupFormData = z.infer<typeof groupSchema>
@@ -77,7 +78,7 @@ const Groups: React.FC = () => {
     control,
   } = useForm<GroupFormData>({
     resolver: zodResolver(groupSchema),
-    defaultValues: { is_active: true, language: 'Indonesia' }
+    defaultValues: { is_active: true, language: 'Indonesia', seed_sessions: true }
   })
 
 
@@ -191,6 +192,7 @@ const Groups: React.FC = () => {
       first_lesson_date: formattedDate,
       first_lesson_time: formattedTime,
       student_ids: group.students?.map(s => s.id) || group.student_ids || [],
+      seed_sessions: true,
     })
     setDialogOpen(true)
   }
@@ -198,7 +200,7 @@ const Groups: React.FC = () => {
   const handleCloseDialog = () => {
     setDialogOpen(false)
     setEditingGroup(null)
-    reset({ is_active: true, student_ids: [] })
+    reset({ is_active: true, student_ids: [], seed_sessions: true })
   }
 
   const onDrop = async (acceptedFiles: File[]) => {
@@ -617,6 +619,15 @@ const Groups: React.FC = () => {
                 <input id="is_active" type="checkbox" {...register('is_active')} className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded" />
                 <label htmlFor="is_active" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">{t('active_group')}</label>
               </div>
+              {editingGroup && (
+                <div className="sm:col-span-2 flex items-start mt-1 p-3 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+                  <input id="seed_sessions" type="checkbox" {...register('seed_sessions')} className="h-4 w-4 mt-0.5 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-gray-600 dark:bg-gray-800 rounded" />
+                  <div className="ml-2">
+                    <label htmlFor="seed_sessions" className="block text-sm font-medium text-gray-900 dark:text-gray-200">{t('seed_sessions_label')}</label>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">{t('seed_sessions_hint')}</p>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
           <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end gap-3 border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">

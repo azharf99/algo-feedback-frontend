@@ -34,6 +34,9 @@ export interface Group {
   students?: Student[]
   student_ids?: number[]
   course?: Course
+  // seed_sessions is request-only: controls whether the backend re-runs the
+  // session seeder on update. Not returned by the API.
+  seed_sessions?: boolean
 }
 
 export interface Session {
