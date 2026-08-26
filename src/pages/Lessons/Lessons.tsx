@@ -22,6 +22,7 @@ import { lessonApi, courseApi } from '../../api/services'
 import { Lesson, Course, StatusFilterValue } from '../../types/data'
 import { useDebounce } from '../../hooks/useDebounce'
 import { downloadBlob } from '../../utils/downloadFile'
+import { downloadCsvTemplate } from '../../utils/csvTemplates'
 import toast from 'react-hot-toast'
 import clsx from 'clsx'
 import Modal from '../../components/ui/Modal'
@@ -623,6 +624,14 @@ const Lessons: React.FC = () => {
         maxWidth="sm"
       >
         <div className="px-6 py-4 bg-white dark:bg-gray-800 transition-colors duration-200">
+          <button
+            type="button"
+            onClick={() => downloadCsvTemplate('lesson')}
+            className="mb-4 inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+          >
+            <Download className="-ml-1 mr-2 h-4 w-4" />
+            {t('download_example_csv')}
+          </button>
           <div
             {...getImportRootProps()}
             className={clsx(
@@ -641,6 +650,9 @@ const Lessons: React.FC = () => {
               {t('csv_headers')}: id, title, category, module, level, number, course_id, description, competency, is_active, is_project_lesson
             </p>
           </div>
+          <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+            {t('csv_import_note')} competency: pisahkan beberapa kompetensi dengan titik koma (;).
+          </p>
         </div>
         <div className="bg-gray-50 dark:bg-gray-800/50 px-6 py-4 flex justify-end border-t border-gray-200 dark:border-gray-700 transition-colors duration-200">
           <button type="button" onClick={() => setImportDialogOpen(false)} className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
@@ -665,6 +677,14 @@ const Lessons: React.FC = () => {
               <li>{t('rows_match_lessons')}</li>
             </ul>
           </div>
+          <button
+            type="button"
+            onClick={() => downloadCsvTemplate('lessonCompetencies')}
+            className="mb-4 inline-flex items-center px-3 py-2 text-sm font-medium text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+          >
+            <Download className="-ml-1 mr-2 h-4 w-4" />
+            {t('download_example_csv')}
+          </button>
           <div
             {...getCompRootProps()}
             className={clsx(
